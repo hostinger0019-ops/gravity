@@ -26,8 +26,8 @@ export default function InstagramSettingsPage({ params }: { params: Promise<{ id
 
     // Check URL params for OAuth result
     useEffect(() => {
-        const successParam = searchParams.get("success");
-        const errorParam = searchParams.get("error");
+        const successParam = searchParams?.get("success");
+        const errorParam = searchParams?.get("error");
 
         if (successParam === "connected") {
             setSuccess("🎉 Instagram connected successfully!");
