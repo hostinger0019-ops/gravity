@@ -52,7 +52,7 @@ export const updateChatbot = async (id: number | string, updates: Partial<Chatbo
 
 export const deleteChatbot = async (id: number | string): Promise<Chatbot[]> => {
   const bot = await gpu.chatbots.getById(String(id));
-  await gpu.chatbots.delete(String(id));
+  await gpu.chatbots.hardDelete(String(id));
   if (!bot) return [];
   return [{ id: bot.id, name: bot.name, logic: (bot as any).directive || "", instructions: (bot as any).knowledge_base || "" }];
 };
