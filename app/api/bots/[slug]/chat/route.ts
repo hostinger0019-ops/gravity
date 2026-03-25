@@ -33,7 +33,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
     // ============================================================================
     let leadCaptureRequest = null;
 
-    if (bot.lead_capture_enabled && bot.lead_capture_config?.trigger === 'during_chat') {
+    if ((bot as any).lead_capture_enabled && (bot as any).lead_capture_config?.trigger === 'during_chat') {
       const lastUserMessage = messages[messages.length - 1];
 
       if (lastUserMessage && lastUserMessage.role === 'user' && typeof lastUserMessage.content === 'string') {
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
         const intent = LeadIntentDetector.detectIntent(
           lastUserMessage.content,
           messages,
-          bot.lead_capture_config,
+          (bot as any).lead_capture_config,
           lastAttempt
         );
 
@@ -72,11 +72,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
           leadCaptureRequest = {
             trigger: true,
             reason: intent.reason,
-            fields: bot.lead_capture_config.fields || ['email', 'name'],
-            requiredFields: bot.lead_capture_config.requiredFields || ['email'],
-            consentText: bot.lead_capture_config.consentText,
-            successMessage: bot.lead_capture_config.successMessage || 'Thanks! How can I help you today?',
-            skipAllowed: bot.lead_capture_config.skipAllowed || false,
+            fields: (bot as any).lead_capture_config.fields || ['email', 'name'],
+            requiredFields: (bot as any).lead_capture_config.requiredFields || ['email'],
+            consentText: (bot as any).lead_capture_config.consentText,
+            successMessage: (bot as any).lead_capture_config.successMessage || 'Thanks! How can I help you today?',
+            skipAllowed: (bot as any).lead_capture_config.skipAllowed || false,
             confidence: intent.confidence,
             trigger_type: intent.trigger_type,
           };
