@@ -1,0 +1,991 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Soften KaTeX error coloring when throwOnError is false */
+.katex-error {
+  color: inherit !important;
+}
+
+/* ==========================================================
+   BotForge Landing Page — Dark Premium Theme
+   Vercel-inspired, scoped under .botforge-landing
+   ========================================================== */
+
+/* ── Entrance Animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+}
+
+/* ── Base Container ── */
+.botforge-landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  background: #000000;
+  color: #ededed;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Subtle dot grid overlay ── */
+.botforge-landing::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Ambient glow orbs ── */
+.botforge-landing::after {
+  content: '';
+  position: fixed;
+  width: 800px;
+  height: 600px;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center,
+    rgba(120, 119, 198, 0.15) 0%,
+    rgba(100, 80, 200, 0.08) 40%,
+    transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+  animation: glowPulse 8s ease-in-out infinite;
+}
+
+/* Everything above the pseudo-elements */
+.botforge-landing > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════
+   Navbar — Glassmorphic, sticky
+   ══════════════════════════════════════ */
+.botforge-landing .navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.botforge-landing .nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.botforge-landing .nav-logo:hover {
+  opacity: 0.85;
+}
+
+.botforge-landing .nav-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #f97316, #ec4899);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.botforge-landing .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.botforge-landing .nav-links a {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 450;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.botforge-landing .nav-links a:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.botforge-landing .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.botforge-landing .btn-login {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.botforge-landing .btn-login:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.botforge-landing .btn-start {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  background: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.botforge-landing .btn-start:hover {
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.12);
+}
+
+/* ══════════════════════════════════════
+   Hero — Big gradient text
+   ══════════════════════════════════════ */
+.botforge-landing .hero {
+  text-align: center;
+  padding: 100px 24px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.botforge-landing .hero h1 {
+  font-size: 68px;
+  font-weight: 800;
+  line-height: 1.08;
+  margin-bottom: 16px;
+  letter-spacing: -2px;
+  background: linear-gradient(180deg, #ffffff 30%, rgba(255, 255, 255, 0.4) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.botforge-landing .hero p {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 400;
+  letter-spacing: -0.2px;
+}
+
+.botforge-landing .typing-cursor {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 300;
+  animation: blink 0.7s infinite;
+  margin-left: 1px;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ══════════════════════════════════════
+   Prompt Box — Dark translucent
+   ══════════════════════════════════════ */
+.botforge-landing .prompt-container {
+  max-width: 720px;
+  width: 100%;
+  margin: 32px auto 0;
+  padding: 0 24px;
+  animation: fadeInUp 0.8s ease-out 0.15s both;
+}
+
+.botforge-landing .prompt-box {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 4px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.botforge-landing .prompt-box:focus-within {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 4px 40px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(120, 119, 198, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.botforge-landing .prompt-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 20px 24px 12px;
+  border: none;
+  background: transparent;
+  color: #ededed;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+}
+
+.botforge-landing .prompt-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.botforge-landing .prompt-textarea:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.botforge-landing .prompt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 12px;
+}
+
+.botforge-landing .prompt-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.botforge-landing .prompt-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.botforge-landing .toolbar-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.botforge-landing .toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.botforge-landing .plan-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.botforge-landing .plan-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.botforge-landing .send-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.botforge-landing .send-btn:hover {
+  background: rgba(255, 255, 255, 0.88);
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.15);
+}
+
+.botforge-landing .send-btn:disabled {
+  opacity: 0.2;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ══════════════════════════════════════
+   Suggestion Chips — Ghost/outlined
+   ══════════════════════════════════════ */
+.botforge-landing .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 720px;
+  margin: 24px auto 0;
+  padding: 0 24px;
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+.botforge-landing .chip {
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.botforge-landing .chip:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.04);
+}
+
+/* ══════════════════════════════════════
+   Chat Area — Dark theme
+   ══════════════════════════════════════ */
+.botforge-landing .chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 24px 8px;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Custom scrollbar for dark theme */
+.botforge-landing .chat-area::-webkit-scrollbar {
+  width: 6px;
+}
+.botforge-landing .chat-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.botforge-landing .chat-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+.botforge-landing .chat-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.botforge-landing .chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.botforge-landing .chat-row {
+  display: flex;
+}
+
+.botforge-landing .chat-row-user {
+  justify-content: flex-end;
+}
+
+.botforge-landing .chat-row-assistant {
+  justify-content: flex-start;
+}
+
+.botforge-landing .bubble-user {
+  max-width: 80%;
+  padding: 12px 18px;
+  border-radius: 20px 20px 6px 20px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.botforge-landing .bubble-assistant {
+  max-width: 80%;
+  padding: 12px 18px;
+  border-radius: 20px 20px 20px 6px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.botforge-landing .bubble-assistant.voice-typing::after {
+  content: '▊';
+  display: inline;
+  animation: blink 0.7s infinite;
+  color: rgba(120, 119, 198, 0.8);
+  margin-left: 2px;
+}
+
+/* ── Loading Dots ── */
+.botforge-landing .loading-bubble {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 22px;
+}
+
+.botforge-landing .dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+
+.botforge-landing .dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.botforge-landing .dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* ══════════════════════════════════════
+   Success Card — keep green, adapt
+   ══════════════════════════════════════ */
+.botforge-landing .success-card {
+  background: linear-gradient(135deg, #22c55e, #10b981);
+  border-radius: 20px;
+  padding: 28px;
+  color: #fff;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.2);
+}
+
+.botforge-landing .success-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.botforge-landing .success-emoji {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.botforge-landing .success-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.botforge-landing .success-header p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.botforge-landing .success-url-box {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.botforge-landing .success-url-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.botforge-landing .success-url-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.botforge-landing .success-url-code {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.botforge-landing .success-copy-btn {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.botforge-landing .success-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.botforge-landing .success-open-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.botforge-landing .success-open-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+}
+
+.botforge-landing .success-secondary-row {
+  display: flex;
+  gap: 10px;
+}
+
+.botforge-landing .success-edit-btn {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  text-align: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.botforge-landing .success-edit-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.botforge-landing .view-bot-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #f97316, #ec4899);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.botforge-landing .view-bot-link:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.35);
+}
+
+/* ── Prompt bottom (chat mode) ── */
+.botforge-landing .prompt-bottom {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: 20px;
+  background: linear-gradient(to top, #000000 0%, rgba(0, 0, 0, 0.8) 60%, transparent 100%);
+  padding-top: 24px;
+}
+
+/* ══════════════════════════════════════
+   Split Layout — after bot created
+   ══════════════════════════════════════ */
+.botforge-landing .split-layout {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 64px);
+  max-height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+.botforge-landing .split-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.botforge-landing .split-left .chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px 8px;
+  max-width: none;
+}
+
+.botforge-landing .split-left .prompt-container {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0 20px 12px;
+  animation: none;
+}
+
+.botforge-landing .split-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: stretch;
+  padding: 16px 16px 16px 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* ── Scroll Divider ── */
+.botforge-landing .scroll-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 4px;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.botforge-landing .scroll-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.botforge-landing .scroll-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+.botforge-landing .scroll-track {
+  width: 2px;
+  flex: 1;
+  max-height: 120px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 1px;
+}
+
+/* ── Preview Card ── */
+.botforge-landing .preview-card {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  background: #0a0a0a;
+}
+
+.botforge-landing .preview-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.botforge-landing .preview-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.botforge-landing .preview-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.botforge-landing .preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.botforge-landing .preview-refresh,
+.botforge-landing .preview-open {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.botforge-landing .preview-refresh:hover,
+.botforge-landing .preview-open:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.botforge-landing .preview-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+  background: #fff;
+}
+
+/* ══════════════════════════════════════
+   Responsive
+   ══════════════════════════════════════ */
+@media (max-width: 640px) {
+  .botforge-landing .hero h1 {
+    font-size: 40px;
+    letter-spacing: -1px;
+  }
+
+  .botforge-landing .hero p {
+    font-size: 15px;
+  }
+
+  .botforge-landing .hero {
+    padding: 60px 20px 30px;
+  }
+
+  .botforge-landing .nav-links {
+    display: none;
+  }
+
+  .botforge-landing .navbar {
+    padding: 12px 16px;
+  }
+
+  .botforge-landing .split-right {
+    display: none;
+  }
+
+  .botforge-landing .scroll-divider {
+    display: none;
+  }
+}
+
+/* ==========================================================
+   Existing animations (used by other pages)
+   ========================================================== */
+@keyframes gradient-x {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 8s ease-in-out infinite;
+}
+
+@keyframes float-slow {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+
+  50% {
+    transform: translateY(-12px) translateX(6px);
+  }
+
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 12s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    filter: blur(16px);
+  }
+
+  50% {
+    opacity: 0.9;
+    filter: blur(24px);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3.5s ease-in-out infinite;
+}
+
+.shimmer {
+  background: linear-gradient(110deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.22) 45%, rgba(255, 255, 255, 0.0) 60%);
+  background-size: 200% 100%;
+  opacity: 0;
+}
+
+@keyframes shimmer-move {
+  0% {
+    background-position: 180% 0;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.65;
+  }
+
+  50% {
+    background-position: -20% 0;
+    opacity: 0.65;
+  }
+
+  60% {
+    opacity: 0;
+  }
+
+  100% {
+    background-position: -20% 0;
+    opacity: 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer-move 2.2s ease-in-out infinite;
+}
+
+/* Chat message fade-in animation */
+@keyframes fadeInMsg {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Spinner animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,100 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (keep .env.example, exclude secrets)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+# typescript build
+*.tsbuildinfo
+next-env.d.ts
+
+# ══════════════════════════════════════
+# Backend / GPU files (NOT for Vercel)
+# ══════════════════════════════════════
+
+# Python files (orchestrators, scrapers, APIs)
+*.py
+
+# GPU backend folder
+/gpu_backend/
+
+# Voice/Speech samples
+/fish_speech_samples/
+
+# Shell scripts for GPU
+hyperstack_script.sh
+
+# Duplicate "- Copy" folders
+/pages - Copy/
+/public - Copy/
+/scripts - Copy/
+/src - Copy/
+/supabase - Copy/
+/types - Copy/
+
+# Misc docs/notes (not needed for deploy)
+/docs/
+/reports/
+CHAT_NAMING_FIX.md
+HYPERSTACK_SETUP.md
+detailed_scraper_report.md
+gap_analysis.md
+implementation_plan.md
+mps_analysis.md
+scraper_fix_plan.md
+form.url
+gpu connecting
+gpu latency
+logic scraper
+vllm prompt
+voicegroqprompt
+voicevllmprompt
+
+# One-off scripts
+generate-sample-data.js
+run-migration.js
+scrape.js
+scrapergpu.js
+
+# IDE
+.vscode/
+
+# Gemini/Antigravity
+.gemini/
+.antigravityignore
+.agents/
