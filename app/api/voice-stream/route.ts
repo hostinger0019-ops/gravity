@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import OpenAI from "openai";
-import { supabaseServer, supabaseService } from "@/lib/supabaseServer";
+// Lazy import to avoid build-time crash when env vars aren't available
+const getSupabase = async () => (await import("@/lib/supabaseServer"));
 
 /**
  * Voice Stream API - Full Streaming Pipeline
@@ -105,6 +106,7 @@ export async function POST(req: NextRequest) {
                 const emb = await openai.embeddings.create({ model: "text-embedding-3-small", input: message });
                 const qvec = emb.data[0]?.embedding as number[];
 
+                const { supabaseService, supabaseServer } = await getSupabase();
                 const db = supabaseService() || supabaseServer;
                 const { data: rows } = await db
                     .from("knowledge_chunks")
