@@ -6,8 +6,8 @@ import Link from "next/link";
 
 function LeadsContent() {
   const params = useSearchParams();
-  const botId = params.get("bot") || "";
-  const botName = params.get("name") || "Chatbot";
+  const botId = params?.get("bot") || "";
+  const botName = params?.get("name") || "Chatbot";
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["leads", botId],
