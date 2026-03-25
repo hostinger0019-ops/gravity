@@ -51,7 +51,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
         // Detect intent
         const intent = LeadIntentDetector.detectIntent(
           lastUserMessage.content,
-          messages,
+          messages as any,
           (bot as any).lead_capture_config,
           lastAttempt
         );
