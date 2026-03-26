@@ -193,6 +193,28 @@ export default function Home() {
     try {
       const currentBotSettings = await fetchBotSettings();
       const res = await fetch("/api/ai-generator/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: msgsForApi, currentBotSettings }) });
+
+      const contentType = res.headers.get("content-type") || "";
+
+      // ── Streaming text response (conversation) ──
+      if (contentType.includes("text/plain")) {
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error("No stream body");
+        const decoder = new TextDecoder();
+        let streamedText = "";
+        // Add empty assistant message to fill
+        setMessages([...newMsgs, { role: "assistant", content: "" }]);
+        setIsLoading(false);
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          streamedText += decoder.decode(value, { stream: true });
+          setMessages([...newMsgs, { role: "assistant", content: streamedText }]);
+        }
+        return;
+      }
+
+      // ── JSON response (create/update commands) ──
       const data = await res.json();
       if (data.error) { setMessages([...newMsgs, { role: "assistant", content: `Error: ${data.error}` }]); return; }
       if (data.parsed?.ready === true && data.parsed?.config) {
