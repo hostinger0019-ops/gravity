@@ -619,15 +619,15 @@ CRITICAL RULES:
           <a href="#">Solutions</a>
           <a href="#">Resources</a>
           <a href="#">Enterprise</a>
-          <a href="#">Pricing</a>
+          <a href="/pricing">Pricing</a>
         </div>
 
         <div className="nav-right">
           {inChat && (
             <button className="btn-login" onClick={resetChat}>✨ New Bot</button>
           )}
-          <button className="btn-login">Log in</button>
-          <button className="btn-start">Get started</button>
+          <button className="btn-login" onClick={() => window.location.href = '/login'}>Log in</button>
+          <button className="btn-start" onClick={() => window.location.href = '/login'}>Get started</button>
         </div>
       </nav>
 
