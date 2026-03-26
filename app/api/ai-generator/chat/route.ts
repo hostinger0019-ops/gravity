@@ -186,63 +186,41 @@ When updating, improve upon these existing values. For example if user says "mak
             return reply;
         }
 
-        // ======= Attempt 1: GPU Backend (handles vLLM routing internally) =======
+        // ======= Proxy to GPU Backend /api/landing/chat =======
         const GPU_URL = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || "";
-        let response: Response | null = null;
-        if (GPU_URL) {
-            try {
-                const gpuRes = await fetch(`${GPU_URL}/api/chat/stream`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ messages: llmMessages, temperature: 0.7, max_tokens: 2000 }),
-                });
-                if (gpuRes.ok && gpuRes.body) {
-                    // Collect streaming response into full text
-                    const reader = gpuRes.body.getReader();
-                    const decoder = new TextDecoder();
-                    let fullText = "";
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-                        fullText += decoder.decode(value, { stream: true });
-                    }
-                    console.log(`[AI Generator] Using GPU backend, got ${fullText.length} chars`);
-                    // Wrap in OpenAI-compatible format so existing parser works
-                    const wrappedBody = JSON.stringify({ choices: [{ message: { content: fullText } }] });
-                    response = new Response(wrappedBody, { status: 200, headers: { "Content-Type": "application/json" } });
-                } else {
-                    console.warn(`[AI Generator] GPU backend failed (${gpuRes.status}), falling back to Groq...`);
-                    response = null;
-                }
-            } catch (e) {
-                console.warn(`[AI Generator] GPU backend unreachable, falling back to Groq...`, e);
-                response = null;
-            }
+        if (!GPU_URL) {
+            throw new Error("GPU_BACKEND_URL not configured");
         }
 
-        // ======= Attempt 2: Groq fallback =======
-        if (!response && GROQ_API_KEY) {
-            for (const model of ["moonshotai/kimi-k2-instruct-0905", "llama-3.3-70b-versatile"]) {
-                try {
-                    response = await fetch(GROQ_API_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${GROQ_API_KEY}` },
-                        body: JSON.stringify({ model, messages: llmMessages, temperature: 0.7, max_tokens: 2000 }),
-                    });
-                    if (response.ok) { console.log(`[AI Generator] Groq fallback: ${model}`); break; }
-                    console.warn(`[AI Generator] Groq ${model} failed (${response.status})`);
-                } catch (e) {
-                    console.warn(`[AI Generator] Groq ${model} error:`, e);
-                }
-            }
+        const gpuRes = await fetch(`${GPU_URL}/api/landing/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                messages: llmMessages.map(m => ({ role: m.role, content: m.content })),
+                template_id: templateId || null,
+                current_bot_settings: currentBotSettings || null,
+                temperature: 0.7,
+                max_tokens: 2000,
+            }),
+        });
+
+        if (!gpuRes.ok) {
+            const errText = await gpuRes.text().catch(() => "");
+            throw new Error(`GPU backend error (${gpuRes.status}): ${errText}`);
         }
 
-        if (!response || !response.ok) {
-            const err = response ? await response.json().catch(() => ({})) : {};
-            throw new Error(err.error?.message || "All LLM providers failed");
+        // Collect streamed response from GPU
+        const reader = gpuRes.body?.getReader();
+        if (!reader) throw new Error("No response body from GPU");
+        const decoder = new TextDecoder();
+        let fullReply = "";
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            fullReply += decoder.decode(value, { stream: true });
         }
 
-        const reply = (await response.json()).choices?.[0]?.message?.content || "";
+        const reply = fullReply;
         let parsed = parseJsonFromReply(reply);
         if (parsed?.config && templateId && templateId !== "custom") {
             const t = getTemplateById(templateId);
