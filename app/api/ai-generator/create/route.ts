@@ -45,21 +45,27 @@ export async function POST(req: NextRequest) {
         console.log("Chatbot created:", chatbot);
 
         // If website URL provided, trigger scraping
+        let scrapeJobId: string | null = null;
         if (config.websiteToScrape) {
             try {
-                const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4010';
-                await fetch(`${appUrl}/api/knowledge/scrape`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        userId: ownerId,
-                        chatbotId: chatbot.id,
-                        url: config.websiteToScrape,
-                        depth: 1,
-                        maxPages: 10,
-                        ingest: true,
-                    }),
-                });
+                const GPU_URL = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || '';
+                if (GPU_URL) {
+                    // Use GPU scraper directly (returns job_id for progress tracking)
+                    const scrapeRes = await fetch(`${GPU_URL}/api/scrape/start`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            chatbot_id: chatbot.id,
+                            url: config.websiteToScrape,
+                            max_pages: 50,
+                        }),
+                        signal: AbortSignal.timeout(10000),
+                    });
+                    if (scrapeRes.ok) {
+                        const scrapeData = await scrapeRes.json();
+                        scrapeJobId = scrapeData.job_id || null;
+                    }
+                }
             } catch (scrapeError) {
                 console.error("Scrape error (non-fatal):", scrapeError);
             }
@@ -68,6 +74,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: true,
             chatbot,
+            job_id: scrapeJobId,
             message: config.websiteToScrape
                 ? "Chatbot created! Website is being imported in the background."
                 : "Chatbot created successfully!",

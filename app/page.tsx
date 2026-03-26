@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import ScrapeProgress from "@/components/builder/ScrapeProgress";
 
 const devNoAuth =
   typeof window !== "undefined" &&
@@ -45,6 +46,7 @@ export default function Home() {
   const [knowledgeFiles, setKnowledgeFiles] = useState<{name: string; content: string; size: number}[]>([]);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [scrapeJobId, setScrapeJobId] = useState<string | null>(null);
   const knowledgeInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -127,9 +129,13 @@ export default function Home() {
       }
       if (data.chatbot) {
         setCreatedBot({ id: data.chatbot.id, name: data.chatbot.name, slug: data.chatbot.slug });
+        // If scraping was triggered, capture job_id for progress UI
+        if (data.job_id) {
+          setScrapeJobId(data.job_id);
+        }
         setMessages((prev) => {
           const m = [...prev];
-          m[m.length - 1] = { role: "assistant", content: `🎉 **Your chatbot "${data.chatbot.name}" is ready!**\n\n${config.websiteToScrape ? "📥 Website content is being imported in the background." : ""}` };
+          m[m.length - 1] = { role: "assistant", content: `🎉 **Your chatbot "${data.chatbot.name}" is ready!**${config.websiteToScrape ? "" : ""}` };
           setCreatedAtIndex(m.length - 1);
           return m;
         });
@@ -756,6 +762,13 @@ CRITICAL RULES:
                 {createdAtIndex !== null && (
                   <div className="chat-row chat-row-assistant">
                     <div className="bubble-assistant">🎉 <strong>{createdBot.name}</strong> is live! You can see the preview on the right. Tell me if you want any changes!</div>
+                  </div>
+                )}
+
+                {/* Scrape progress UI */}
+                {scrapeJobId && (
+                  <div className="chat-row chat-row-assistant">
+                    <ScrapeProgress jobId={scrapeJobId} onComplete={() => setScrapeJobId(null)} />
                   </div>
                 )}
 
