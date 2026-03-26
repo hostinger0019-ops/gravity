@@ -200,44 +200,32 @@ When updating, improve upon these existing values. For example if user says "mak
             throw new Error(`GPU backend error (${gpuRes.status}): ${errText}`);
         }
 
-        // Read the full response first to decide: JSON command or text chat
+        // Read full response to detect JSON vs text
         const reader = gpuRes.body?.getReader();
         if (!reader) throw new Error("No response body from GPU");
         const decoder = new TextDecoder();
-        let fullReply = "";
+        const chunks: string[] = [];
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
-            fullReply += decoder.decode(value, { stream: true });
+            chunks.push(decoder.decode(value, { stream: true }));
         }
+        const fullReply = chunks.join("");
 
-        const reply = fullReply;
-        let parsed = parseJsonFromReply(reply);
+        // Check if it's a JSON command (create/update)
+        let parsed = parseJsonFromReply(fullReply);
         if (parsed?.config && templateId && templateId !== "custom") {
             const t = getTemplateById(templateId);
             if (t) parsed.config.theme = t.suggestedTheme;
         }
 
-        // If LLM returned JSON (create/update command) → return as JSON
+        // JSON response → return as JSON (for create/update actions)
         if (parsed) {
-            return NextResponse.json({ reply: getFriendlyReply(reply, parsed), parsed });
+            return NextResponse.json({ reply: getFriendlyReply(fullReply, parsed), parsed });
         }
 
-        // Otherwise → stream the text response word by word
-        const encoder = new TextEncoder();
-        const stream = new ReadableStream({
-            async start(controller) {
-                const words = reply.split(/(\s+)/); // keep whitespace
-                for (const word of words) {
-                    controller.enqueue(encoder.encode(word));
-                    // Small delay between words for typing effect
-                    await new Promise(r => setTimeout(r, 20));
-                }
-                controller.close();
-            },
-        });
-
-        return new Response(stream, {
+        // Text response → pipe directly to browser (no buffering delay)
+        return new Response(fullReply, {
             headers: {
                 "Content-Type": "text/plain; charset=utf-8",
                 "X-Content-Type": "stream",
