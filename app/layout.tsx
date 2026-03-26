@@ -3,6 +3,7 @@ import "katex/dist/katex.min.css"; // Math rendering styles
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { QueryProvider } from "@/components/QueryProvider";
+import AuthProvider from "@/components/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-black text-white`}>
-        <QueryProvider>{children}</QueryProvider>
+        <AuthProvider>
+          <QueryProvider>{children}</QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,70 +1,85 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
-const devNoAuth = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true";
+import { signIn, useSession } from "next-auth/react";
 
 export default function LoginForm({ fallbackNext }: { fallbackNext: string }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = params?.get("next") || fallbackNext;
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // In dev-no-auth mode, auto-redirect to admin
-    if (devNoAuth) {
-      localStorage.setItem("user_email", "dev@localhost");
-      localStorage.setItem("user_id", "00000000-0000-0000-0000-000000000000");
+    // If already authenticated, redirect
+    if (status === "authenticated" && session?.user) {
+      // Store user info for legacy components that check localStorage
+      localStorage.setItem("user_email", session.user.email || "");
+      localStorage.setItem("user_id", (session.user as any).gpu_id || "");
+      localStorage.setItem("user_name", session.user.name || "");
+      localStorage.setItem("user_avatar", session.user.image || "");
       router.replace(next);
-      return;
     }
-    // Check if already logged in
-    const stored = localStorage.getItem("user_email");
-    if (stored) router.replace(next);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [status, session, router, next]);
 
-  async function signInWithPassword(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true); setMsg(null);
-    // Store credentials locally (in production, call a real auth API)
-    localStorage.setItem("user_email", email);
-    localStorage.setItem("user_id", "00000000-0000-0000-0000-000000000000");
-    router.replace(next);
-    setLoading(false);
+  async function handleGoogleSignIn() {
+    setLoading(true);
+    await signIn("google", { callbackUrl: next });
   }
 
-  async function signInMagic(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true); setMsg(null);
-    // Magic link not available without Supabase
-    setMsg("Magic link sign-in is not available. Please use email and password.");
-    setLoading(false);
+  if (status === "loading") {
+    return (
+      <div className="w-full max-w-md border border-white/10 rounded-xl p-6 bg-white/5">
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="w-full max-w-md border border-white/10 rounded-xl p-6 bg-white/5">
-      <h1 className="text-2xl font-semibold mb-4">Sign in</h1>
-      {msg && <p className="mb-3 text-sm text-slate-300">{msg}</p>}
-      <form className="space-y-3" onSubmit={signInWithPassword}>
+      <h1 className="text-2xl font-semibold mb-2">Welcome to BotForge</h1>
+      <p className="text-sm text-slate-400 mb-6">Sign in to create and manage your AI chatbots</p>
+
+      {/* Google Sign In */}
+      <button
+        onClick={handleGoogleSignIn}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-3 rounded-lg bg-white text-black py-3 px-4 font-medium hover:bg-gray-100 transition-colors disabled:opacity-50"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        {loading ? "Signing in..." : "Sign in with Google"}
+      </button>
+
+      <div className="my-6 flex items-center gap-3">
+        <div className="h-px bg-white/10 flex-1"></div>
+        <span className="text-xs text-slate-500 uppercase">or</span>
+        <div className="h-px bg-white/10 flex-1"></div>
+      </div>
+
+      {/* Email/password - coming soon */}
+      <div className="space-y-3 opacity-50 pointer-events-none">
         <div>
           <label className="block text-sm mb-1">Email</label>
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded bg-black/40 border border-white/10 px-3 py-2 outline-none" placeholder="you@example.com" />
+          <input type="email" className="w-full rounded bg-black/40 border border-white/10 px-3 py-2 outline-none" placeholder="you@example.com" disabled />
         </div>
         <div>
           <label className="block text-sm mb-1">Password</label>
-          <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded bg-black/40 border border-white/10 px-3 py-2 outline-none" placeholder="••••••••" />
+          <input type="password" className="w-full rounded bg-black/40 border border-white/10 px-3 py-2 outline-none" placeholder="••••••••" disabled />
         </div>
-        <button disabled={loading} className="w-full rounded bg-blue-600 py-2 font-medium hover:bg-blue-500">{loading ? "Signing in…" : "Sign in"}</button>
-      </form>
-      <div className="my-4 h-px bg-white/10" />
-      <form className="space-y-3" onSubmit={signInMagic}>
-        <button disabled={loading || !email} className="w-full rounded bg-white/10 py-2 font-medium hover:bg-white/20">{loading ? "Sending…" : "Send magic link"}</button>
-      </form>
-      <p className="mt-4 text-sm text-slate-300">No account? <a href={`/signup?next=${encodeURIComponent(next)}`} className="text-blue-400 hover:underline">Create one</a></p>
+        <button disabled className="w-full rounded bg-blue-600/50 py-2 font-medium">Sign in with Email (Coming Soon)</button>
+      </div>
+
+      <p className="mt-6 text-xs text-center text-slate-500">
+        By signing in, you agree to our Terms of Service and Privacy Policy.
+        <br />You get <span className="text-blue-400 font-medium">50 free credits</span> on signup! 🎉
+      </p>
     </div>
   );
 }
