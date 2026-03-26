@@ -186,23 +186,36 @@ When updating, improve upon these existing values. For example if user says "mak
             return reply;
         }
 
-        // ======= Attempt 1: vLLM via orchestrator (non-streaming) =======
+        // ======= Attempt 1: GPU Backend (handles vLLM routing internally) =======
+        const GPU_URL = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || "";
         let response: Response | null = null;
-        if (VLLM_API_URL) {
+        if (GPU_URL) {
             try {
-                response = await fetch(`${VLLM_API_URL}/v1/chat/completions`, {
+                const gpuRes = await fetch(`${GPU_URL}/api/chat/stream`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", "x-api-key": ORCHESTRATOR_API_KEY },
-                    body: JSON.stringify({ model: VLLM_MODEL, messages: llmMessages, temperature: 0.7, max_tokens: 2000 }),
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: llmMessages, temperature: 0.7, max_tokens: 2000 }),
                 });
-                if (response.ok) {
-                    console.log(`[AI Generator] Using vLLM: ${VLLM_MODEL}`);
+                if (gpuRes.ok && gpuRes.body) {
+                    // Collect streaming response into full text
+                    const reader = gpuRes.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullText = "";
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        fullText += decoder.decode(value, { stream: true });
+                    }
+                    console.log(`[AI Generator] Using GPU backend, got ${fullText.length} chars`);
+                    // Wrap in OpenAI-compatible format so existing parser works
+                    const wrappedBody = JSON.stringify({ choices: [{ message: { content: fullText } }] });
+                    response = new Response(wrappedBody, { status: 200, headers: { "Content-Type": "application/json" } });
                 } else {
-                    console.warn(`[AI Generator] vLLM failed (${response.status}), falling back to Groq...`);
+                    console.warn(`[AI Generator] GPU backend failed (${gpuRes.status}), falling back to Groq...`);
                     response = null;
                 }
             } catch (e) {
-                console.warn(`[AI Generator] vLLM unreachable, falling back to Groq...`, e);
+                console.warn(`[AI Generator] GPU backend unreachable, falling back to Groq...`, e);
                 response = null;
             }
         }
@@ -210,13 +223,17 @@ When updating, improve upon these existing values. For example if user says "mak
         // ======= Attempt 2: Groq fallback =======
         if (!response && GROQ_API_KEY) {
             for (const model of ["moonshotai/kimi-k2-instruct-0905", "llama-3.3-70b-versatile"]) {
-                response = await fetch(GROQ_API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${GROQ_API_KEY}` },
-                    body: JSON.stringify({ model, messages: llmMessages, temperature: 0.7, max_tokens: 2000 }),
-                });
-                if (response.ok) { console.log(`[AI Generator] Groq fallback: ${model}`); break; }
-                console.warn(`[AI Generator] Groq ${model} failed (${response.status})`);
+                try {
+                    response = await fetch(GROQ_API_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${GROQ_API_KEY}` },
+                        body: JSON.stringify({ model, messages: llmMessages, temperature: 0.7, max_tokens: 2000 }),
+                    });
+                    if (response.ok) { console.log(`[AI Generator] Groq fallback: ${model}`); break; }
+                    console.warn(`[AI Generator] Groq ${model} failed (${response.status})`);
+                } catch (e) {
+                    console.warn(`[AI Generator] Groq ${model} error:`, e);
+                }
             }
         }
 
