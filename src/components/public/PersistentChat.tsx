@@ -672,6 +672,9 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       images.push(String(url));
       return String(pre || " ");
     });
+    // 6) Normalize Unicode bullets (•) to markdown list items
+    text = text.replace(/^[•●]\s*/gm, '- ');
+    text = text.replace(/\n[•●]\s*/g, '\n- ');
     return { text: text.trim(), images, products };
   }
 
