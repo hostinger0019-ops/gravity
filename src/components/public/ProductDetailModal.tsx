@@ -97,8 +97,8 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
           <img
             src={allImages[activeImg] || product.url}
             alt={product.name}
-            className="w-full h-auto object-contain transition-opacity duration-300"
-            style={{ maxHeight: '360px', opacity: imgLoaded ? 1 : 0, padding: '16px' }}
+            className="h-auto object-contain transition-opacity duration-300 mx-auto block"
+            style={{ maxHeight: '360px', maxWidth: '100%', opacity: imgLoaded ? 1 : 0, padding: '16px', imageRendering: 'auto' }}
             onLoad={() => setImgLoaded(true)}
           />
           {/* Gradient overlay */}
