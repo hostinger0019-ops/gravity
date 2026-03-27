@@ -88,7 +88,7 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
         </button>
 
         {/* ── Hero Image Section ── */}
-        <div className="relative w-full overflow-hidden" style={{ minHeight: '280px', backgroundColor: 'rgba(255,255,255,0.03)' }}>
+        <div className="relative w-full overflow-hidden flex items-center justify-center" style={{ minHeight: '200px', background: 'radial-gradient(ellipse at center, rgba(212,165,116,0.05) 0%, rgba(11,17,32,0.4) 100%)' }}>
           {!imgLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
@@ -97,8 +97,8 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
           <img
             src={allImages[activeImg] || product.url}
             alt={product.name}
-            className="h-auto object-contain transition-opacity duration-300 mx-auto block"
-            style={{ maxHeight: '360px', maxWidth: '100%', opacity: imgLoaded ? 1 : 0, padding: '16px', imageRendering: 'auto' }}
+            className="h-auto object-contain transition-opacity duration-300 block"
+            style={{ maxHeight: '320px', maxWidth: '80%', opacity: imgLoaded ? 1 : 0, padding: '12px' }}
             onLoad={() => setImgLoaded(true)}
           />
           {/* Gradient overlay */}
