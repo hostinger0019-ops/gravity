@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
                         body: JSON.stringify({
                             chatbot_id: chatbot.id,
                             url: config.websiteToScrape,
-                            max_pages: 50,
+                            max_pages: 5000,
                         }),
                         signal: AbortSignal.timeout(10000),
                     });

@@ -613,6 +613,15 @@ function ProductGrid({ products }: { products: GridProduct[] }) {
 }
 
 // Extract [PRODUCT_GRID:json] and split content
+function resolveImageUrlForGrid(url: string): string {
+  if (!url) return url;
+  // Convert GPU image URLs to HTTPS proxy path
+  const match = url.match(/^https?:\/\/[^/]+(\/images\/.+)$/);
+  if (match) return `/api/img${match[1]}`;
+  if (url.startsWith('/images/')) return `/api/img${url}`;
+  return url;
+}
+
 function extractProductGrid(content: string): { gridProducts: GridProduct[] | null; textContent: string } {
   const regex = /\[PRODUCT_GRID:(\[[\s\S]*?\])\]/;
   const match = regex.exec(content);
@@ -621,7 +630,9 @@ function extractProductGrid(content: string): { gridProducts: GridProduct[] | nu
 
   if (match) {
     try {
-      gridProducts = JSON.parse(match[1]) as GridProduct[];
+      const parsed = JSON.parse(match[1]) as GridProduct[];
+      // Resolve image URLs through HTTPS proxy
+      gridProducts = parsed.map(p => ({ ...p, url: resolveImageUrlForGrid(p.url) }));
       textContent = content.slice(0, match.index) + content.slice(match.index + match[0].length);
     } catch {
       // keep textContent as-is

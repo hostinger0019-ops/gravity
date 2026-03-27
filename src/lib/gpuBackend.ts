@@ -418,13 +418,36 @@ const leads = {
 };
 
 // ---------------------------------------------------------------------------
+// Image URL resolver — converts relative paths to absolute GPU URLs
+// ---------------------------------------------------------------------------
+
+function resolveImageUrl(url: string | null | undefined): string | null {
+    if (!url) return null;
+    // Relative path like /images/abc/123.jpg → use HTTPS proxy
+    if (url.startsWith('/images/')) return `/api/img${url}`;
+    // GPU URL (any host) with /images/ path → use HTTPS proxy
+    const match = url.match(/^https?:\/\/[^/]+(\/images\/.+)$/);
+    if (match) return `/api/img${match[1]}`;
+    // External URL (e.g., from the scraped site) — return as-is
+    return url;
+}
+
+function resolveProductImages(products: any[]): any[] {
+    return products.map(p => ({
+        ...p,
+        image_url: resolveImageUrl(p.image_url),
+        image_urls: Array.isArray(p.image_urls) ? p.image_urls.map(resolveImageUrl).filter(Boolean) : [],
+    }));
+}
+
+// ---------------------------------------------------------------------------
 // Products
 // ---------------------------------------------------------------------------
 
 const products = {
     async list(chatbotId: string, opts?: { category?: string; inStock?: boolean; page?: number; pageSize?: number }): Promise<any[]> {
         const res = await gpuFetch<{ products: any[] }>(`/products${qs({ chatbotId, category: opts?.category, inStock: opts?.inStock, page: opts?.page, pageSize: opts?.pageSize })}`);
-        return res.products;
+        return resolveProductImages(res.products);
     },
     async search(chatbotId: string, queryOrOpts?: string | { query?: string; min_price?: number; max_price?: number; category?: string; in_stock?: boolean; limit?: number }, opts?: { minPrice?: number; maxPrice?: number; category?: string; inStock?: boolean; limit?: number }): Promise<any[]> {
         let payload: Record<string, any>;
@@ -439,9 +462,12 @@ const products = {
             method: "POST",
             body: JSON.stringify(payload),
         });
-        return res.products;
+        return resolveProductImages(res.products);
     },
-    async getById(id: string): Promise<any> { return gpuFetch(`/products/${id}`); },
+    async getById(id: string): Promise<any> {
+        const p = await gpuFetch(`/products/${id}`);
+        return { ...p, image_url: resolveImageUrl(p.image_url) };
+    },
     async create(payload: any): Promise<any> { return gpuFetch("/products", { method: "POST", body: JSON.stringify(payload) }); },
     async createBatch(chatbotId: string, products: any[]): Promise<{ products: any[]; count: number }> {
         return gpuFetch("/products/batch", { method: "POST", body: JSON.stringify({ chatbot_id: chatbotId, products }) });
@@ -658,10 +684,12 @@ async function chatPrepare(chatbotId: string, query: string): Promise<{
     product_count: number;
     timing: Record<string, number>;
 }> {
-    return await gpuFetch("/chat/prepare", {
+    const result = await gpuFetch("/chat/prepare", {
         method: "POST",
         body: JSON.stringify({ chatbot_id: chatbotId, query }),
     });
+    if (result.products) result.products = resolveProductImages(result.products);
+    return result;
 }
 
 const properties = {
