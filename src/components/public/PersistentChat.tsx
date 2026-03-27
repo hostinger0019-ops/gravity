@@ -1225,7 +1225,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                       {/* Product cards grid (from [PRODUCT_GRID:JSON]) */}
                       {products.length > 0 && (
                         <div className="mb-3 grid grid-cols-2 gap-3">
-                          {products.slice(0, 6).map((p, idx) => (
+                          {products.map((p, idx) => (
                             <div key={idx} className="rounded-xl overflow-hidden border border-neutral-700/50 bg-black/20 hover:border-amber-600/40 transition-all duration-300 hover:shadow-lg hover:shadow-black/30">
                               <img src={p.url} alt={p.name} loading="lazy" className="w-full h-44 object-contain bg-white/5 p-2" />
                               <div className="p-2.5">
