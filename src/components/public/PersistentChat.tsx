@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 // Unified Markdown + Math rendering component
 import { RenderedMessage } from "./RenderedMessage"; // handles markdown + math normalization (converts [ ... ] to LaTeX)
+import { ProductDetailModal, type ProductDetail } from "./ProductDetailModal";
 import type { PublicChatProps } from "./PublicChat";
 import { shouldShowActionButtons } from "@/components/utils";
 import { renamePublicConversation, deletePublicConversation } from "@/data/publicConversationMutations";
@@ -58,6 +59,9 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   const [partial, setPartial] = useState<string>("");
   const pendingVoiceTextRef = useRef<string | null>(null);
   const audioElRef = useRef<HTMLAudioElement | null>(null);
+
+  // Product detail modal
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetail | null>(null);
 
   // ── Inline Voice Streaming State ──
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -628,7 +632,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   const headerTitle = useMemo(() => name || "Chatbot", [name]);
 
   // Extract inline images from markdown and plain URLs, return clean text + images
-  type ProductCard = { name: string; url: string; price?: string };
+  type ProductCard = { name: string; url: string; price?: string; product_id?: number; rating?: number; stock_status?: string; description?: string; category?: string; brand?: string; product_url?: string; image_urls?: string[] };
   function splitImages(md: string): { text: string; images: string[]; products: ProductCard[] } {
     let text = String(md || "");
     const images: string[] = [];
@@ -961,6 +965,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   };
 
   return (
+    <>
     <div className={`relative flex h-[100dvh] ${bgMain}`}>
       {/* Hidden audio element for realtime TTS playback */}
       <audio
@@ -1217,7 +1222,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                       {products.length > 0 && (
                         <div className="mb-3 grid grid-cols-2 gap-3">
                           {products.map((p, idx) => (
-                            <div key={idx} className="rounded-xl overflow-hidden border border-neutral-700/50 bg-black/20 hover:border-amber-600/40 transition-all duration-300 hover:shadow-lg hover:shadow-black/30">
+                            <div key={idx} className="rounded-xl overflow-hidden border border-neutral-700/50 bg-black/20 hover:border-amber-600/40 transition-all duration-300 hover:shadow-lg hover:shadow-black/30 cursor-pointer" onClick={() => setSelectedProduct(p as ProductDetail)}>
                               <img src={p.url} alt={p.name} loading="lazy" className="w-full h-44 object-contain bg-white/5 p-2" />
                               <div className="p-2.5">
                                 <p className="text-xs font-semibold truncate">{p.name}</p>
@@ -1346,6 +1351,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         </form>
       </div>
     </div>
+    {selectedProduct && <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+  </>
   );
 }
 
