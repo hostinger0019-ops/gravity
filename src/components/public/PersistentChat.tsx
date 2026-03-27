@@ -638,7 +638,14 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
     text = text.replace(/\[PRODUCT_GRID:(\[[\s\S]*?\])\]/g, (_m, json) => {
       try {
         const items = JSON.parse(json) as ProductCard[];
-        products.push(...items.filter(p => p?.url));
+        products.push(...items.filter(p => p?.url).map(p => {
+          // Resolve GPU image URLs through HTTPS proxy
+          let url = p.url;
+          const imgMatch = url.match(/^https?:\/\/[^/]+(\/images\/.+)$/);
+          if (imgMatch) url = `/api/img${imgMatch[1]}`;
+          else if (url.startsWith('/images/')) url = `/api/img${url}`;
+          return { ...p, url };
+        }));
       } catch { }
       return "";
     });
