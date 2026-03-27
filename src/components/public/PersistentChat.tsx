@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 // Unified Markdown + Math rendering component
 import { RenderedMessage } from "./RenderedMessage"; // handles markdown + math normalization (converts [ ... ] to LaTeX)
-import { ProductDetailModal, type ProductDetail } from "./ProductDetailModal";
 import type { PublicChatProps } from "./PublicChat";
 import { shouldShowActionButtons } from "@/components/utils";
 import { renamePublicConversation, deletePublicConversation } from "@/data/publicConversationMutations";
@@ -59,9 +58,6 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   const [partial, setPartial] = useState<string>("");
   const pendingVoiceTextRef = useRef<string | null>(null);
   const audioElRef = useRef<HTMLAudioElement | null>(null);
-
-  // Product detail modal
-  const [selectedProduct, setSelectedProduct] = useState<ProductDetail | null>(null);
 
   // ── Inline Voice Streaming State ──
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -632,7 +628,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   const headerTitle = useMemo(() => name || "Chatbot", [name]);
 
   // Extract inline images from markdown and plain URLs, return clean text + images
-  type ProductCard = { name: string; url: string; price?: string; product_id?: number; rating?: number; stock_status?: string; description?: string; category?: string; brand?: string; product_url?: string; image_urls?: string[] };
+  type ProductCard = { name: string; url: string; price?: string };
   function splitImages(md: string): { text: string; images: string[]; products: ProductCard[] } {
     let text = String(md || "");
     const images: string[] = [];
@@ -965,7 +961,6 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   };
 
   return (
-    <>
     <div className={`relative flex h-[100dvh] ${bgMain}`}>
       {/* Hidden audio element for realtime TTS playback */}
       <audio
@@ -999,11 +994,10 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
           <div className="font-semibold truncate text-sm">{headerTitle}</div>
           <button
             onClick={onNewChat}
-            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all ${
-              light
+            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all ${light
                 ? 'bg-black text-white hover:bg-gray-800'
                 : 'bg-white text-black hover:bg-gray-200'
-            }`}
+              }`}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -1034,40 +1028,36 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                   setActiveCid(c.id);
                   setSidebarOpen(false);
                 }}
-                className={`group w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-150 flex items-start gap-2.5 ${
-                  isActive
+                className={`group w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-150 flex items-start gap-2.5 ${isActive
                     ? light
                       ? 'bg-gray-100 border-l-2 border-l-black'
                       : 'bg-white/[0.06] border-l-2 border-l-white'
                     : light
                       ? 'hover:bg-gray-50 border-l-2 border-l-transparent'
                       : 'hover:bg-white/[0.03] border-l-2 border-l-transparent'
-                }`}
+                  }`}
               >
                 {/* Chat icon */}
                 <svg
                   width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                  className={`mt-0.5 flex-shrink-0 transition-colors ${
-                    isActive
+                  className={`mt-0.5 flex-shrink-0 transition-colors ${isActive
                       ? light ? 'text-black' : 'text-white'
                       : light ? 'text-gray-400 group-hover:text-gray-600' : 'text-gray-600 group-hover:text-gray-400'
-                  }`}
+                    }`}
                 >
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
                 {/* Title + timestamp */}
                 <div className="min-w-0 flex-1">
-                  <div className={`truncate font-medium transition-colors ${
-                    isActive
+                  <div className={`truncate font-medium transition-colors ${isActive
                       ? light ? 'text-black' : 'text-white'
                       : light ? 'text-gray-700' : 'text-gray-300'
-                  }`}>
+                    }`}>
                     {c.title || 'Untitled'}
                   </div>
                   {timeAgo && (
-                    <div className={`text-[11px] mt-0.5 ${
-                      light ? 'text-gray-400' : 'text-gray-500'
-                    }`}>
+                    <div className={`text-[11px] mt-0.5 ${light ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
                       {timeAgo}
                     </div>
                   )}
@@ -1083,11 +1073,10 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
             <button
               type="button"
               onClick={() => setSidebarMenuOpen((v) => !v)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all ${
-                light
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all ${light
                   ? 'hover:bg-gray-100 text-gray-600'
                   : 'hover:bg-white/[0.06] text-gray-400'
-              }`}
+                }`}
             >
               <span className="flex items-center gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -1105,17 +1094,15 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
 
             {/* Dropdown menu */}
             {sidebarMenuOpen && (
-              <div className={`absolute bottom-full left-0 right-0 mb-1 rounded-lg border overflow-hidden shadow-xl ${
-                light
+              <div className={`absolute bottom-full left-0 right-0 mb-1 rounded-lg border overflow-hidden shadow-xl ${light
                   ? 'bg-white border-gray-200'
                   : 'bg-[#1a1a1a] border-gray-800'
-              }`}>
+                }`}>
                 <button
                   type="button"
                   onClick={() => { setLight((v) => !v); setSidebarMenuOpen(false); }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors ${
-                    light ? 'hover:bg-gray-50 text-gray-700' : 'hover:bg-white/[0.06] text-gray-300'
-                  }`}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors ${light ? 'hover:bg-gray-50 text-gray-700' : 'hover:bg-white/[0.06] text-gray-300'
+                    }`}
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                     {light
@@ -1128,9 +1115,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                 <button
                   type="button"
                   onClick={() => { onRename(); setSidebarMenuOpen(false); }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors ${
-                    light ? 'hover:bg-gray-50 text-gray-700' : 'hover:bg-white/[0.06] text-gray-300'
-                  }`}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors ${light ? 'hover:bg-gray-50 text-gray-700' : 'hover:bg-white/[0.06] text-gray-300'
+                    }`}
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -1141,9 +1127,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                 <button
                   type="button"
                   onClick={() => { if (activeCid) onDeleteChat(activeCid); setSidebarMenuOpen(false); }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-red-400 ${
-                    light ? 'hover:bg-red-50' : 'hover:bg-red-500/10'
-                  }`}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-red-400 ${light ? 'hover:bg-red-50' : 'hover:bg-red-500/10'
+                    }`}
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                     <polyline points="3 6 5 6 21 6" />
@@ -1196,9 +1181,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
               {/* Assistant avatar */}
               {m.role === "assistant" && (
                 <div className="flex-shrink-0 mr-2.5 mt-1">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                    light ? 'bg-gray-100 border border-gray-200' : 'bg-white/[0.06] border border-white/10'
-                  }`}>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center ${light ? 'bg-gray-100 border border-gray-200' : 'bg-white/[0.06] border border-white/10'
+                    }`}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
                       className={light ? 'text-gray-500' : 'text-gray-400'}
                     >
@@ -1211,11 +1195,10 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
               )}
 
               <div
-                className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] px-4 py-3 text-sm md:text-[15px] leading-relaxed ${
-                  m.role === "user"
+                className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] px-4 py-3 text-sm md:text-[15px] leading-relaxed ${m.role === "user"
                     ? `${radius} shadow-sm ${light ? 'bg-black text-white' : 'bg-[#2a2a2e] text-white'}`
                     : 'rounded-lg'
-                }`}
+                  }`}
                 style={{
                   ...(m.role !== "user" ? {
                     background: bubbleBotBg,
@@ -1234,7 +1217,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                       {products.length > 0 && (
                         <div className="mb-3 grid grid-cols-2 gap-3">
                           {products.map((p, idx) => (
-                            <div key={idx} className="rounded-xl overflow-hidden border border-neutral-700/50 bg-black/20 hover:border-amber-600/40 transition-all duration-300 hover:shadow-lg hover:shadow-black/30 cursor-pointer" onClick={() => setSelectedProduct(p as ProductDetail)}>
+                            <div key={idx} className="rounded-xl overflow-hidden border border-neutral-700/50 bg-black/20 hover:border-amber-600/40 transition-all duration-300 hover:shadow-lg hover:shadow-black/30">
                               <img src={p.url} alt={p.name} loading="lazy" className="w-full h-44 object-contain bg-white/5 p-2" />
                               <div className="p-2.5">
                                 <p className="text-xs font-semibold truncate">{p.name}</p>
@@ -1288,9 +1271,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
           ))}
           {typingIndicator && loading && (
             <div className="flex items-center gap-2.5" style={{ animation: 'fadeInMsg 0.3s ease-out both' }}>
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                light ? 'bg-gray-100 border border-gray-200' : 'bg-white/[0.06] border border-white/10'
-              }`}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${light ? 'bg-gray-100 border border-gray-200' : 'bg-white/[0.06] border border-white/10'
+                }`}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
                   className={light ? 'text-gray-500' : 'text-gray-400'}
                 >
@@ -1299,9 +1281,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                   <path d="M6 14a6 6 0 0 1 12 0" />
                 </svg>
               </div>
-              <div className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg ${
-                light ? 'bg-gray-50' : 'bg-white/[0.03]'
-              }`}>
+              <div className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg ${light ? 'bg-gray-50' : 'bg-white/[0.03]'
+                }`}>
                 <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${light ? 'bg-gray-400' : 'bg-gray-500'}`} style={{ animationDelay: '0s' }} />
                 <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${light ? 'bg-gray-400' : 'bg-gray-500'}`} style={{ animationDelay: '0.15s' }} />
                 <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${light ? 'bg-gray-400' : 'bg-gray-500'}`} style={{ animationDelay: '0.3s' }} />
@@ -1320,13 +1301,12 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
               type="button"
               onClick={toggleVoiceRecording}
               disabled={isProcessingVoice || loading}
-              className={`px-3 py-2 border rounded-xl transition-all hover:scale-105 ${
-                isVoiceRecording
+              className={`px-3 py-2 border rounded-xl transition-all hover:scale-105 ${isVoiceRecording
                   ? "bg-green-500/15 border-green-500 text-green-400"
                   : isProcessingVoice
-                  ? "bg-yellow-500/15 border-yellow-500 text-yellow-400"
-                  : `${borderInput} bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 ${light ? "border-indigo-300" : "border-indigo-500/50"}`
-              }`}
+                    ? "bg-yellow-500/15 border-yellow-500 text-yellow-400"
+                    : `${borderInput} bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 ${light ? "border-indigo-300" : "border-indigo-500/50"}`
+                }`}
               title={isVoiceRecording ? "Stop voice" : isProcessingVoice ? "Processing..." : "Start voice"}
               style={isVoiceRecording ? { animation: "pulse 1s infinite" } : {}}
             >
@@ -1366,8 +1346,6 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         </form>
       </div>
     </div>
-    <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
-    </>
   );
 }
 
