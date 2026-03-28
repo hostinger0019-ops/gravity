@@ -81,8 +81,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   const borderClr = light ? "border-gray-200" : "border-gray-800";
   const borderInput = light ? "border-gray-300" : "border-gray-700";
   const bubbleUserText = light ? "#000000" : "#000000";
-  const bubbleBotBg = light ? "transparent" : "transparent";
-  const bubbleBotText = light ? "#374151" : "#d1d5db";
+  const bubbleBotBg = light ? "rgba(0,0,0,0.03)" : "rgba(255,255,255,0.03)";
+  const bubbleBotText = light ? "#1a1a2e" : "#e5e7eb";
 
   // Sidebar open on mobile
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -966,12 +966,6 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
 
   return (
     <>
-    <style>{`
-      @keyframes msgFadeIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    `}</style>
     <div className={`relative flex h-[100dvh] ${bgMain}`}>
       {/* Hidden audio element for realtime TTS playback */}
       <audio
@@ -1206,13 +1200,13 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
               )}
 
               <div
-                className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] text-sm md:text-[15px] leading-relaxed ${m.role === "user"
-                    ? `px-4 py-3 ${radius} shadow-sm ${light ? 'bg-black text-white' : 'bg-[#2a2a2e] text-white'}`
-                    : 'py-2'
+                className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] px-4 py-3 text-sm md:text-[15px] leading-relaxed ${m.role === "user"
+                    ? `${radius} shadow-sm ${light ? 'bg-black text-white' : 'bg-[#2a2a2e] text-white'}`
+                    : 'rounded-lg'
                   }`}
                 style={{
-                  animation: 'msgFadeIn 0.4s ease-out both',
                   ...(m.role !== "user" ? {
+                    background: bubbleBotBg,
                     color: bubbleBotText,
                   } : {}),
                 }}
