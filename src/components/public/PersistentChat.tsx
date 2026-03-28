@@ -967,12 +967,13 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   return (
     <>
     <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
       @keyframes msgFadeIn {
         from { opacity: 0; transform: translateY(8px); }
         to { opacity: 1; transform: translateY(0); }
       }
     `}</style>
-    <div className={`relative flex h-[100dvh] ${bgMain}`}>
+    <div className={`relative flex h-[100dvh] ${bgMain}`} style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
       {/* Hidden audio element for realtime TTS playback */}
       <audio
         ref={audioElRef as any}
