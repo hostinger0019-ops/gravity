@@ -23,6 +23,7 @@ interface ProductDetailModalProps {
 export function ProductDetailModal({ product, onClose }: ProductDetailModalProps) {
   const [activeImg, setActiveImg] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   // All images: main + variants
   const allImages = product
@@ -33,6 +34,7 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
   useEffect(() => {
     setActiveImg(0);
     setImgLoaded(false);
+    setDescExpanded(false);
   }, [product]);
 
   // Close on Escape
@@ -193,8 +195,19 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
           {product.description && (
             <div className="mb-4">
               <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                {product.description}
+                {descExpanded || product.description.length <= 150
+                  ? product.description
+                  : product.description.slice(0, 150) + '...'}
               </p>
+              {product.description.length > 150 && (
+                <button
+                  onClick={() => setDescExpanded(v => !v)}
+                  className="text-xs font-medium mt-1 transition-colors hover:underline"
+                  style={{ color: '#D4A574' }}
+                >
+                  {descExpanded ? 'Show Less' : 'Read More'}
+                </button>
+              )}
             </div>
           )}
 
