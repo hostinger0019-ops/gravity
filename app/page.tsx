@@ -59,32 +59,109 @@ export default function Home() {
 
   const SUBTITLE = "Create AI chatbots and voicebots by chatting with AI";
 
-  const STORAGE_KEY = "botforge-chat-session";
+  // ── Multi-session storage ──
+  type BuilderSession = { id: string; title: string; messages: Message[]; createdBot: CreatedChatbot | null; createdAtIndex: number | null; updatedAt: string };
+  const SESSIONS_KEY = "botforge-sessions";
+  const ACTIVE_KEY = "botforge-active";
+  const [sessions, setSessions] = useState<BuilderSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [showRecentChats, setShowRecentChats] = useState(false);
+
+  const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+  const saveSessions = (s: BuilderSession[]) => {
+    try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(s.slice(0, 20))); } catch {}
+  };
+
+  const persistCurrent = (sid: string | null, msgs: Message[], bot: CreatedChatbot | null, idx: number | null) => {
+    if (!sid || msgs.length === 0) return;
+    setSessions(prev => {
+      const title = msgs.find(m => m.role === "user")?.content.replace(/^🎤\s*/, "").slice(0, 45) || "New Chat";
+      const updated = prev.map(s => s.id === sid ? { ...s, messages: msgs, createdBot: bot, createdAtIndex: idx, updatedAt: new Date().toISOString(), title } : s);
+      saveSessions(updated);
+      return updated;
+    });
+  };
+
   const inChat = messages.length > 0;
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
-  // ── Load chat history ──
+  // ── Load sessions on mount ──
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const s = JSON.parse(saved);
-        if (s.messages?.length > 0) setMessages(s.messages);
-        if (s.createdBot) setCreatedBot(s.createdBot);
-        if (s.createdAtIndex !== undefined) setCreatedAtIndex(s.createdAtIndex);
-      }
-    } catch { }
+    let loaded: BuilderSession[] = [];
+    try { loaded = JSON.parse(localStorage.getItem(SESSIONS_KEY) || "[]"); } catch {}
+    const savedActiveId = localStorage.getItem(ACTIVE_KEY);
+
+    // Migrate from old single-session format
+    if (loaded.length === 0) {
+      try {
+        const old = localStorage.getItem("botforge-chat-session");
+        if (old) {
+          const p = JSON.parse(old);
+          if (p.messages?.length > 0) {
+            const migrated: BuilderSession = {
+              id: genId(), title: p.messages.find((m: Message) => m.role === "user")?.content.slice(0, 45) || "Chat",
+              messages: p.messages, createdBot: p.createdBot || null, createdAtIndex: p.createdAtIndex ?? null, updatedAt: new Date().toISOString(),
+            };
+            loaded.push(migrated);
+            saveSessions(loaded);
+            localStorage.removeItem("botforge-chat-session");
+          }
+        }
+      } catch {}
+    }
+
+    setSessions(loaded);
+    const active = loaded.find(s => s.id === savedActiveId) || loaded[0];
+    if (active) {
+      setActiveSessionId(active.id);
+      setMessages(active.messages);
+      setCreatedBot(active.createdBot);
+      setCreatedAtIndex(active.createdAtIndex);
+      localStorage.setItem(ACTIVE_KEY, active.id);
+    }
     setHasLoadedHistory(true);
   }, []);
 
-  // ── Save chat history ──
+  // ── Auto-save current session ──
   useEffect(() => {
-    if (!hasLoadedHistory || typeof window === "undefined") return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ messages, createdBot, createdAtIndex }));
-    } catch { }
-  }, [messages, createdBot, createdAtIndex, hasLoadedHistory]);
+    if (!hasLoadedHistory || !activeSessionId) return;
+    persistCurrent(activeSessionId, messages, createdBot, createdAtIndex);
+  }, [messages, createdBot, createdAtIndex, hasLoadedHistory, activeSessionId]);
+
+  // Switch to a different session
+  const switchSession = (id: string) => {
+    persistCurrent(activeSessionId, messages, createdBot, createdAtIndex);
+    const s = sessions.find(s => s.id === id);
+    if (!s) return;
+    setActiveSessionId(id);
+    setMessages(s.messages);
+    setCreatedBot(s.createdBot);
+    setCreatedAtIndex(s.createdAtIndex);
+    setInput("");
+    localStorage.setItem(ACTIVE_KEY, id);
+    setShowRecentChats(false);
+  };
+
+  const deleteSession = (id: string) => {
+    setSessions(prev => {
+      const next = prev.filter(s => s.id !== id);
+      saveSessions(next);
+      if (id === activeSessionId) {
+        if (next.length) { switchSession(next[0].id); } else { setMessages([]); setCreatedBot(null); setCreatedAtIndex(null); setActiveSessionId(null); localStorage.removeItem(ACTIVE_KEY); }
+      }
+      return next;
+    });
+  };
+
+  const relTime = (iso: string) => {
+    const d = Date.now() - new Date(iso).getTime();
+    if (d < 60000) return "now";
+    if (d < 3600000) return `${Math.floor(d / 60000)}m`;
+    if (d < 86400000) return `${Math.floor(d / 3600000)}h`;
+    return `${Math.floor(d / 86400000)}d`;
+  };
 
   // ── Typing effect ──
   useEffect(() => {
@@ -268,8 +345,14 @@ export default function Home() {
   };
 
   const resetChat = () => {
+    // Save current session before starting new
+    persistCurrent(activeSessionId, messages, createdBot, createdAtIndex);
+    const fresh: BuilderSession = { id: genId(), title: "New Chat", messages: [], createdBot: null, createdAtIndex: null, updatedAt: new Date().toISOString() };
+    setSessions(prev => { const next = [fresh, ...prev].slice(0, 20); saveSessions(next); return next; });
+    setActiveSessionId(fresh.id);
     setMessages([]); setCreatedBot(null); setCreatedAtIndex(null); setInput("");
-    if (typeof window !== "undefined") localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(ACTIVE_KEY, fresh.id);
+    setShowRecentChats(false);
   };
 
   // ── Voice Streaming (16kHz AudioWorklet → GPU VAD + STT) ──
@@ -652,6 +735,59 @@ CRITICAL RULES:
         </div>
 
         <div className="nav-right">
+          {/* Recent Chats dropdown */}
+          {sessions.length > 0 && (
+            <div style={{ position: "relative" }}>
+              <button
+                className="btn-login"
+                onClick={() => setShowRecentChats(!showRecentChats)}
+                style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px" }}
+              >
+                💬 Recent Chats
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6" /></svg>
+              </button>
+              {showRecentChats && (
+                <>
+                  <div style={{ position: "fixed", inset: 0, zIndex: 40 }} onClick={() => setShowRecentChats(false)} />
+                  <div style={{
+                    position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 50,
+                    width: 280, maxHeight: 360, overflowY: "auto",
+                    background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 12, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", padding: "6px",
+                  }}>
+                    <div style={{ padding: "8px 10px 6px", fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em" }}>Recent Sessions</div>
+                    {sessions.map(s => (
+                      <div
+                        key={s.id}
+                        onClick={() => switchSession(s.id)}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 8,
+                          padding: "8px 10px", borderRadius: 8, cursor: "pointer",
+                          background: s.id === activeSessionId ? "rgba(99,102,241,0.15)" : "transparent",
+                          transition: "background 0.15s",
+                        }}
+                        onMouseEnter={e => { if (s.id !== activeSessionId) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+                        onMouseLeave={e => { if (s.id !== activeSessionId) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                      >
+                        <span style={{ fontSize: 16 }}>{s.createdBot ? "🤖" : "💬"}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, color: s.id === activeSessionId ? "#818cf8" : "#ddd", fontWeight: s.id === activeSessionId ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</div>
+                          <div style={{ fontSize: 11, color: "#666" }}>{relTime(s.updatedAt)}</div>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }}
+                          style={{ background: "none", border: "none", color: "#555", cursor: "pointer", padding: 4, borderRadius: 4, fontSize: 11, opacity: 0.5, transition: "opacity 0.15s" }}
+                          onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+                          onMouseLeave={e => (e.currentTarget.style.opacity = "0.5")}
+                          title="Delete"
+                        >✕</button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
           {inChat && (
             <button className="btn-login" onClick={resetChat}>✨ New Bot</button>
           )}
