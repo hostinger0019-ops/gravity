@@ -665,8 +665,45 @@ CRITICAL RULES:
           {inChat && (
             <button className="btn-login" onClick={resetChat}>✨ New Bot</button>
           )}
-          <button className="btn-login" onClick={() => window.location.href = '/login'}>Log in</button>
-          <button className="btn-start" onClick={() => window.location.href = '/login'}>Get started</button>
+          {authStatus === "authenticated" && session?.user ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <a href="/admin/chatbots" className="btn-login" style={{ fontSize: "13px" }}>My Bots</a>
+              <a
+                href="/admin/chatbots"
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "9999px", padding: "4px 14px 4px 4px", cursor: "pointer",
+                  textDecoration: "none", color: "#fff", transition: "all 0.2s",
+                }}
+              >
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    alt=""
+                    style={{ width: 28, height: 28, borderRadius: "9999px", objectFit: "cover" }}
+                  />
+                ) : (
+                  <div style={{
+                    width: 28, height: 28, borderRadius: "9999px",
+                    background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 13, fontWeight: 700, color: "#fff",
+                  }}>
+                    {(session.user.name || session.user.email || "U")[0].toUpperCase()}
+                  </div>
+                )}
+                <span style={{ fontSize: 13, fontWeight: 500 }}>
+                  {(session.user.name || session.user.email || "User").split(" ")[0]}
+                </span>
+              </a>
+            </div>
+          ) : (
+            <>
+              <button className="btn-login" onClick={() => window.location.href = '/login'}>Log in</button>
+              <button className="btn-start" onClick={() => window.location.href = '/login'}>Get started</button>
+            </>
+          )}
         </div>
       </nav>
 
