@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { gpu } from "@/lib/gpuBackend";
 
 export async function POST(req: NextRequest) {
@@ -10,11 +11,22 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Config required" }, { status: 400 });
         }
 
-        // Owner ID — use provided userId or fallback to dev dummy
-        const ownerId = userId || "00000000-0000-0000-0000-000000000000";
-        if (!userId) {
-            console.log("Using fallback owner_id for development");
+        // Get the real user from NextAuth session (server-side, tamper-proof)
+        const session = await getServerSession();
+        const sessionGpuId = (session?.user as any)?.gpu_id;
+
+        // Priority: server-side session gpu_id > client-sent userId > dev fallback
+        const devNoAuth = process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true";
+        const ownerId = sessionGpuId || userId || (devNoAuth ? "00000000-0000-0000-0000-000000000000" : null);
+
+        if (!ownerId) {
+            return NextResponse.json(
+                { error: "Please log in first to create a chatbot." },
+                { status: 401 }
+            );
         }
+
+        console.log("Creating chatbot with ownerId:", ownerId, "source:", sessionGpuId ? "session" : "client");
 
         // Generate a unique slug
         const baseSlug = config.slug || config.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'bot';

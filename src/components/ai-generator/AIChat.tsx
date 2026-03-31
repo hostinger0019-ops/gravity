@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { TemplateSelector } from "./TemplateSelector";
 import { RestaurantTemplate, RestaurantConfig } from "./RestaurantTemplate";
 import { IndustryTemplate } from "@/data/industry-templates";
@@ -32,6 +33,7 @@ interface CreatedChatbot {
 
 export function AIChat() {
     const router = useRouter();
+    const { data: session } = useSession();
     const [messages, setMessages] = useState<Message[]>([
         {
             role: "assistant",
@@ -163,6 +165,15 @@ Be warm, welcoming, and knowledgeable about the restaurant. If someone wants to 
 
     // Auto-create chatbot from config
     const createChatbot = async (config: ChatbotConfig) => {
+        // Check login before creating
+        const gpuId = (session?.user as any)?.gpu_id;
+        if (!devNoAuth && !gpuId) {
+            setMessages(prev => [...prev, {
+                role: "assistant",
+                content: "🔒 **You need to log in first** to create a chatbot. Your bot needs to be linked to your account.\n\n[👉 Click here to log in](/login?next=/admin/ai)"
+            }]);
+            return;
+        }
         setIsCreating(true);
         setMessages(prev => [...prev, {
             role: "assistant",
@@ -170,10 +181,10 @@ Be warm, welcoming, and knowledgeable about the restaurant. If someone wants to 
         }]);
 
         try {
-            // Get user ID from localStorage or dev-mode fallback
+            // Use the session gpu_id instead of localStorage
             const userId = devNoAuth
                 ? "00000000-0000-0000-0000-000000000000"
-                : (typeof window !== "undefined" ? localStorage.getItem("user_id") : null);
+                : gpuId;
             console.log("Creating chatbot with userId:", userId);
 
             const response = await fetch("/api/ai-generator/create", {
