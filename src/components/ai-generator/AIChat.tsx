@@ -31,70 +31,164 @@ interface CreatedChatbot {
     slug: string;
 }
 
+// ── Session types ──
+interface BuilderSession {
+    id: string;
+    title: string;
+    messages: Message[];
+    selectedTemplate: string | null;
+    createdBot: CreatedChatbot | null;
+    createdAtIndex: number | null;
+    updatedAt: string;
+}
+
+const SESSIONS_KEY = "ai-builder-sessions";
+const ACTIVE_KEY = "ai-builder-active";
+const MAX_SESSIONS = 20;
+const INITIAL_MSG: Message = {
+    role: "assistant",
+    content: "Hi! 🤖 I'll help you create the perfect chatbot. Tell me about your business and what you want the chatbot to do.\n\n💡 **Tip:** Include your website URL and I'll automatically import your content!",
+};
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function loadSessions(): BuilderSession[] {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem(SESSIONS_KEY) || "[]"); } catch { return []; }
+}
+
+function saveSessions(sessions: BuilderSession[]) {
+    if (typeof window === "undefined") return;
+    try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions.slice(0, MAX_SESSIONS))); } catch {}
+}
+
+function saveActiveId(id: string | null) {
+    if (typeof window === "undefined") return;
+    if (id) localStorage.setItem(ACTIVE_KEY, id); else localStorage.removeItem(ACTIVE_KEY);
+}
+
 export function AIChat() {
     const router = useRouter();
     const { data: session } = useSession();
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            role: "assistant",
-            content: "Hi! 🤖 I'll help you create the perfect chatbot. Tell me about your business and what you want the chatbot to do.\n\n💡 **Tip:** Include your website URL and I'll automatically import your content!",
-        },
-    ]);
+    const [messages, setMessages] = useState<Message[]>([INITIAL_MSG]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
     const [showRestaurantTemplate, setShowRestaurantTemplate] = useState(false);
     const [createdBot, setCreatedBot] = useState<CreatedChatbot | null>(null);
-    const [createdAtIndex, setCreatedAtIndex] = useState<number | null>(null); // Track when bot was created
+    const [createdAtIndex, setCreatedAtIndex] = useState<number | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
-    const STORAGE_KEY = "ai-chat-session";
+    // ── Multi-session state ──
+    const [sessions, setSessions] = useState<BuilderSession[]>([]);
+    const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    // Load chat history from localStorage on mount
+    // Save current state back into sessions array
+    const persistCurrent = (sid: string | null, msgs: Message[], tpl: string | null, bot: CreatedChatbot | null, idx: number | null) => {
+        if (!sid) return;
+        setSessions(prev => {
+            const now = new Date().toISOString();
+            const title = msgs.find(m => m.role === "user")?.content.slice(0, 45) || "New Chat";
+            const updated = prev.map(s => s.id === sid ? { ...s, messages: msgs, selectedTemplate: tpl, createdBot: bot, createdAtIndex: idx, updatedAt: now, title } : s);
+            saveSessions(updated);
+            return updated;
+        });
+    };
+
+    // Load sessions on mount
     useEffect(() => {
         if (typeof window === "undefined") return;
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                const session = JSON.parse(saved);
-                if (session.messages && session.messages.length > 1) {
-                    setMessages(session.messages);
+        const loaded = loadSessions();
+        const savedActiveId = localStorage.getItem(ACTIVE_KEY);
+
+        // Migrate from old single-session format
+        if (loaded.length === 0) {
+            try {
+                const old = localStorage.getItem("ai-chat-session");
+                if (old) {
+                    const parsed = JSON.parse(old);
+                    if (parsed.messages && parsed.messages.length > 1) {
+                        const migrated: BuilderSession = {
+                            id: genId(),
+                            title: parsed.messages.find((m: Message) => m.role === "user")?.content.slice(0, 45) || "Imported Chat",
+                            messages: parsed.messages,
+                            selectedTemplate: parsed.selectedTemplate || null,
+                            createdBot: parsed.createdBot || null,
+                            createdAtIndex: parsed.createdAtIndex ?? null,
+                            updatedAt: parsed.updatedAt || new Date().toISOString(),
+                        };
+                        loaded.push(migrated);
+                        saveSessions(loaded);
+                        saveActiveId(migrated.id);
+                        localStorage.removeItem("ai-chat-session");
+                    }
                 }
-                if (session.selectedTemplate) {
-                    setSelectedTemplate(session.selectedTemplate);
-                }
-                if (session.createdBot) {
-                    setCreatedBot(session.createdBot);
-                }
-                if (session.createdAtIndex !== undefined) {
-                    setCreatedAtIndex(session.createdAtIndex);
-                }
-            }
-        } catch (e) {
-            console.error("Failed to load chat history:", e);
+            } catch {}
+        }
+
+        setSessions(loaded);
+        const active = loaded.find(s => s.id === savedActiveId) || loaded[0];
+        if (active) {
+            setActiveSessionId(active.id);
+            setMessages(active.messages);
+            setSelectedTemplate(active.selectedTemplate);
+            setCreatedBot(active.createdBot);
+            setCreatedAtIndex(active.createdAtIndex);
+            saveActiveId(active.id);
+        } else {
+            // No sessions — create a fresh one
+            const fresh: BuilderSession = { id: genId(), title: "New Chat", messages: [INITIAL_MSG], selectedTemplate: null, createdBot: null, createdAtIndex: null, updatedAt: new Date().toISOString() };
+            setSessions([fresh]);
+            setActiveSessionId(fresh.id);
+            saveSessions([fresh]);
+            saveActiveId(fresh.id);
         }
         setHasLoadedHistory(true);
     }, []);
 
-    // Save chat history to localStorage whenever state changes
+    // Auto-save current session whenever messages/bot change
     useEffect(() => {
-        if (!hasLoadedHistory || typeof window === "undefined") return;
-        try {
-            const session = {
-                messages,
-                selectedTemplate,
-                createdBot,
-                createdAtIndex,
-                updatedAt: new Date().toISOString(),
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-        } catch (e) {
-            console.error("Failed to save chat history:", e);
-        }
-    }, [messages, selectedTemplate, createdBot, createdAtIndex, hasLoadedHistory]);
+        if (!hasLoadedHistory || !activeSessionId) return;
+        persistCurrent(activeSessionId, messages, selectedTemplate, createdBot, createdAtIndex);
+    }, [messages, selectedTemplate, createdBot, createdAtIndex, hasLoadedHistory, activeSessionId]);
+
+    // Switch to a different session
+    const switchSession = (id: string) => {
+        // Save current before switching
+        persistCurrent(activeSessionId, messages, selectedTemplate, createdBot, createdAtIndex);
+        const s = sessions.find(s => s.id === id);
+        if (!s) return;
+        setActiveSessionId(id);
+        setMessages(s.messages);
+        setSelectedTemplate(s.selectedTemplate);
+        setCreatedBot(s.createdBot);
+        setCreatedAtIndex(s.createdAtIndex);
+        setInput("");
+        setShowRestaurantTemplate(false);
+        saveActiveId(id);
+        setSidebarOpen(false);
+    };
+
+    // Delete a session
+    const deleteSession = (id: string) => {
+        setSessions(prev => {
+            const next = prev.filter(s => s.id !== id);
+            saveSessions(next);
+            if (id === activeSessionId) {
+                const fallback = next[0];
+                if (fallback) {
+                    switchSession(fallback.id);
+                } else {
+                    newSession();
+                }
+            }
+            return next;
+        });
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -392,31 +486,105 @@ Be warm, welcoming, and knowledgeable about the restaurant. If someone wants to 
         }
     };
 
-    const resetChat = () => {
-        setMessages([{
-            role: "assistant",
-            content: "Hi! 🤖 I'll help you create the perfect chatbot. Tell me about your business and what you want the chatbot to do.\n\n💡 **Tip:** Include your website URL and I'll automatically import your content!",
-        }]);
+    // Create a new session (replaces old resetChat)
+    const newSession = () => {
+        // Save current session first
+        persistCurrent(activeSessionId, messages, selectedTemplate, createdBot, createdAtIndex);
+        const fresh: BuilderSession = { id: genId(), title: "New Chat", messages: [INITIAL_MSG], selectedTemplate: null, createdBot: null, createdAtIndex: null, updatedAt: new Date().toISOString() };
+        setSessions(prev => {
+            const next = [fresh, ...prev].slice(0, MAX_SESSIONS);
+            saveSessions(next);
+            return next;
+        });
+        setActiveSessionId(fresh.id);
+        setMessages([INITIAL_MSG]);
         setSelectedTemplate(null);
         setShowRestaurantTemplate(false);
         setCreatedBot(null);
         setCreatedAtIndex(null);
         setInput("");
-        // Clear localStorage when starting over
-        if (typeof window !== "undefined") {
-            localStorage.removeItem(STORAGE_KEY);
-        }
+        saveActiveId(fresh.id);
+        setSidebarOpen(false);
     };
+
+    const resetChat = newSession;
 
     const origin = typeof window !== "undefined" ? window.location.origin : "";
 
+    // Relative time helper
+    const relTime = (iso: string) => {
+        const d = Date.now() - new Date(iso).getTime();
+        if (d < 60000) return "Just now";
+        if (d < 3600000) return `${Math.floor(d / 60000)}m ago`;
+        if (d < 86400000) return `${Math.floor(d / 3600000)}h ago`;
+        return `${Math.floor(d / 86400000)}d ago`;
+    };
+
     return (
-        <div className="h-full flex flex-col bg-gray-50">
+        <div className="h-full flex bg-gray-50">
+            {/* ── Sidebar (Perplexity-style) ── */}
+            {/* Desktop: always shown as narrow panel. Mobile: slide-over */}
+            {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+            <div className={`fixed lg:relative z-40 top-0 left-0 h-full w-[260px] bg-white border-r border-gray-200 flex flex-col transition-transform duration-200 ${
+                sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            }`}>
+                {/* Sidebar header */}
+                <div className="p-3 border-b border-gray-100">
+                    <button
+                        onClick={newSession}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition-opacity"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                        New Chat
+                    </button>
+                </div>
+                {/* Session list */}
+                <div className="flex-1 overflow-y-auto py-1">
+                    {sessions.map(s => (
+                        <div
+                            key={s.id}
+                            onClick={() => switchSession(s.id)}
+                            className={`group flex items-center gap-2 px-3 py-2.5 mx-1.5 my-0.5 rounded-lg cursor-pointer transition-colors text-sm ${
+                                s.id === activeSessionId
+                                    ? "bg-indigo-50 text-indigo-700 font-medium"
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }`}
+                        >
+                            <span className="text-base">{s.createdBot ? "🤖" : "💬"}</span>
+                            <div className="flex-1 min-w-0">
+                                <div className="truncate text-[13px]">{s.title}</div>
+                                <div className="text-[11px] text-gray-400">{relTime(s.updatedAt)}</div>
+                            </div>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }}
+                                className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                                title="Delete"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+                {/* Session count */}
+                <div className="p-3 border-t border-gray-100 text-xs text-gray-400 text-center">
+                    {sessions.length} session{sessions.length !== 1 ? "s" : ""}
+                </div>
+            </div>
+
+            {/* ── Main content ── */}
+            <div className="flex-1 flex flex-col min-w-0">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 p-6">
                 <div className="max-w-4xl mx-auto">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
+                            {/* Sidebar toggle */}
+                            <button
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                className="lg:hidden p-2 -ml-2 text-gray-500 hover:text-gray-700 rounded-lg"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                            </button>
                             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-2xl">
                                 ✨
                             </div>
@@ -427,10 +595,10 @@ Be warm, welcoming, and knowledgeable about the restaurant. If someone wants to 
                         </div>
                         <button
                             type="button"
-                            onClick={resetChat}
+                            onClick={newSession}
                             className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 border border-gray-300 rounded-lg"
                         >
-                            Start Over
+                            + New Chat
                         </button>
                     </div>
                 </div>
@@ -649,6 +817,7 @@ Be warm, welcoming, and knowledgeable about the restaurant. If someone wants to 
                         }
                     </p>
                 </div>
+            </div>
             </div>
         </div>
     );
