@@ -343,6 +343,13 @@ function hasMath(text: string): boolean {
 // Normalize various math notations into standard $inline$ or $$block$$ so remark-math catches them.
 function normalizeMath(raw: string): string {
   let txt = raw;
+  // 0a) Escape currency dollar signs BEFORE any math processing
+  // Matches $123, $99.99, $1,000 — real currency, not LaTeX
+  const currencyPlaceholders: string[] = [];
+  txt = txt.replace(/\$(\d[\d,]*\.?\d*)/g, (_m, amount) => {
+    const i = currencyPlaceholders.push(amount) - 1;
+    return `@@CURRENCY_${i}@@`;
+  });
   // 0) Protect fenced code blocks and inline code from any math normalization
   type CodeFenceEntry = { lang: string; body: string };
   const codeFencePlaceholders: CodeFenceEntry[] = [];
@@ -503,6 +510,8 @@ function normalizeMath(raw: string): string {
     return '```' + header + body + '```';
   });
   txt = txt.replace(/@@INLINE_CODE_(\d+)@@/g, (_m, d) => '`' + (inlineCodePlaceholders[Number(d)] || '') + '`');
+  // Restore currency dollar signs
+  txt = txt.replace(/@@CURRENCY_(\d+)@@/g, (_m, d) => '$' + (currencyPlaceholders[Number(d)] || ''));
   return txt;
 }
 
