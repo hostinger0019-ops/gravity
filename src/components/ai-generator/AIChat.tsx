@@ -309,6 +309,7 @@ Be warm, welcoming, and knowledgeable about the restaurant. If someone wants to 
                 starterQuestions: bot.starter_questions || [],
                 brandColor: bot.brand_color || "",
                 theme: bot.theme_template || "",
+                tagline: bot.tagline || "",
             };
         } catch {
             return null;

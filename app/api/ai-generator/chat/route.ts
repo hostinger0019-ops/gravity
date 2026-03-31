@@ -41,13 +41,14 @@ When ready, respond with ONLY this JSON (no text before or after):
 When user asks to CHANGE/UPDATE an existing chatbot, respond with ONLY this JSON:
 {"update":true,"changes":{"field":"new value"},"userMessage":"Friendly message describing what you changed"}
 
-Only include fields that need changing. Possible fields: name, greeting, directive, starterQuestions, brandColor, theme, placeholder.
+Only include fields that need changing. Possible fields: name, greeting, directive, starterQuestions, brandColor, theme, placeholder, tagline.
 Themes: default, modern, restaurant, ecommerce, realestate, saas, healthcare, instagram.
 The "userMessage" field is REQUIRED.
 
 FIELD DEFINITIONS:
 - greeting: Welcome message shown when chatbot loads
-- placeholder: Hint text in the input box
+- tagline: Subtitle text shown under the bot name in the chat header (e.g., "Ask me anything!")
+- placeholder: Hint text in the message input box
 - starterQuestions: Quick-reply suggestion buttons
 - directive: The AI's behavior instructions (system prompt)
 - brandColor: Hex color code (e.g., "#FF0000" for red)
@@ -133,6 +134,7 @@ When ready to create, ALWAYS use these values:
 - Starter Questions: ${JSON.stringify(currentBotSettings.starterQuestions || [])}
 - Brand Color: ${currentBotSettings.brandColor || "Not set"}
 - Theme: ${currentBotSettings.theme || "Not set"}
+- Tagline: ${currentBotSettings.tagline || "Not set"}
 
 When updating, improve upon these existing values. For example if user says "make it more professional", rewrite the EXISTING directive above in a professional tone — don't create a generic one.`;
         }

@@ -37,7 +37,7 @@ export async function PATCH(
         if (updates.brandColor !== undefined) dbUpdates.brand_color = updates.brandColor;
         if (updates.theme !== undefined) dbUpdates.theme_template = updates.theme;
         if (updates.tagline !== undefined) dbUpdates.tagline = updates.tagline;
-        if (updates.placeholder !== undefined) dbUpdates.placeholder = updates.placeholder;
+        if (updates.placeholder !== undefined) dbUpdates.placeholder_message = updates.placeholder;
 
         if (Object.keys(dbUpdates).length === 0) {
             return NextResponse.json({ error: "No valid updates provided" }, { status: 400 });
