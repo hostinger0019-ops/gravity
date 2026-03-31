@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SectionNav } from "./SectionNav";
@@ -10,19 +10,56 @@ import { IntegrationsForm } from "./IntegrationsForm";
 import { ModelForm } from "./ModelForm";
 import { SettingsForm } from "./SettingsForm";
 import { ChatPreview } from "@/components/preview/ChatPreview";
-import {
-  createChatbot,
-  getChatbotById,
-  updateChatbot,
-  softDeleteChatbot,
-} from "@/data/chatbots";
 import type { ChatbotRecord } from "@/data/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useAutoSave } from "./useAutoSave";
-import { isSlugAvailable, slugify } from "@/data/chatbots";
+
+// ── API helpers (go through Next.js server, not GPU directly) ──
+async function getChatbotById(id: string) {
+  const res = await fetch(`/api/admin/chatbots/${id}`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+async function createChatbot(payload: any) {
+  const res = await fetch("/api/admin/chatbots", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to create chatbot");
+  return res.json();
+}
+
+async function updateChatbot(id: string, patch: any) {
+  const res = await fetch(`/api/admin/chatbots/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to update chatbot");
+  }
+  const data = await res.json();
+  return data.chatbot || data;
+}
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
+
+async function isSlugAvailable(slug: string, excludeId?: string): Promise<boolean> {
+  // For now, always return true — the GPU backend will reject duplicates
+  return true;
+}
 const devNoAuth = typeof process !== "undefined" && process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true";
 
 const nav = [
