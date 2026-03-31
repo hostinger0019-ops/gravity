@@ -41,30 +41,30 @@ export function IntegrationsForm() {
       ].map((i) => (
         <label key={i.key} className="flex items-center gap-3">
           <input type="checkbox" {...form.register(`integrations.${i.key}`)} />
-          <span className="text-sm">{i.label}</span>
+          <span className="text-sm text-gray-200">{i.label}</span>
         </label>
       ))}
 
-      <div className="mt-6 p-4 border rounded-lg">
+      <div className="mt-6 p-4 border border-gray-700 rounded-lg bg-gray-900/50">
         <div className="flex items-center justify-between">
-          <div className="font-medium">Embed</div>
+          <div className="font-medium text-white">Embed</div>
           <div className="flex gap-2 text-xs">
-            <button type="button" onClick={() => setMode('float')} className={`px-2 py-1 rounded ${mode === 'float' ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>Floating</button>
-            <button type="button" onClick={() => setMode('inline')} className={`px-2 py-1 rounded ${mode === 'inline' ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>Inline</button>
+            <button type="button" onClick={() => setMode('float')} className={`px-2 py-1 rounded ${mode === 'float' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}>Floating</button>
+            <button type="button" onClick={() => setMode('inline')} className={`px-2 py-1 rounded ${mode === 'inline' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}>Inline</button>
           </div>
         </div>
-        <p className="mt-2 text-sm text-gray-600">Copy and paste this snippet into your website. It will render your chatbot with your current theme and settings.</p>
-        <textarea readOnly className="mt-3 w-full h-32 text-xs font-mono p-3 border rounded" value={embedCode} />
+        <p className="mt-2 text-sm text-gray-400">Copy and paste this snippet into your website. It will render your chatbot with your current theme and settings.</p>
+        <textarea readOnly className="mt-3 w-full h-32 text-xs font-mono p-3 border border-gray-600 rounded bg-gray-800 text-green-400" value={embedCode} />
         <div className="mt-2 flex gap-2">
-          <button type="button" onClick={() => { navigator.clipboard.writeText(embedCode); }} className="text-xs px-3 py-1.5 rounded border">Copy</button>
+          <button type="button" onClick={() => { navigator.clipboard.writeText(embedCode); }} className="text-xs px-3 py-1.5 rounded border border-gray-600 text-gray-300 hover:bg-gray-700">Copy</button>
           <button
             type="button"
             onClick={() => setShowPreview(!showPreview)}
-            className={`text-xs px-3 py-1.5 rounded border ${showPreview ? 'bg-indigo-600 text-white' : ''}`}
+            className={`text-xs px-3 py-1.5 rounded border border-gray-600 ${showPreview ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}
           >
             {showPreview ? 'Hide Preview' : 'Preview'}
           </button>
-          <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs px-3 py-1.5 rounded border">Open in New Tab</a>
+          <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs px-3 py-1.5 rounded border border-gray-600 text-gray-300 hover:bg-gray-700">Open in New Tab</a>
         </div>
         <div className="mt-2 text-[11px] text-gray-500">Advanced: restrict allowed domains and tokens in a future update.</div>
 
