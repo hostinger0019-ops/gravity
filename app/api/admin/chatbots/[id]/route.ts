@@ -50,3 +50,19 @@ export async function PATCH(
         return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 }
+
+// DELETE - Soft delete chatbot
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
+
+    try {
+        await gpu.chatbots.softDelete(id);
+        return NextResponse.json({ message: "Chatbot deleted" });
+    } catch (error) {
+        console.error("DELETE error:", error);
+        return NextResponse.json({ error: "Failed to delete chatbot" }, { status: 500 });
+    }
+}

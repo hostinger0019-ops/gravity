@@ -1,7 +1,18 @@
 "use client";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getChatbots, softDeleteChatbot } from "@/data/chatbots";
+
+// Fetch through Next.js API proxy (server-side) instead of direct GPU call
+async function getChatbots() {
+  const res = await fetch("/api/admin/chatbots");
+  if (!res.ok) throw new Error("Failed to load chatbots");
+  return res.json();
+}
+
+async function softDeleteChatbot(id: string) {
+  const res = await fetch(`/api/admin/chatbots/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete chatbot");
+}
 
 // Icons
 const PlusIcon = () => (
