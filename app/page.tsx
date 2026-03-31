@@ -59,7 +59,7 @@ export default function Home() {
 
   const SUBTITLE = "Create AI chatbots and voicebots by chatting with AI";
 
-  // ── Multi-session storage ──
+  // ── Multi-session storage (GPU backend + localStorage fallback) ──
   type BuilderSession = { id: string; title: string; messages: Message[]; createdBot: CreatedChatbot | null; createdAtIndex: number | null; updatedAt: string };
   const SESSIONS_KEY = "botforge-sessions";
   const ACTIVE_KEY = "botforge-active";
@@ -67,20 +67,10 @@ export default function Home() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [showRecentChats, setShowRecentChats] = useState(false);
 
-  const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const userEmail = session?.user?.email || null;
 
-  const saveSessions = (s: BuilderSession[]) => {
+  const saveLocalSessions = (s: BuilderSession[]) => {
     try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(s.slice(0, 20))); } catch {}
-  };
-
-  const persistCurrent = (sid: string | null, msgs: Message[], bot: CreatedChatbot | null, idx: number | null) => {
-    if (!sid || msgs.length === 0) return;
-    setSessions(prev => {
-      const title = msgs.find(m => m.role === "user")?.content.replace(/^🎤\s*/, "").slice(0, 45) || "New Chat";
-      const updated = prev.map(s => s.id === sid ? { ...s, messages: msgs, createdBot: bot, createdAtIndex: idx, updatedAt: new Date().toISOString(), title } : s);
-      saveSessions(updated);
-      return updated;
-    });
   };
 
   const inChat = messages.length > 0;
@@ -89,65 +79,145 @@ export default function Home() {
   // ── Load sessions on mount ──
   useEffect(() => {
     if (typeof window === "undefined") return;
-    let loaded: BuilderSession[] = [];
-    try { loaded = JSON.parse(localStorage.getItem(SESSIONS_KEY) || "[]"); } catch {}
-    const savedActiveId = localStorage.getItem(ACTIVE_KEY);
-
-    // Migrate from old single-session format
-    if (loaded.length === 0) {
-      try {
-        const old = localStorage.getItem("botforge-chat-session");
-        if (old) {
-          const p = JSON.parse(old);
-          if (p.messages?.length > 0) {
-            const migrated: BuilderSession = {
-              id: genId(), title: p.messages.find((m: Message) => m.role === "user")?.content.slice(0, 45) || "Chat",
-              messages: p.messages, createdBot: p.createdBot || null, createdAtIndex: p.createdAtIndex ?? null, updatedAt: new Date().toISOString(),
-            };
-            loaded.push(migrated);
-            saveSessions(loaded);
-            localStorage.removeItem("botforge-chat-session");
+    (async () => {
+      // Try backend first if logged in
+      if (userEmail) {
+        try {
+          const res = await fetch(`/api/builder-sessions?email=${encodeURIComponent(userEmail)}`);
+          if (res.ok) {
+            const data = await res.json();
+            const backendSessions: BuilderSession[] = (data.sessions || []).map((s: any) => ({
+              id: s.id, title: s.title || "Chat", messages: [],
+              createdBot: s.created_bot_id ? { id: s.created_bot_id, name: s.title, slug: s.created_bot_slug || "" } : null,
+              createdAtIndex: null, updatedAt: s.updated_at || s.created_at || new Date().toISOString(),
+            }));
+            if (backendSessions.length > 0) {
+              setSessions(backendSessions);
+              saveLocalSessions(backendSessions);
+              const savedActiveId = localStorage.getItem(ACTIVE_KEY);
+              const active = backendSessions.find(s => s.id === savedActiveId) || backendSessions[0];
+              setActiveSessionId(active.id);
+              localStorage.setItem(ACTIVE_KEY, active.id);
+              // Load messages for active session
+              try {
+                const msgRes = await fetch(`/api/builder-sessions/${active.id}`);
+                if (msgRes.ok) {
+                  const msgData = await msgRes.json();
+                  const msgs: Message[] = (msgData.messages || []).map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content }));
+                  if (msgs.length > 0) {
+                    setMessages(msgs);
+                    // Check if any message mentions a created bot
+                    const botSession = backendSessions.find(s => s.id === active.id);
+                    if (botSession?.createdBot) setCreatedBot(botSession.createdBot);
+                  }
+                }
+              } catch {}
+              setHasLoadedHistory(true);
+              return;
+            }
           }
-        }
-      } catch {}
-    }
+        } catch (e) { console.warn("Failed to load backend sessions:", e); }
+      }
 
-    setSessions(loaded);
-    const active = loaded.find(s => s.id === savedActiveId) || loaded[0];
-    if (active) {
-      setActiveSessionId(active.id);
-      setMessages(active.messages);
-      setCreatedBot(active.createdBot);
-      setCreatedAtIndex(active.createdAtIndex);
-      localStorage.setItem(ACTIVE_KEY, active.id);
-    }
-    setHasLoadedHistory(true);
-  }, []);
+      // Fallback to localStorage
+      let loaded: BuilderSession[] = [];
+      try { loaded = JSON.parse(localStorage.getItem(SESSIONS_KEY) || "[]"); } catch {}
 
-  // ── Auto-save current session ──
+      // Migrate from old single-session format
+      if (loaded.length === 0) {
+        try {
+          const old = localStorage.getItem("botforge-chat-session");
+          if (old) {
+            const p = JSON.parse(old);
+            if (p.messages?.length > 0) {
+              const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+              const migrated: BuilderSession = {
+                id, title: p.messages.find((m: Message) => m.role === "user")?.content.slice(0, 45) || "Chat",
+                messages: p.messages, createdBot: p.createdBot || null, createdAtIndex: p.createdAtIndex ?? null, updatedAt: new Date().toISOString(),
+              };
+              loaded.push(migrated);
+              saveLocalSessions(loaded);
+              localStorage.removeItem("botforge-chat-session");
+            }
+          }
+        } catch {}
+      }
+
+      setSessions(loaded);
+      const savedActiveId = localStorage.getItem(ACTIVE_KEY);
+      const active = loaded.find(s => s.id === savedActiveId) || loaded[0];
+      if (active) {
+        setActiveSessionId(active.id);
+        setMessages(active.messages);
+        setCreatedBot(active.createdBot);
+        setCreatedAtIndex(active.createdAtIndex);
+        localStorage.setItem(ACTIVE_KEY, active.id);
+      }
+      setHasLoadedHistory(true);
+    })();
+  }, [userEmail]);
+
+  // ── Save messages to backend after each change ──
+  const lastSavedMsgCount = useRef(0);
   useEffect(() => {
-    if (!hasLoadedHistory || !activeSessionId) return;
-    persistCurrent(activeSessionId, messages, createdBot, createdAtIndex);
-  }, [messages, createdBot, createdAtIndex, hasLoadedHistory, activeSessionId]);
+    if (!hasLoadedHistory || !activeSessionId || messages.length === 0) return;
+    // Save to localStorage cache
+    setSessions(prev => {
+      const title = messages.find(m => m.role === "user")?.content.replace(/^🎤\s*/, "").slice(0, 45) || "New Chat";
+      const updated = prev.map(s => s.id === activeSessionId ? { ...s, messages, createdBot, createdAtIndex, updatedAt: new Date().toISOString(), title } : s);
+      saveLocalSessions(updated);
+      return updated;
+    });
+    // Save new messages to backend
+    if (userEmail && messages.length > lastSavedMsgCount.current && !isLoading) {
+      const newMsgs = messages.slice(lastSavedMsgCount.current);
+      lastSavedMsgCount.current = messages.length;
+      fetch(`/api/builder-sessions/${activeSessionId}/messages`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMsgs.map(m => ({ role: m.role, content: m.content })) }),
+      }).catch(e => console.warn("Failed to save messages:", e));
+    }
+  }, [messages, createdBot, createdAtIndex, hasLoadedHistory, activeSessionId, isLoading]);
 
   // Switch to a different session
-  const switchSession = (id: string) => {
-    persistCurrent(activeSessionId, messages, createdBot, createdAtIndex);
+  const switchSession = async (id: string) => {
     const s = sessions.find(s => s.id === id);
     if (!s) return;
     setActiveSessionId(id);
-    setMessages(s.messages);
-    setCreatedBot(s.createdBot);
-    setCreatedAtIndex(s.createdAtIndex);
     setInput("");
     localStorage.setItem(ACTIVE_KEY, id);
     setShowRecentChats(false);
+    // Load messages from backend if available
+    if (userEmail) {
+      try {
+        const res = await fetch(`/api/builder-sessions/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          const msgs: Message[] = (data.messages || []).map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content }));
+          setMessages(msgs);
+          lastSavedMsgCount.current = msgs.length;
+          if (s.createdBot) setCreatedBot(s.createdBot);
+          else setCreatedBot(null);
+          setCreatedAtIndex(null);
+          return;
+        }
+      } catch {}
+    }
+    // Fallback to cached messages
+    setMessages(s.messages);
+    setCreatedBot(s.createdBot);
+    setCreatedAtIndex(s.createdAtIndex);
+    lastSavedMsgCount.current = s.messages.length;
   };
 
-  const deleteSession = (id: string) => {
+  const deleteSession = async (id: string) => {
+    // Delete from backend
+    if (userEmail) {
+      fetch(`/api/builder-sessions/${id}`, { method: "DELETE" }).catch(() => {});
+    }
     setSessions(prev => {
       const next = prev.filter(s => s.id !== id);
-      saveSessions(next);
+      saveLocalSessions(next);
       if (id === activeSessionId) {
         if (next.length) { switchSession(next[0].id); } else { setMessages([]); setCreatedBot(null); setCreatedAtIndex(null); setActiveSessionId(null); localStorage.removeItem(ACTIVE_KEY); }
       }
@@ -211,9 +281,10 @@ export default function Home() {
         if (data.job_id) {
           setScrapeJobId(data.job_id);
         }
+        const embedScript = `<script src="${origin}/embed/widget.js" data-slug="${data.chatbot.slug}" data-mode="float" defer></script>`;
         setMessages((prev) => {
           const m = [...prev];
-          m[m.length - 1] = { role: "assistant", content: `🎉 **Your chatbot "${data.chatbot.name}" is ready!**${config.websiteToScrape ? "" : ""}` };
+          m[m.length - 1] = { role: "assistant", content: `🎉 **Your chatbot "${data.chatbot.name}" is ready!**\n\n📋 **Embed on your website** — copy this code:\n\n\`\`\`html\n${embedScript}\n\`\`\`\n\n🔗 **Live link:** [${origin}/c/${data.chatbot.slug}](${origin}/c/${data.chatbot.slug})${config.websiteToScrape ? "\n\n⏳ Scraping website content..." : ""}` };
           setCreatedAtIndex(m.length - 1);
           return m;
         });
@@ -344,13 +415,26 @@ export default function Home() {
     setTimeout(() => sendMessage(text), 50);
   };
 
-  const resetChat = () => {
-    // Save current session before starting new
-    persistCurrent(activeSessionId, messages, createdBot, createdAtIndex);
-    const fresh: BuilderSession = { id: genId(), title: "New Chat", messages: [], createdBot: null, createdAtIndex: null, updatedAt: new Date().toISOString() };
-    setSessions(prev => { const next = [fresh, ...prev].slice(0, 20); saveSessions(next); return next; });
+  const resetChat = async () => {
+    // Create new session on backend if logged in
+    let newId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    if (userEmail) {
+      try {
+        const res = await fetch("/api/builder-sessions", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_email: userEmail, title: "New Chat" }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          newId = data.session?.id || newId;
+        }
+      } catch {}
+    }
+    const fresh: BuilderSession = { id: newId, title: "New Chat", messages: [], createdBot: null, createdAtIndex: null, updatedAt: new Date().toISOString() };
+    setSessions(prev => { const next = [fresh, ...prev].slice(0, 20); saveLocalSessions(next); return next; });
     setActiveSessionId(fresh.id);
     setMessages([]); setCreatedBot(null); setCreatedAtIndex(null); setInput("");
+    lastSavedMsgCount.current = 0;
     localStorage.setItem(ACTIVE_KEY, fresh.id);
     setShowRecentChats(false);
   };
@@ -714,6 +798,34 @@ CRITICAL RULES:
   // JSX — exact same structure as new/botbuilder/page.tsx
   // with chat area added when inChat is true
   // ══════════════════════════════════════════════════════════
+  // ── Lightweight markdown for code blocks, bold, and links ──
+  const renderContent = (text: string) => {
+    // Split on fenced code blocks
+    const parts = text.split(/(```[\s\S]*?```)/);
+    return parts.map((part, i) => {
+      if (part.startsWith('```')) {
+        const code = part.replace(/```\w*\n?/, '').replace(/\n?```$/, '');
+        return (
+          <div key={i} style={{ position: 'relative', margin: '8px 0' }}>
+            <pre style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '12px 14px', fontSize: 12, fontFamily: 'monospace', overflowX: 'auto', color: '#4ade80', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{code}</pre>
+            <button
+              onClick={() => { navigator.clipboard.writeText(code); }}
+              style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '3px 8px', fontSize: 11, color: '#a1a1aa', cursor: 'pointer' }}
+            >Copy</button>
+          </div>
+        );
+      }
+      // Inline: bold **text** and links [text](url)
+      const inlineParts = part.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
+      return <span key={i}>{inlineParts.map((ip, j) => {
+        if (ip.startsWith('**') && ip.endsWith('**')) return <strong key={j}>{ip.slice(2, -2)}</strong>;
+        const linkMatch = ip.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (linkMatch) return <a key={j} href={linkMatch[2]} target="_blank" rel="noreferrer" style={{ color: '#818cf8', textDecoration: 'underline' }}>{linkMatch[1]}</a>;
+        return <span key={j}>{ip}</span>;
+      })}</span>;
+    });
+  };
+
   return (
     <div className="botforge-landing">
       {/* Navbar */}
@@ -848,7 +960,7 @@ CRITICAL RULES:
             <div className="chat-messages">
               {messages.map((msg, i) => (
                 <div key={i} className={`chat-row ${msg.role === "user" ? "chat-row-user" : "chat-row-assistant"}`}>
-                  <div className={`${msg.role === "user" ? "bubble-user" : "bubble-assistant"}${msg.role === "assistant" && i === messages.length - 1 && isVoiceTyping ? " voice-typing" : ""}`}>{msg.content}</div>
+                  <div className={`${msg.role === "user" ? "bubble-user" : "bubble-assistant"}${msg.role === "assistant" && i === messages.length - 1 && isVoiceTyping ? " voice-typing" : ""}`}>{msg.role === "assistant" ? renderContent(msg.content) : msg.content}</div>
                 </div>
               ))}
               {isLoading && (
@@ -950,7 +1062,7 @@ CRITICAL RULES:
               <div className="chat-messages">
                 {messages.slice(0, createdAtIndex !== null ? createdAtIndex + 1 : messages.length).map((msg, i) => (
                   <div key={i} className={`chat-row ${msg.role === "user" ? "chat-row-user" : "chat-row-assistant"}`}>
-                    <div className={msg.role === "user" ? "bubble-user" : "bubble-assistant"}>{msg.content}</div>
+                    <div className={msg.role === "user" ? "bubble-user" : "bubble-assistant"}>{msg.role === "assistant" ? renderContent(msg.content) : msg.content}</div>
                   </div>
                 ))}
 
@@ -971,7 +1083,7 @@ CRITICAL RULES:
                 {/* Post-creation messages */}
                 {createdAtIndex !== null && messages.slice(createdAtIndex + 1).map((msg, i) => (
                   <div key={`post-${i}`} className={`chat-row ${msg.role === "user" ? "chat-row-user" : "chat-row-assistant"}`}>
-                    <div className={msg.role === "user" ? "bubble-user" : "bubble-assistant"}>{msg.content}</div>
+                    <div className={msg.role === "user" ? "bubble-user" : "bubble-assistant"}>{msg.role === "assistant" ? renderContent(msg.content) : msg.content}</div>
                   </div>
                 ))}
 
