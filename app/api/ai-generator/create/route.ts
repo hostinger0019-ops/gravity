@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { gpu } from "@/lib/gpuBackend";
 
 export async function POST(req: NextRequest) {
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Get the real user from NextAuth session (server-side, tamper-proof)
-        const session = await getServerSession();
+        const session = await getServerSession(authOptions);
         const sessionGpuId = (session?.user as any)?.gpu_id;
 
         // Priority: server-side session gpu_id > client-sent userId > dev fallback
