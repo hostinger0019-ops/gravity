@@ -982,7 +982,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         to { opacity: 1; transform: translateY(0); }
       }
     `}</style>
-    <div className={`relative flex h-[100dvh] ${bgMain}`} style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+    <div className={`relative flex h-[100dvh] overflow-hidden ${bgMain}`} style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
       {/* Hidden audio element for realtime TTS playback */}
       <audio
         ref={audioElRef as any}
@@ -1198,7 +1198,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         </div>
 
         {/* Messages */}
-        <div className={`flex-1 overflow-y-auto p-3 md:p-6 space-y-4 ${bgPanel}`}>
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 space-y-4 ${bgPanel}`}>
           {messages.map((m, i) => (
             <div
               key={i}
@@ -1228,6 +1228,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                   }`}
                 style={{
                   animation: 'msgFadeIn 0.4s ease-out both',
+                  wordBreak: 'break-word' as const,
+                  overflowWrap: 'anywhere' as const,
                   ...(m.role !== "user" ? {
                     color: bubbleBotText,
                   } : {}),
