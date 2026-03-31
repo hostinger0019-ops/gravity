@@ -43,7 +43,13 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // Final fallback for dev mode
+        // Final fallback: use email as owner identifier
+        if (!ownerId && session?.user?.email) {
+            console.log("Using email as ownerId fallback:", session.user.email);
+            ownerId = session.user.email;
+        }
+
+        // Dev mode fallback
         if (!ownerId) {
             const devNoAuth = process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true";
             if (devNoAuth) {
