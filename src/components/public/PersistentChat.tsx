@@ -44,6 +44,15 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   const storageKey = useMemo(() => `public-chat:${slug}:active`, [slug]);
   const sessionsKey = useMemo(() => `public-chat:${slug}:sessions:v1`, [slug]);
 
+  // Detect embed mode from URL query param (?embed=1)
+  const [isEmbed, setIsEmbed] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setIsEmbed(params.get('embed') === '1');
+    }
+  }, []);
+
   // Messages for currently active conversation
   const [messages, setMessages] = useState<Msg[]>(
     greeting ? [{ role: "assistant", content: greeting }] : []
@@ -982,7 +991,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         style={{ display: 'none' }}
       />
       {/* Mobile overlay */}
-      {sidebarOpen && (
+      {!isEmbed && sidebarOpen && (
         <button
           aria-label="Close sidebar"
           className="fixed inset-0 z-30 bg-black/50 md:hidden"
@@ -990,7 +999,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — hidden in embed mode */}
+      {!isEmbed && (
       <div
         className={
           `fixed inset-y-0 left-0 z-40 w-64 sm:w-72 border-r ${borderClr} ${bgPanel} ` +
@@ -1153,13 +1163,15 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
           </div>
         </div>
       </div>
+      )}
 
       {/* Main */}
       <div className="flex-1 flex flex-col">
         {/* Top bar with bot avatar and chat name */}
         <div className={`p-3 border-b ${borderClr} ${bgPanel} flex items-center justify-between sticky top-0 z-10`}>
           <div className="flex items-center gap-2">
-            {/* Hamburger for mobile */}
+            {/* Hamburger for mobile — hide in embed mode */}
+            {!isEmbed && (
             <button
               type="button"
               aria-label="Open sidebar"
@@ -1173,13 +1185,16 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                 <line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
+            )}
             <img src={avatarUrl || "/favicon.ico"} onError={(e) => ((e.currentTarget.src = "/favicon.ico"))} className={`w-7 h-7 rounded-full border ${light ? "border-gray-300" : "border-gray-700"}`} alt="avatar" />
             <div className="font-semibold text-sm md:text-base">{chatName}</div>
           </div>
+          {!isEmbed && (
           <div className="flex gap-2">
             <button onClick={onRename} className={`text-xs md:text-sm px-2 py-1 border ${borderInput} rounded-md transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>Edit Chat Name</button>
             <button onClick={() => activeCid && onDeleteChat(activeCid)} className={`text-xs md:text-sm px-2 py-1 border ${borderInput} rounded-md transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>Delete Chat</button>
           </div>
+          )}
         </div>
 
         {/* Messages */}

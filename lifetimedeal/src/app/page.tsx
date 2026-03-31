@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Script from "next/script";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -821,6 +822,12 @@ export default function LifetimeDealPage() {
                 <FinalCTA />
             </main>
             <Footer />
+            <Script
+                src="https://tarik.business/embed/widget.js"
+                data-slug="lifetime-deal-bot-mnf2oc31"
+                data-mode="float"
+                strategy="lazyOnload"
+            />
         </div>
     );
 }
