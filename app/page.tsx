@@ -119,20 +119,10 @@ export default function Home() {
 
   // ── Create chatbot ──
   const createChatbot = async (config: ChatbotConfig) => {
-    // Check if user is logged in before creating
-    const gpuId = (session?.user as any)?.gpu_id;
-    if (!devNoAuth && !gpuId) {
-      setMessages((prev) => [...prev, {
-        role: "assistant",
-        content: "🔒 **Please log in first** to create your chatbot. Your bot needs to be linked to your account so you can manage it later.\n\n[👉 Click here to log in](/login?next=/)"
-      }]);
-      return;
-    }
     setIsCreating(true);
     setMessages((prev) => [...prev, { role: "assistant", content: "⏳ Creating your chatbot..." }]);
     try {
-      const userId = devNoAuth ? "00000000-0000-0000-0000-000000000000" : gpuId;
-      const res = await fetch("/api/ai-generator/create", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ config, userId }) });
+      const res = await fetch("/api/ai-generator/create", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ config }) });
       const data = await res.json();
       if (data.error) {
         setMessages((prev) => { const m = [...prev]; m[m.length - 1] = { role: "assistant", content: "❌ Error: " + data.error }; return m; });

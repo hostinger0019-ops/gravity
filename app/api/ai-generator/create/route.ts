@@ -3,10 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { gpu } from "@/lib/gpuBackend";
 
+const GPU_URL = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || "http://localhost:8000";
+
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { config, userId } = body;
+        const { config } = body;
 
         if (!config) {
             return NextResponse.json({ error: "Config required" }, { status: 400 });
@@ -14,11 +16,40 @@ export async function POST(req: NextRequest) {
 
         // Get the real user from NextAuth session (server-side, tamper-proof)
         const session = await getServerSession(authOptions);
-        const sessionGpuId = (session?.user as any)?.gpu_id;
+        let ownerId = (session?.user as any)?.gpu_id;
 
-        // Priority: server-side session gpu_id > client-sent userId > dev fallback
-        const devNoAuth = process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true";
-        const ownerId = sessionGpuId || userId || (devNoAuth ? "00000000-0000-0000-0000-000000000000" : null);
+        // If session exists but gpu_id is missing (GPU sync failed during login),
+        // do a fresh sync now using the session email
+        if (!ownerId && session?.user?.email) {
+            console.log("gpu_id missing from session, syncing user by email:", session.user.email);
+            try {
+                const syncRes = await fetch(`${GPU_URL}/api/users/sync`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: session.user.email,
+                        name: session.user.name || "",
+                        avatar_url: session.user.image || "",
+                    }),
+                    signal: AbortSignal.timeout(5000),
+                });
+                if (syncRes.ok) {
+                    const syncData = await syncRes.json();
+                    ownerId = syncData.id;
+                    console.log("User synced, gpu_id:", ownerId);
+                }
+            } catch (syncErr) {
+                console.error("User sync failed:", syncErr);
+            }
+        }
+
+        // Final fallback for dev mode
+        if (!ownerId) {
+            const devNoAuth = process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true";
+            if (devNoAuth) {
+                ownerId = "00000000-0000-0000-0000-000000000000";
+            }
+        }
 
         if (!ownerId) {
             return NextResponse.json(
@@ -27,7 +58,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        console.log("Creating chatbot with ownerId:", ownerId, "source:", sessionGpuId ? "session" : "client");
+        console.log("Creating chatbot with ownerId:", ownerId);
 
         // Generate a unique slug
         const baseSlug = config.slug || config.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'bot';
