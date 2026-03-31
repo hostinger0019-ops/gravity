@@ -67,21 +67,37 @@
           cursor: pointer; user-select: none;
           font-size: 22px;
           z-index: 2147483000;
+          transition: transform 0.2s ease;
         }
+        .launcher:hover { transform: scale(1.08); }
         .panel {
           position: fixed;
           ${position.includes('right') ? 'right: 20px;' : 'left: 20px;'}
           bottom: 90px;
-          width: 360px;
-          height: 520px;
+          width: 400px;
+          height: 600px;
+          max-height: calc(100vh - 120px);
+          max-width: calc(100vw - 40px);
           background: transparent;
           border: none;
           z-index: 2147483000;
           display: none;
+          border-radius: 16px;
+          overflow: hidden;
         }
         .panel.open { display: block; }
         .frame {
-          width: 100%; height: 100%; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+          width: 100%; height: 100%; border: none; border-radius: 16px;
+          box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+        }
+        @media (max-width: 480px) {
+          .panel {
+            width: calc(100vw - 24px);
+            height: calc(100vh - 100px);
+            right: 12px;
+            left: 12px;
+            bottom: 80px;
+          }
         }
       `;
       root.appendChild(style);
