@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { gpu } from "@/lib/gpuBackend";
 
-// GET chatbot by ID
+// GET chatbot by ID (owner must match)
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -11,13 +13,21 @@ export async function GET(
     try {
         const data = await gpu.chatbots.getById(id);
         if (!data) return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
+
+        // Ownership check for admin routes
+        const session = await getServerSession(authOptions);
+        const gpuId = (session?.user as any)?.gpu_id;
+        if (gpuId && data.owner_id && data.owner_id !== gpuId && data.owner_id !== "00000000-0000-0000-0000-000000000000") {
+            return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+        }
+
         return NextResponse.json(data);
     } catch {
         return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
     }
 }
 
-// PATCH - Update chatbot
+// PATCH - Update chatbot (only owner can update)
 export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -25,6 +35,16 @@ export async function PATCH(
     const { id } = await params;
 
     try {
+        // Verify ownership
+        const session = await getServerSession(authOptions);
+        const gpuId = (session?.user as any)?.gpu_id;
+        if (gpuId) {
+            const bot = await gpu.chatbots.getById(id);
+            if (bot && bot.owner_id !== gpuId && bot.owner_id !== "00000000-0000-0000-0000-000000000000") {
+                return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+            }
+        }
+
         const updates = await req.json();
 
         // Map frontend field names to database column names
@@ -51,7 +71,7 @@ export async function PATCH(
     }
 }
 
-// DELETE - Soft delete chatbot
+// DELETE - Soft delete chatbot (only owner can delete)
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -59,6 +79,16 @@ export async function DELETE(
     const { id } = await params;
 
     try {
+        // Verify ownership
+        const session = await getServerSession(authOptions);
+        const gpuId = (session?.user as any)?.gpu_id;
+        if (gpuId) {
+            const bot = await gpu.chatbots.getById(id);
+            if (bot && bot.owner_id !== gpuId && bot.owner_id !== "00000000-0000-0000-0000-000000000000") {
+                return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+            }
+        }
+
         await gpu.chatbots.softDelete(id);
         return NextResponse.json({ message: "Chatbot deleted" });
     } catch (error) {

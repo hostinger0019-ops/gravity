@@ -1010,7 +1010,7 @@ CRITICAL RULES:
                       <div style={{ padding: "6px" }}>
                         {[
                           { label: "My Bots", icon: "🤖", href: "/admin/chatbots" },
-                          { label: "Billing & Plans", icon: "💳", href: "/pricing" },
+                          { label: "Billing & Plans", icon: "💳", href: "/admin/billing" },
                           { label: "Admin Dashboard", icon: "📊", href: "/admin/conversations" },
                         ].map((item) => (
                           <a
