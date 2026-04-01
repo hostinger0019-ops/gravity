@@ -33,6 +33,8 @@ export default function RealEstateChatUI({
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isEmbed, setIsEmbed] = useState(false);
+    useEffect(() => { if (typeof window !== 'undefined') { const p = new URLSearchParams(window.location.search); setIsEmbed(p.get('embed') === '1'); } }, []);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -123,7 +125,7 @@ export default function RealEstateChatUI({
     const hasMessages = messages.length > 0;
 
     return (
-        <div className="flex flex-col h-screen bg-[#F8F6F3] relative overflow-hidden">
+        <div className={`flex flex-col ${isEmbed ? 'h-full' : 'h-screen'} bg-[#F8F6F3] relative overflow-hidden`}>
             {/* Elegant texture overlay */}
             <div
                 className="absolute inset-0 opacity-[0.02] pointer-events-none"
@@ -134,32 +136,32 @@ export default function RealEstateChatUI({
 
             {/* Premium Header */}
             <header
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+                className={`${isEmbed ? 'sticky' : 'fixed'} top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
                         ? "bg-white/80 backdrop-blur-xl border-b border-amber-100/50 shadow-sm"
                         : "bg-transparent"
                     }`}
             >
-                <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div className={`max-w-4xl mx-auto ${isEmbed ? 'px-3 py-2' : 'px-6 py-4'} flex items-center justify-between`}>
                     <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/25">
-                            <span className="text-white text-xl">🏠</span>
+                        <div className={`${isEmbed ? 'w-7 h-7 rounded-lg' : 'w-11 h-11 rounded-xl'} bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/25`}>
+                            <span className={`text-white ${isEmbed ? 'text-sm' : 'text-xl'}`}>🏠</span>
                         </div>
                         <div>
-                            <h1 className="text-[15px] font-semibold text-gray-900 tracking-tight">{name}</h1>
-                            <p className="text-[12px] text-amber-700/70 font-medium">{tagline || "Your Property Expert"}</p>
+                            <h1 className={`${isEmbed ? 'text-sm' : 'text-[15px]'} font-semibold text-gray-900 tracking-tight`}>{name}</h1>
+                            {isEmbed ? <div className="flex items-center gap-1 text-[10px] text-emerald-600"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />Online</div> : <p className="text-[12px] text-amber-700/70 font-medium">{tagline || "Your Property Expert"}</p>}
                         </div>
                     </div>
-                    <a
+                    {!isEmbed && <a
                         href={`/admin/chatbots/${botId}`}
                         className="px-3.5 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 border border-amber-200/50 transition-all text-[12px] font-medium text-amber-800"
                     >
                         Admin
-                    </a>
+                    </a>}
                 </div>
             </header>
 
             {/* Content */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-20 pb-48">
+            <div ref={scrollContainerRef} className={`flex-1 overflow-y-auto ${isEmbed ? 'pt-2 pb-4' : 'pt-20 pb-48'}`}>
                 <div className="max-w-3xl mx-auto px-6">
                     {!hasMessages ? (
                         <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fadeIn">
@@ -264,9 +266,9 @@ export default function RealEstateChatUI({
             </div>
 
             {/* Floating Input */}
-            <div className="fixed bottom-0 left-0 right-0 z-40">
-                <div className="h-8 bg-gradient-to-t from-[#F8F6F3] to-transparent" />
-                <div className="bg-[#F8F6F3] pb-6 px-4">
+            <div className={`${isEmbed ? 'sticky' : 'fixed'} bottom-0 left-0 right-0 z-40`}>
+                {!isEmbed && <div className="h-8 bg-gradient-to-t from-[#F8F6F3] to-transparent" />}
+                <div className={`bg-[#F8F6F3] ${isEmbed ? 'pb-2 px-2' : 'pb-6 px-4'}`}>
                     <div className="max-w-3xl mx-auto">
                         {/* Suggestion Pills */}
                         {!hasMessages && (
@@ -320,9 +322,9 @@ export default function RealEstateChatUI({
                                 </div>
                             </div>
                         </form>
-                        <p className="text-center text-[11px] text-gray-400 mt-3 font-medium">
+                        {!isEmbed && <p className="text-center text-[11px] text-gray-400 mt-3 font-medium">
                             Powered by AI • {name}
-                        </p>
+                        </p>}
                     </div>
                 </div>
             </div>

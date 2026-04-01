@@ -39,6 +39,9 @@ export default function RestaurantChatUI({
     const inputRef = useRef<HTMLInputElement>(null);
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [showReservationModal, setShowReservationModal] = useState(false);
+    // Detect embed mode
+    const [isEmbed, setIsEmbed] = useState(false);
+    useEffect(() => { if (typeof window !== 'undefined') { const p = new URLSearchParams(window.location.search); setIsEmbed(p.get('embed') === '1'); } }, []);
 
     // Handle successful order/reservation
     const handleModalSuccess = (message: string) => {
@@ -118,15 +121,16 @@ export default function RestaurantChatUI({
     return (
         <div className="h-full flex flex-col bg-gradient-to-b from-amber-50 to-orange-50">
             {/* Restaurant Header */}
-            <header className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 shadow-lg">
+            <header className={`bg-gradient-to-r from-orange-600 to-red-600 text-white ${isEmbed ? 'px-3 py-2' : 'p-4'} shadow-lg`}>
                 <div className="max-w-3xl mx-auto flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-3xl shadow-inner">
+                    <div className={`${isEmbed ? 'w-8 h-8 text-xl' : 'w-14 h-14 text-3xl'} rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shadow-inner`}>
                         🍽️
                     </div>
                     <div className="flex-1">
-                        <h1 className="text-xl font-bold">{name}</h1>
-                        <p className="text-orange-100 text-sm">{tagline || "Your restaurant assistant"}</p>
+                        <h1 className={`${isEmbed ? 'text-sm' : 'text-xl'} font-bold`}>{name}</h1>
+                        {isEmbed ? <div className="flex items-center gap-1 text-[10px] text-orange-100"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />Online</div> : <p className="text-orange-100 text-sm">{tagline || "Your restaurant assistant"}</p>}
                     </div>
+                    {!isEmbed && (
                     <div className="flex gap-2">
                         <a
                             href={`/admin/chatbots/${botId}`}
@@ -137,10 +141,12 @@ export default function RestaurantChatUI({
                             ⚙️ Admin
                         </a>
                     </div>
+                    )}
                 </div>
             </header>
 
-            {/* Quick Actions Bar */}
+            {/* Quick Actions Bar — hidden in embed mode */}
+            {!isEmbed && (
             <div className="bg-white border-b border-orange-100 py-3 px-4 overflow-x-auto">
                 <div className="max-w-3xl mx-auto flex gap-2">
                     <button
@@ -169,6 +175,7 @@ export default function RestaurantChatUI({
                     ))}
                 </div>
             </div>
+            )}
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4">

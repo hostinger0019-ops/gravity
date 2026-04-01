@@ -51,6 +51,8 @@ export default function EcommerceChatUI({
     const [isLoading, setIsLoading] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [voiceOpen, setVoiceOpen] = useState(false);
+    const [isEmbed, setIsEmbed] = useState(false);
+    useEffect(() => { if (typeof window !== 'undefined') { const p = new URLSearchParams(window.location.search); setIsEmbed(p.get('embed') === '1'); } }, []);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -162,7 +164,7 @@ export default function EcommerceChatUI({
     };
 
     return (
-        <div className="flex flex-col h-screen relative overflow-hidden" style={{ background: "linear-gradient(180deg, #080E1A 0%, #0B1120 30%, #0F172A 100%)" }}>
+        <div className={`flex flex-col ${isEmbed ? 'h-full' : 'h-screen'} relative overflow-hidden`} style={{ background: "linear-gradient(180deg, #080E1A 0%, #0B1120 30%, #0F172A 100%)" }}>
             {/* Voice Mode Overlay */}
             <ChatbotVoiceMode
                 isOpen={voiceOpen}
@@ -178,7 +180,7 @@ export default function EcommerceChatUI({
 
             {/* Header */}
             <header
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+                className={`${isEmbed ? 'sticky' : 'fixed'} top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
                     ? "backdrop-blur-xl border-b shadow-lg"
                     : ""
                     }`}
@@ -187,8 +189,9 @@ export default function EcommerceChatUI({
                     borderColor: isScrolled ? "rgba(212, 165, 116, 0.15)" : "transparent",
                 }}
             >
-                <div className="max-w-5xl mx-auto px-6 py-3">
-                    {/* Top line: BotForge label */}
+                <div className={`max-w-5xl mx-auto ${isEmbed ? 'px-3 py-2' : 'px-6 py-3'}`}>
+                    {/* Top line: BotForge label — hidden in embed */}
+                    {!isEmbed && (
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <span className="text-[11px] font-medium tracking-widest uppercase" style={{ color: "#8B9CC0" }}>
@@ -203,20 +206,24 @@ export default function EcommerceChatUI({
                             <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] text-white" style={{ background: "linear-gradient(135deg, #D4A574, #C4956A)" }}>A</span>
                         </a>
                     </div>
+                    )}
                     {/* Brand name */}
+                    <div className="flex items-center justify-between">
                     <h1
-                        className="text-2xl md:text-3xl font-bold tracking-wide mt-1"
+                        className={`${isEmbed ? 'text-sm' : 'text-2xl md:text-3xl mt-1'} font-bold tracking-wide`}
                         style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#D4A574" }}
                     >
                         {name}
                     </h1>
+                    {isEmbed && <div className="flex items-center gap-1 text-[10px]" style={{ color: '#6EE7B7' }}><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Online</div>}
+                    </div>
                 </div>
             </header>
 
             {/* Main Content Area */}
             <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto pt-24 pb-56"
+                className={`flex-1 overflow-y-auto ${isEmbed ? 'pt-2 pb-4' : 'pt-24 pb-56'}`}
             >
                 <div className="max-w-5xl mx-auto px-6">
                     {!hasMessages ? (
@@ -441,11 +448,11 @@ export default function EcommerceChatUI({
             </div>
 
             {/* Floating Input Area */}
-            <div className="fixed bottom-0 left-0 right-0 z-40">
+            <div className={`${isEmbed ? 'sticky' : 'fixed'} bottom-0 left-0 right-0 z-40`}>
                 {/* Gradient fade */}
-                <div className="h-8" style={{ background: "linear-gradient(to top, #0F172A, transparent)" }} />
+                {!isEmbed && <div className="h-8" style={{ background: "linear-gradient(to top, #0F172A, transparent)" }} />}
 
-                <div className="pb-5 px-4" style={{ backgroundColor: "#0F172A" }}>
+                <div className={`${isEmbed ? 'pb-2 px-2' : 'pb-5 px-4'}`} style={{ backgroundColor: "#0F172A" }}>
                     <div className="max-w-5xl mx-auto">
                         {/* Suggestion Chips */}
                         {!hasMessages && suggestions.length > 0 && (
@@ -541,9 +548,9 @@ export default function EcommerceChatUI({
                         </form>
 
                         {/* Footer */}
-                        <p className="text-center text-[11px] mt-3 font-medium tracking-wide" style={{ color: "#4A5568" }}>
+                        {!isEmbed && <p className="text-center text-[11px] mt-3 font-medium tracking-wide" style={{ color: "#4A5568" }}>
                             Powered by AI • {name}
-                        </p>
+                        </p>}
                     </div>
                 </div>
             </div>

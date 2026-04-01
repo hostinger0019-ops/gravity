@@ -35,6 +35,8 @@ export default function InstagramChatUI({
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isEmbed, setIsEmbed] = useState(false);
+    useEffect(() => { if (typeof window !== 'undefined') { const p = new URLSearchParams(window.location.search); setIsEmbed(p.get('embed') === '1'); } }, []);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -116,7 +118,7 @@ export default function InstagramChatUI({
     const hasMessages = messages.length > 0;
 
     return (
-        <div className="flex flex-col h-screen relative overflow-hidden" style={{ background: "linear-gradient(135deg, #833AB4 0%, #E1306C 50%, #F77737 100%)" }}>
+        <div className={`flex flex-col ${isEmbed ? 'h-full' : 'h-screen'} relative overflow-hidden`} style={{ background: "linear-gradient(135deg, #833AB4 0%, #E1306C 50%, #F77737 100%)" }}>
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-10 left-10 w-40 h-40 border border-white rounded-full" />
@@ -125,26 +127,26 @@ export default function InstagramChatUI({
             </div>
 
             {/* Header */}
-            <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-black/30 backdrop-blur-xl" : "bg-transparent"
+            <header className={`${isEmbed ? 'sticky' : 'fixed'} top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-black/30 backdrop-blur-xl" : "bg-transparent"
                 }`}>
-                <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div className={`max-w-4xl mx-auto ${isEmbed ? 'px-3 py-2' : 'px-6 py-4'} flex items-center justify-between`}>
                     <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur flex items-center justify-center border-2 border-white/50">
-                            <span className="text-xl">📷</span>
+                        <div className={`${isEmbed ? 'w-7 h-7' : 'w-11 h-11'} rounded-full bg-white/20 backdrop-blur flex items-center justify-center border-2 border-white/50`}>
+                            <span className={`${isEmbed ? 'text-sm' : 'text-xl'}`}>📷</span>
                         </div>
                         <div>
-                            <h1 className="text-[15px] font-semibold text-white tracking-tight">{name}</h1>
-                            <p className="text-[12px] text-white/70 font-medium">{tagline || "Instagram Automation"}</p>
+                            <h1 className={`${isEmbed ? 'text-sm' : 'text-[15px]'} font-semibold text-white tracking-tight`}>{name}</h1>
+                            {isEmbed ? <div className="flex items-center gap-1 text-[10px] text-white/80"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />Online</div> : <p className="text-[12px] text-white/70 font-medium">{tagline || "Instagram Automation"}</p>}
                         </div>
                     </div>
-                    <a href={`/admin/chatbots/${botId}`} className="px-3.5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 text-[12px] font-medium text-white transition-all">
+                    {!isEmbed && <a href={`/admin/chatbots/${botId}`} className="px-3.5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 text-[12px] font-medium text-white transition-all">
                         Admin
-                    </a>
+                    </a>}
                 </div>
             </header>
 
             {/* Content */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-20 pb-48">
+            <div ref={scrollContainerRef} className={`flex-1 overflow-y-auto ${isEmbed ? 'pt-2 pb-4' : 'pt-20 pb-48'}`}>
                 <div className="max-w-3xl mx-auto px-6">
                     {!hasMessages ? (
                         <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -232,9 +234,9 @@ export default function InstagramChatUI({
             </div>
 
             {/* Input */}
-            <div className="fixed bottom-0 left-0 right-0 z-40">
-                <div className="h-8 bg-gradient-to-t from-[#E1306C] to-transparent" />
-                <div className="pb-6 px-4" style={{ background: "linear-gradient(135deg, #833AB4 0%, #E1306C 100%)" }}>
+            <div className={`${isEmbed ? 'sticky' : 'fixed'} bottom-0 left-0 right-0 z-40`}>
+                {!isEmbed && <div className="h-8 bg-gradient-to-t from-[#E1306C] to-transparent" />}
+                <div className={`${isEmbed ? 'pb-2 px-2' : 'pb-6 px-4'}`} style={{ background: "linear-gradient(135deg, #833AB4 0%, #E1306C 100%)" }}>
                     <div className="max-w-3xl mx-auto">
                         {!hasMessages && (
                             <div className="flex flex-wrap gap-2 justify-center mb-4">
@@ -272,7 +274,7 @@ export default function InstagramChatUI({
                                 </div>
                             </div>
                         </form>
-                        <p className="text-center text-[11px] text-white/60 mt-3">Powered by AI • {name}</p>
+                        {!isEmbed && <p className="text-center text-[11px] text-white/60 mt-3">Powered by AI • {name}</p>}
                     </div>
                 </div>
             </div>

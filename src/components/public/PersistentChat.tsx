@@ -982,7 +982,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         to { opacity: 1; transform: translateY(0); }
       }
     `}</style>
-    <div className={`relative flex h-[100dvh] overflow-hidden ${bgMain}`} style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+    <div className={`relative flex ${isEmbed ? 'h-full' : 'h-[100dvh]'} overflow-hidden ${bgMain}`} style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
       {/* Hidden audio element for realtime TTS playback */}
       <audio
         ref={audioElRef as any}
@@ -1166,9 +1166,9 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       )}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Top bar with bot avatar and chat name */}
-        <div className={`p-3 border-b ${borderClr} ${bgPanel} flex items-center justify-between sticky top-0 z-10`}>
+        <div className={`${isEmbed ? 'px-3 py-2' : 'p-3'} border-b ${borderClr} ${bgPanel} flex items-center justify-between sticky top-0 z-10`}>
           <div className="flex items-center gap-2">
             {/* Hamburger for mobile — hide in embed mode */}
             {!isEmbed && (
@@ -1186,8 +1186,11 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
               </svg>
             </button>
             )}
-            <img src={avatarUrl || "/favicon.ico"} onError={(e) => ((e.currentTarget.src = "/favicon.ico"))} className={`w-7 h-7 rounded-full border ${light ? "border-gray-300" : "border-gray-700"}`} alt="avatar" />
-            <div className="font-semibold text-sm md:text-base">{chatName}</div>
+            <img src={avatarUrl || "/favicon.ico"} onError={(e) => ((e.currentTarget.src = "/favicon.ico"))} className={`${isEmbed ? 'w-6 h-6' : 'w-7 h-7'} rounded-full border ${light ? "border-gray-300" : "border-gray-700"}`} alt="avatar" />
+            <div>
+              <div className={`font-semibold ${isEmbed ? 'text-xs' : 'text-sm md:text-base'}`}>{chatName}</div>
+              {isEmbed && <div className="flex items-center gap-1 text-[10px] text-emerald-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Online</div>}
+            </div>
           </div>
           {!isEmbed && (
           <div className="flex gap-2">
@@ -1198,7 +1201,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         </div>
 
         {/* Messages */}
-        <div className={`flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 space-y-4 ${bgPanel}`}>
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden ${isEmbed ? 'p-2 space-y-3' : 'p-3 md:p-6 space-y-4'} ${bgPanel}`}>
           {messages.map((m, i) => (
             <div
               key={i}
@@ -1322,10 +1325,11 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         </div>
 
         {/* Composer */}
-        <form onSubmit={onSubmit} className={`p-2 md:p-3 ${bgPanel} border-t ${borderClr}`}>
+        <form onSubmit={onSubmit} className={`${isEmbed ? 'p-2' : 'p-2 md:p-3'} ${bgPanel} border-t ${borderClr}`}>
           <div className="flex items-center gap-2">
-            <input ref={inputRef} className={`flex-1 border ${borderInput} ${light ? "bg-white text-black" : "bg-[#141414] text-white"} rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 text-sm md:text-base transition-shadow focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} placeholder={tagline || "Ask your AI Teacher…"} />
+            <input ref={inputRef} className={`flex-1 border ${borderInput} ${light ? "bg-white text-black" : "bg-[#141414] text-white"} rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 ${isEmbed ? 'text-sm' : 'text-sm md:text-base'} transition-shadow focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} placeholder={tagline || "Ask your AI Teacher…"} />
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+            {!isEmbed && (
             <button
               type="button"
               onClick={toggleVoiceRecording}
@@ -1355,8 +1359,9 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                 </span>
               </span>
             </button>
-            <button type="button" onClick={onPickImage} className={`px-2 py-2 border rounded-xl ${borderInput} transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>📷</button>
-            <button type="submit" disabled={loading} className="px-3 py-2 border rounded-xl text-sm md:text-base transition-shadow hover:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]" style={{ borderColor: brandColor, color: brandColor }}>{loading ? 'Waiting…' : 'Send'}</button>
+            )}
+            {!isEmbed && <button type="button" onClick={onPickImage} className={`px-2 py-2 border rounded-xl ${borderInput} transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>📷</button>}
+            <button type="submit" disabled={loading} className={`${isEmbed ? 'px-3 py-2 rounded-xl text-sm text-white' : 'px-3 py-2 border rounded-xl text-sm md:text-base transition-shadow hover:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]'}`} style={isEmbed ? { background: brandColor } : { borderColor: brandColor, color: brandColor }}>{loading ? '…' : 'Send'}</button>
           </div>
           {(partial || voiceTranscript) && (
             <div className="mt-2 text-xs text-gray-400 whitespace-pre-wrap">

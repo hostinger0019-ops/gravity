@@ -33,6 +33,9 @@ export default function SaaSChatUI({
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    // Detect embed mode
+    const [isEmbed, setIsEmbed] = useState(false);
+    useEffect(() => { if (typeof window !== 'undefined') { const p = new URLSearchParams(window.location.search); setIsEmbed(p.get('embed') === '1'); } }, []);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -114,33 +117,35 @@ export default function SaaSChatUI({
     const hasMessages = messages.length > 0;
 
     return (
-        <div className="flex flex-col h-screen bg-[#0F0F10] relative overflow-hidden">
-            {/* Gradient orbs */}
+        <div className={`flex flex-col ${isEmbed ? 'h-full' : 'h-screen'} bg-[#0F0F10] relative overflow-hidden`}>
+            {/* Gradient orbs — hidden in embed mode */}
+            {!isEmbed && <>
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute top-1/2 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+            </>}
 
             {/* Header */}
-            <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-[#0F0F10]/80 backdrop-blur-xl border-b border-white/5" : "bg-transparent"
+            <header className={`${isEmbed ? 'sticky' : 'fixed'} top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-[#0F0F10]/80 backdrop-blur-xl border-b border-white/5" : "bg-transparent"
                 }`}>
-                <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div className={`max-w-4xl mx-auto ${isEmbed ? 'px-3 py-2' : 'px-6 py-4'} flex items-center justify-between`}>
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
-                            <span className="text-white text-lg font-bold">⚡</span>
+                        <div className={`${isEmbed ? 'w-7 h-7 rounded-lg' : 'w-10 h-10 rounded-xl'} bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/25`}>
+                            <span className={`text-white ${isEmbed ? 'text-sm' : 'text-lg'} font-bold`}>⚡</span>
                         </div>
                         <div>
-                            <h1 className="text-[15px] font-semibold text-white tracking-tight">{name}</h1>
-                            <p className="text-[12px] text-gray-400">{tagline || "Onboarding Assistant"}</p>
+                            <h1 className={`${isEmbed ? 'text-sm' : 'text-[15px]'} font-semibold text-white tracking-tight`}>{name}</h1>
+                            {isEmbed ? <div className="flex items-center gap-1 text-[10px] text-emerald-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Online</div> : <p className="text-[12px] text-gray-400">{tagline || "Onboarding Assistant"}</p>}
                         </div>
                     </div>
-                    <a href={`/admin/chatbots/${botId}`} className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[12px] font-medium text-gray-300 transition-all">
+                    {!isEmbed && <a href={`/admin/chatbots/${botId}`} className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[12px] font-medium text-gray-300 transition-all">
                         Admin
-                    </a>
+                    </a>}
                 </div>
             </header>
 
             {/* Content */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-20 pb-48">
+            <div ref={scrollContainerRef} className={`flex-1 overflow-y-auto ${isEmbed ? 'pt-2 pb-4' : 'pt-20 pb-48'}`}>
                 <div className="max-w-3xl mx-auto px-6">
                     {!hasMessages ? (
                         <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -223,9 +228,9 @@ export default function SaaSChatUI({
             </div>
 
             {/* Input */}
-            <div className="fixed bottom-0 left-0 right-0 z-40">
-                <div className="h-8 bg-gradient-to-t from-[#0F0F10] to-transparent" />
-                <div className="bg-[#0F0F10] pb-6 px-4">
+            <div className={`${isEmbed ? 'sticky' : 'fixed'} bottom-0 left-0 right-0 z-40`}>
+                {!isEmbed && <div className="h-8 bg-gradient-to-t from-[#0F0F10] to-transparent" />}
+                <div className={`bg-[#0F0F10] ${isEmbed ? 'pb-2 px-2' : 'pb-6 px-4'}`}>
                     <div className="max-w-3xl mx-auto">
                         {!hasMessages && (
                             <div className="flex flex-wrap gap-2 justify-center mb-4">
@@ -245,7 +250,7 @@ export default function SaaSChatUI({
                                     onChange={(e) => setInput(e.target.value)}
                                     placeholder="Ask about features, setup, or anything else..."
                                     disabled={isLoading}
-                                    className="w-full px-5 py-4 pr-24 text-[15px] text-white placeholder-gray-500 bg-transparent focus:outline-none"
+                                    className={`w-full ${isEmbed ? 'px-3 py-2.5 pr-16 text-sm' : 'px-5 py-4 pr-24 text-[15px]'} text-white placeholder-gray-500 bg-transparent focus:outline-none`}
                                 />
                                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                     <button
@@ -263,7 +268,7 @@ export default function SaaSChatUI({
                                 </div>
                             </div>
                         </form>
-                        <p className="text-center text-[11px] text-gray-500 mt-3">Powered by AI • {name}</p>
+                        {!isEmbed && <p className="text-center text-[11px] text-gray-500 mt-3">Powered by AI • {name}</p>}
                     </div>
                 </div>
             </div>

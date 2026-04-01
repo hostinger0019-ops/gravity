@@ -57,6 +57,9 @@ export default function ModernChatUI({
   // Image attachment (live chat)
   const fileRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Detect embed mode (?embed=1 in URL)
+  const [isEmbed, setIsEmbed] = useState(false);
+  useEffect(() => { if (typeof window !== 'undefined') { const p = new URLSearchParams(window.location.search); setIsEmbed(p.get('embed') === '1'); } }, []);
   // Track whether we are currently streaming a reply to avoid Typewriter re-init loops
   const [streaming, setStreaming] = useState(false);
 
@@ -289,16 +292,17 @@ export default function ModernChatUI({
   }, [activeCid]);
 
   return (
-    <div className="relative h-[100dvh] w-full bg-gradient-to-b from-sky-50 to-emerald-50 text-gray-900 flex md:flex-row">
-      {/* Sidebar overlay (mobile only) */}
-      {sidebarOpen && (
+    <div className={`relative ${isEmbed ? 'h-full' : 'h-[100dvh]'} w-full bg-gradient-to-b from-sky-50 to-emerald-50 text-gray-900 flex md:flex-row`}>
+      {/* Sidebar overlay (mobile only) — hidden in embed mode */}
+      {!isEmbed && sidebarOpen && (
         <button
           aria-label="Close sidebar"
           className="fixed inset-0 z-30 bg-black/30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      {/* Sidebar panel: off-canvas on mobile, static on desktop */}
+      {/* Sidebar panel: hidden entirely in embed mode */}
+      {!isEmbed && (
       <aside
         className={
           `fixed inset-y-0 left-0 z-40 w-64 sm:w-72 border-r border-sky-100 bg-white/90 backdrop-blur ` +
@@ -312,7 +316,6 @@ export default function ModernChatUI({
           <button
             onClick={async () => {
               try {
-                // Create a neutral-titled conversation; we'll rename after first message
                 const titleSuggestion = 'New Chat';
                 const resp = await fetch(`/api/bots/${encodeURIComponent(slug)}/conversations`, {
                   method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: titleSuggestion })
@@ -393,14 +396,16 @@ export default function ModernChatUI({
           </button>
         </div>
       </aside>
+      )}
 
       {/* Content column (header + messages + composer) */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Header */}
         <header className="sticky top-0 z-20 backdrop-blur bg-white/60 border-b border-sky-100">
-          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className={`max-w-4xl mx-auto ${isEmbed ? 'px-3 py-2' : 'px-4 py-3'} flex items-center justify-between`}>
             <div className="flex items-center gap-3">
-              {/* Hamburger for mobile */}
+              {/* Hamburger for mobile — hidden in embed */}
+              {!isEmbed && (
               <button
                 type="button"
                 aria-label="Open sidebar"
@@ -413,18 +418,19 @@ export default function ModernChatUI({
                   <line x1="3" y1="18" x2="21" y2="18" />
                 </svg>
               </button>
+              )}
               <img
                 src={avatarUrl || "/favicon.ico"}
                 onError={(e) => ((e.currentTarget.src = "/favicon.ico"))}
                 alt="avatar"
-                className="h-9 w-9 rounded-full ring-1 ring-sky-200"
+                className={`${isEmbed ? 'h-7 w-7' : 'h-9 w-9'} rounded-full ring-1 ring-sky-200`}
               />
               <div>
-                <div className="font-semibold text-gray-900">{name}</div>
-                {tagline && <div className="text-xs text-gray-500">{tagline}</div>}
+                <div className={`font-semibold text-gray-900 ${isEmbed ? 'text-sm' : ''}`}>{name}</div>
+                {isEmbed ? <div className="flex items-center gap-1 text-[10px] text-emerald-500"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Online</div> : tagline && <div className="text-xs text-gray-500">{tagline}</div>}
               </div>
             </div>
-            <div className="text-[11px] text-gray-500">Powered by AI</div>
+            {!isEmbed && <div className="text-[11px] text-gray-500">Powered by AI</div>}
           </div>
         </header>
 
@@ -490,6 +496,7 @@ export default function ModernChatUI({
                   reader.readAsDataURL(f);
                 }}
               />
+              {!isEmbed && (
               <button
                 type="button"
                 aria-label="Attach image"
@@ -498,6 +505,7 @@ export default function ModernChatUI({
               >
                 📷
               </button>
+              )}
               <button
                 onClick={() => !loading && send()}
                 disabled={loading}
