@@ -824,7 +824,7 @@ export default function LifetimeDealPage() {
             <Footer />
             <Script
                 src="https://tarik.business/embed/widget.js"
-                data-slug="lifetime-deal-bot-mnf2oc31"
+                data-slug="lifetime-deal-bot-mnfsd3f6"
                 data-mode="float"
                 strategy="lazyOnload"
             />
