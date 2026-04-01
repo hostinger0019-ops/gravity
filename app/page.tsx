@@ -66,6 +66,7 @@ export default function Home() {
   const [sessions, setSessions] = useState<BuilderSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [showRecentChats, setShowRecentChats] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
 
   const userEmail = session?.user?.email || null;
 
@@ -906,35 +907,151 @@ CRITICAL RULES:
           {authStatus === "authenticated" && session?.user ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <a href="/admin/chatbots" className="btn-login" style={{ fontSize: "13px" }}>My Bots</a>
-              <a
-                href="/admin/chatbots"
-                style={{
-                  display: "flex", alignItems: "center", gap: "8px",
-                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: "9999px", padding: "4px 14px 4px 4px", cursor: "pointer",
-                  textDecoration: "none", color: "#fff", transition: "all 0.2s",
-                }}
-              >
-                {session.user.image ? (
-                  <img
-                    src={session.user.image}
-                    alt=""
-                    style={{ width: 28, height: 28, borderRadius: "9999px", objectFit: "cover" }}
-                  />
-                ) : (
-                  <div style={{
-                    width: 28, height: 28, borderRadius: "9999px",
-                    background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 13, fontWeight: 700, color: "#fff",
-                  }}>
-                    {(session.user.name || session.user.email || "U")[0].toUpperCase()}
-                  </div>
-                )}
-                <span style={{ fontSize: 13, fontWeight: 500 }}>
+              <div style={{ position: "relative" }}>
+                <button
+                  onClick={() => setShowAccountMenu(!showAccountMenu)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "8px",
+                    background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+                    borderRadius: "9999px", padding: "4px 14px 4px 4px", cursor: "pointer",
+                    color: "#fff", transition: "all 0.2s", fontSize: 13, fontWeight: 500,
+                  }}
+                >
+                  {session.user.image ? (
+                    <img
+                      src={session.user.image}
+                      alt=""
+                      style={{ width: 28, height: 28, borderRadius: "9999px", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: 28, height: 28, borderRadius: "9999px",
+                      background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 13, fontWeight: 700, color: "#fff",
+                    }}>
+                      {(session.user.name || session.user.email || "U")[0].toUpperCase()}
+                    </div>
+                  )}
                   {(session.user.name || session.user.email || "User").split(" ")[0]}
-                </span>
-              </a>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+
+                {/* Account dropdown */}
+                {showAccountMenu && (
+                  <>
+                    <div style={{ position: "fixed", inset: 0, zIndex: 40 }} onClick={() => setShowAccountMenu(false)} />
+                    <div style={{
+                      position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 50,
+                      width: 300, background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.6)", overflow: "hidden",
+                    }}>
+                      {/* Profile header */}
+                      <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          {session.user.image ? (
+                            <img src={session.user.image} alt="" style={{ width: 44, height: 44, borderRadius: "9999px", objectFit: "cover" }} />
+                          ) : (
+                            <div style={{
+                              width: 44, height: 44, borderRadius: "9999px",
+                              background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              fontSize: 18, fontWeight: 700, color: "#fff",
+                            }}>
+                              {(session.user.name || session.user.email || "U")[0].toUpperCase()}
+                            </div>
+                          )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 15, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {session.user.name || "User"}
+                            </div>
+                            <div style={{ fontSize: 12, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {session.user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Plan badge */}
+                      <div style={{ padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <div>
+                            <div style={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Current Plan</div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <span style={{
+                                fontSize: 14, fontWeight: 600, color: "#fff",
+                                background: (session.user as any).plan === "free" ? "rgba(255,255,255,0.08)" :
+                                  (session.user as any).plan?.startsWith("ltd_") ? "linear-gradient(135deg, #F59E0B, #EF4444)" :
+                                  "linear-gradient(135deg, #8B5CF6, #6366F1)",
+                                padding: "3px 10px", borderRadius: 6,
+                              }}>
+                                {((session.user as any).plan || "free").replace("ltd_", "LTD ").replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                              </span>
+                            </div>
+                          </div>
+                          <a href="/pricing" style={{ fontSize: 12, color: "#818cf8", textDecoration: "none", fontWeight: 500 }}>
+                            Upgrade →
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Credits */}
+                      <div style={{ padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                        <div style={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>Credits Balance</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: 22, fontWeight: 700, color: "#4ade80" }}>
+                            {(session.user as any).credit_balance ?? 0}
+                          </span>
+                          <span style={{ fontSize: 12, color: "#666" }}>credits remaining</span>
+                        </div>
+                      </div>
+
+                      {/* Quick links */}
+                      <div style={{ padding: "6px" }}>
+                        {[
+                          { label: "My Bots", icon: "🤖", href: "/admin/chatbots" },
+                          { label: "Billing & Plans", icon: "💳", href: "/pricing" },
+                          { label: "Admin Dashboard", icon: "📊", href: "/admin/conversations" },
+                        ].map((item) => (
+                          <a
+                            key={item.label}
+                            href={item.href}
+                            style={{
+                              display: "flex", alignItems: "center", gap: 10,
+                              padding: "10px 12px", borderRadius: 10, textDecoration: "none",
+                              color: "#ccc", fontSize: 13, fontWeight: 500,
+                              transition: "background 0.15s",
+                            }}
+                            onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+                            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                          >
+                            <span style={{ fontSize: 16 }}>{item.icon}</span>
+                            {item.label}
+                          </a>
+                        ))}
+
+                        {/* Sign out */}
+                        <button
+                          onClick={() => {
+                            import("next-auth/react").then(m => m.signOut());
+                          }}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 10, width: "100%",
+                            padding: "10px 12px", borderRadius: 10, border: "none",
+                            background: "transparent", color: "#ef4444", fontSize: 13,
+                            fontWeight: 500, cursor: "pointer", transition: "background 0.15s",
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.08)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <span style={{ fontSize: 16 }}>🚪</span>
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           ) : (
             <>
