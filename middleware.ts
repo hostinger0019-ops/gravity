@@ -1,18 +1,23 @@
-/**
- * Next.js Middleware — Protect admin routes and API routes.
- * Unauthenticated users are redirected to /login.
- */
-export { default } from "next-auth/middleware";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+
+export async function middleware(req: NextRequest) {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    if (!token) {
+        const loginUrl = new URL("/login", req.url);
+        loginUrl.searchParams.set("callbackUrl", req.url);
+        return NextResponse.redirect(loginUrl);
+    }
+
+    return NextResponse.next();
+}
 
 export const config = {
     matcher: [
-        // Protect all admin pages
         "/admin/:path*",
-        // Protect admin API routes
         "/api/admin/:path*",
-        // Protect builder session API
         "/api/builder-sessions/:path*",
-        // Protect AI generator API
         "/api/ai-generator/:path*",
     ],
 };
