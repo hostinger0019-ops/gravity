@@ -704,6 +704,67 @@ const properties = {
 };
 
 // ---------------------------------------------------------------------------
+// Plans & Usage
+// ---------------------------------------------------------------------------
+
+const plans = {
+    async list(): Promise<any[]> {
+        const res = await gpuFetch<{ plans: any[] }>("/plans");
+        return res.plans;
+    },
+    async getById(planId: string): Promise<any> {
+        return gpuFetch(`/plans/${planId}`);
+    },
+};
+
+const userPlan = {
+    async get(userId: string): Promise<any> {
+        return gpuFetch(`/user-plan/${userId}`);
+    },
+    async assign(userId: string, planId: string): Promise<any> {
+        return gpuFetch("/user-plan", {
+            method: "POST",
+            body: JSON.stringify({ user_id: userId, plan_id: planId }),
+        });
+    },
+};
+
+const usage = {
+    async get(userId: string, period?: string): Promise<{ message_count: number; voice_minutes: number }> {
+        return gpuFetch(`/usage/${userId}${qs({ period })}`);
+    },
+    async increment(userId: string, type: string = "chat_message", amount: number = 1): Promise<any> {
+        return gpuFetch("/usage/increment", {
+            method: "POST",
+            body: JSON.stringify({ user_id: userId, type, amount }),
+        });
+    },
+    async check(userId: string): Promise<{ allowed: boolean; remaining: number; limit: number; used: number }> {
+        return gpuFetch(`/usage/check/${userId}`);
+    },
+};
+
+const addons = {
+    async list(userId: string): Promise<any[]> {
+        const res = await gpuFetch<{ addons: any[] }>(`/user-addons${qs({ userId })}`);
+        return res.addons;
+    },
+    async hasAddon(userId: string, addonType: string): Promise<boolean> {
+        const res = await gpuFetch<{ has_addon: boolean }>(`/user-addons/check${qs({ userId, addonType })}`);
+        return res.has_addon;
+    },
+    async add(userId: string, addonType: string): Promise<any> {
+        return gpuFetch("/user-addons", {
+            method: "POST",
+            body: JSON.stringify({ user_id: userId, addon_type: addonType }),
+        });
+    },
+    async remove(addonId: string): Promise<void> {
+        await gpuFetch(`/user-addons/${addonId}`, { method: "DELETE" });
+    },
+};
+
+// ---------------------------------------------------------------------------
 // Unified export
 // ---------------------------------------------------------------------------
 
@@ -727,6 +788,11 @@ export const gpu = {
     properties,
     intent,
     chatPrepare,
+    plans,
+    userPlan,
+    usage,
+    addons,
 };
 
 export default gpu;
+
