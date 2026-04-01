@@ -1168,15 +1168,15 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       {/* Main */}
       <div className="flex-1 flex flex-col min-h-0">
         {/* Top bar with bot avatar and chat name */}
-        <div className={`p-3 border-b ${borderClr} ${bgPanel} flex items-center justify-between sticky top-0 z-10`}>
-          <div className="flex items-center gap-2">
+        <div className={`p-2 sm:p-3 border-b ${borderClr} ${bgPanel} flex items-center justify-between sticky top-0 z-10`}>
+          <div className="flex items-center gap-2 min-w-0">
             {/* Hamburger for mobile */}
             <button
               type="button"
               aria-label="Open sidebar"
               aria-expanded={sidebarOpen}
               onClick={() => setSidebarOpen(true)}
-              className={`md:hidden mr-1 inline-flex h-8 w-8 items-center justify-center rounded border ${borderInput} transition-colors ${light ? 'hover:bg-gray-100' : 'hover:bg-[#141414]'}`}
+              className={`md:hidden mr-1 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded border ${borderInput} transition-colors ${light ? 'hover:bg-gray-100' : 'hover:bg-[#141414]'}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6" />
@@ -1184,19 +1184,19 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                 <line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
-            <img src={avatarUrl || "/favicon.ico"} onError={(e) => ((e.currentTarget.src = "/favicon.ico"))} className={`w-7 h-7 rounded-full border ${light ? "border-gray-300" : "border-gray-700"}`} alt="avatar" />
-            <div>
-              <div className={`font-semibold text-sm md:text-base`}>{chatName}</div>
+            <img src={avatarUrl || "/favicon.ico"} onError={(e) => ((e.currentTarget.src = "/favicon.ico"))} className={`w-7 h-7 flex-shrink-0 rounded-full border ${light ? "border-gray-300" : "border-gray-700"}`} alt="avatar" />
+            <div className="min-w-0">
+              <div className={`font-semibold text-sm md:text-base truncate`}>{chatName}</div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="hidden sm:flex gap-2 flex-shrink-0">
             <button onClick={onRename} className={`text-xs md:text-sm px-2 py-1 border ${borderInput} rounded-md transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>Edit Chat Name</button>
             <button onClick={() => activeCid && onDeleteChat(activeCid)} className={`text-xs md:text-sm px-2 py-1 border ${borderInput} rounded-md transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>Delete Chat</button>
           </div>
         </div>
 
         {/* Messages */}
-        <div className={`flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 space-y-4 ${bgPanel}`}>
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-3 md:p-6 space-y-4 ${bgPanel}`}>
           {messages.map((m, i) => (
             <div
               key={i}
@@ -1322,13 +1322,13 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         {/* Composer */}
         <form onSubmit={onSubmit} className={`p-2 md:p-3 ${bgPanel} border-t ${borderClr}`}>
           <div className="flex items-center gap-2">
-            <input ref={inputRef} className={`flex-1 border ${borderInput} ${light ? "bg-white text-black" : "bg-[#141414] text-white"} rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 text-sm md:text-base transition-shadow focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} placeholder={tagline || "Ask your AI Teacher…"} />
+            <input ref={inputRef} className={`flex-1 min-w-0 border ${borderInput} ${light ? "bg-white text-black" : "bg-[#141414] text-white"} rounded-xl px-2 sm:px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 text-sm transition-shadow focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} placeholder={tagline || "Ask your AI Teacher…"} />
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
             <button
               type="button"
               onClick={toggleVoiceRecording}
               disabled={isProcessingVoice || loading}
-              className={`px-3 py-2 border rounded-xl transition-all hover:scale-105 ${isVoiceRecording
+              className={`px-2 sm:px-3 py-2 border rounded-xl transition-all hover:scale-105 ${isVoiceRecording
                   ? "bg-green-500/15 border-green-500 text-green-400"
                   : isProcessingVoice
                     ? "bg-yellow-500/15 border-yellow-500 text-yellow-400"
@@ -1353,8 +1353,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                 </span>
               </span>
             </button>
-            <button type="button" onClick={onPickImage} className={`px-2 py-2 border rounded-xl ${borderInput} transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>📷</button>
-            <button type="submit" disabled={loading} className={`px-3 py-2 border rounded-xl text-sm md:text-base transition-shadow hover:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} style={{ borderColor: brandColor, color: brandColor }}>{loading ? '…' : 'Send'}</button>
+            <button type="button" onClick={onPickImage} className={`px-2 py-2 border rounded-xl flex-shrink-0 ${borderInput} transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>📷</button>
+            <button type="submit" disabled={loading} className={`px-2 sm:px-3 py-2 border rounded-xl text-xs sm:text-sm flex-shrink-0 transition-shadow hover:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} style={{ borderColor: brandColor, color: brandColor }}>{loading ? '…' : 'Send'}</button>
           </div>
           {(partial || voiceTranscript) && (
             <div className="mt-2 text-xs text-gray-400 whitespace-pre-wrap">
