@@ -168,13 +168,15 @@ export default async function PublicBotPage({ params, searchParams }: { params: 
     );
   }
 
-  // Embed mode: simple container that fills the iframe cleanly (no fixed positioning, no decorative gradients)
+  // Embed mode: centered widget container (not full-page)
   if (isEmbed) {
     return (
-      <div className="w-full h-[100dvh] bg-[#0a0a0a] text-white overflow-hidden">
-        <ErrorBoundary fallback={<div className="p-4 text-red-500">Something went wrong.</div>}>
-          {renderChatUI(bot)}
-        </ErrorBoundary>
+      <div className="w-full h-[100dvh] flex items-center justify-center bg-[#0a0a0a]">
+        <div className="w-full max-w-[400px] h-[600px] max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+          <ErrorBoundary fallback={<div className="p-4 text-red-500">Something went wrong.</div>}>
+            {renderChatUI(bot)}
+          </ErrorBoundary>
+        </div>
       </div>
     );
   }
