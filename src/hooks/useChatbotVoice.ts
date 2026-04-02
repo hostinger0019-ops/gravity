@@ -175,7 +175,7 @@ export function useChatbotVoice(options: UseChatbotVoiceOptions = {}) {
       const opts = optionsRef.current;
       const baseWsUrl = opts.wsUrl
         || process.env.NEXT_PUBLIC_CHATBOT_VOICE_WS_URL
-        || `ws://${window.location.hostname}:4444`;
+        || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
       const wsUrl = `${baseWsUrl}/ws/voice?api_key=test-key-1`;
       
       const ws = new WebSocket(wsUrl);

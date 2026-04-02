@@ -712,7 +712,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
 
       await ctx.audioWorklet.addModule('/pcm-processor.js');
 
-      const wsUrl = process.env.NEXT_PUBLIC_CHATBOT_VOICE_WS_URL || `ws://${window.location.hostname}:4444`;
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsUrl = process.env.NEXT_PUBLIC_CHATBOT_VOICE_WS_URL || `${wsProtocol}://${window.location.host}`;
       const ws = new WebSocket(`${wsUrl}/ws/voice?api_key=test-key-1`);
       voiceWsRef.current = ws;
 

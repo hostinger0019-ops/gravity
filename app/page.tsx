@@ -462,7 +462,8 @@ export default function Home() {
       await ctx.audioWorklet.addModule('/pcm-processor.js');
 
       // Open WebSocket connection
-      const wsUrl = process.env.NEXT_PUBLIC_ORCHESTRATOR_WS_URL || "ws://195.26.233.15:36649";
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsUrl = process.env.NEXT_PUBLIC_ORCHESTRATOR_WS_URL || `${wsProtocol}://${window.location.host}`;
       const apiKey = process.env.NEXT_PUBLIC_ORCHESTRATOR_API_KEY || "test-key-1";
       const ws = new WebSocket(`${wsUrl}/ws/voice?api_key=${apiKey}`);
       voiceWsRef.current = ws;

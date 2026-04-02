@@ -26,7 +26,8 @@ export default function VoiceChat() {
 
   // Initialize WebSocket
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws/voice");
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${wsProtocol}://localhost:8000/ws/voice`);
 
     ws.onopen = () => {
       console.log("Connected to Voice Worker");
