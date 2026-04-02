@@ -882,7 +882,7 @@ CRITICAL RULES:
                     </a>
                   ))}
                   <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: "6px", paddingTop: "8px", padding: "8px 12px" }}>
-                    <a href="#" style={{ fontSize: "12.5px", color: "#3b82f6", textDecoration: "none", fontWeight: 500 }} onClick={(e) => { e.preventDefault(); setShowSolutions(false); }}>View all solutions →</a>
+                    <a href="/solutions" style={{ fontSize: "12.5px", color: "#3b82f6", textDecoration: "none", fontWeight: 500 }} onClick={() => setShowSolutions(false)}>View all solutions →</a>
                   </div>
                 </div>
               </>
