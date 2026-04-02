@@ -59,7 +59,10 @@ export async function POST(req: NextRequest) {
       try {
         const gpuRes = await fetch(`${GPU_BACKEND}/api/scrape/start`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+                "Content-Type": "application/json",
+                ...(process.env.GPU_API_KEY ? { "X-API-Key": process.env.GPU_API_KEY } : {}),
+              },
           body: JSON.stringify({
             chatbot_id: chatbotId,
             url: url || null,

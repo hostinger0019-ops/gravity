@@ -187,7 +187,10 @@ When updating, improve upon these existing values. For example if user says "mak
 
         const gpuRes = await fetch(`${GPU_URL}/api/landing/chat`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                ...(process.env.GPU_API_KEY ? { "X-API-Key": process.env.GPU_API_KEY } : {}),
+            },
             body: JSON.stringify({
                 messages: llmMessages.map(m => ({ role: m.role, content: m.content })),
                 template_id: templateId || null,
