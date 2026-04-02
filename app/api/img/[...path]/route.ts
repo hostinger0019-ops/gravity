@@ -13,7 +13,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ path: strin
 
     try {
         const res = await fetch(gpuImageUrl, {
-            headers: { "User-Agent": "BotForge/1.0" },
+            headers: { "User-Agent": "Agent Forja/1.0" },
             signal: AbortSignal.timeout(10000),
         });
 

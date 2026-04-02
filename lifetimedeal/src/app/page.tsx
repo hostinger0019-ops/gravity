@@ -82,7 +82,7 @@ const Header = () => {
                                 <Zap className="w-8 h-8 text-violet-400 relative" />
                             </div>
                             <div>
-                                <span className="text-xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">BotForge</span>
+                                <span className="text-xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">Agent Forja</span>
                                 <p className="text-[10px] text-violet-300/60">Lifetime Deal</p>
                             </div>
                         </Link>
@@ -216,7 +216,7 @@ const Hero = () => (
                 >
                     {/* Main image */}
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-violet-500/10">
-                        <img src="/dashboard.png" alt="BotForge Dashboard" className="w-full h-auto" />
+                        <img src="/dashboard.png" alt="Agent Forja Dashboard" className="w-full h-auto" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     </div>
 
@@ -340,7 +340,7 @@ const HowItWorks = () => {
 const Features = () => {
     const features = [
         { icon: <Bot className="w-7 h-7" />, title: "AI-Powered Builder", desc: "Describe the business. AI builds the bot, writes the greeting, configures everything automatically.", gradient: "from-violet-500 to-fuchsia-500" },
-        { icon: <Palette className="w-7 h-7" />, title: "Full White-Label", desc: "Your brand everywhere. Remove all BotForge branding. Custom colors, logo, and company name.", gradient: "from-fuchsia-500 to-rose-500" },
+        { icon: <Palette className="w-7 h-7" />, title: "Full White-Label", desc: "Your brand everywhere. Remove all Agent Forja branding. Custom colors, logo, and company name.", gradient: "from-fuchsia-500 to-rose-500" },
         { icon: <Globe className="w-7 h-7" />, title: "One-Line Embed", desc: "Copy-paste embed code works on WordPress, Shopify, Wix, Squarespace, or raw HTML.", gradient: "from-cyan-500 to-blue-500" },
         { icon: <BarChart3 className="w-7 h-7" />, title: "Lead Capture", desc: "Auto-collect emails, names, and phone numbers from every conversation. Export leads anytime.", gradient: "from-rose-500 to-orange-500" },
         { icon: <FileText className="w-7 h-7" />, title: "Knowledge Base", desc: "Upload PDFs or scrape any website. Bot answers accurately using RAG technology.", gradient: "from-amber-500 to-yellow-500" },
@@ -624,7 +624,7 @@ const Calculator = () => (
 /* ═══ Testimonials ═══ */
 const Testimonials = () => {
     const testimonials = [
-        { name: "Alex Rivera", role: "Agency Owner, Digital Wave", quote: "Paid for itself in the first week. I landed 3 clients at $149/month each. The white-label is flawless — they have no idea I'm using BotForge.", rating: 5 },
+        { name: "Alex Rivera", role: "Agency Owner, Digital Wave", quote: "Paid for itself in the first week. I landed 3 clients at $149/month each. The white-label is flawless — they have no idea I'm using Agent Forja.", rating: 5 },
         { name: "Sarah Kim", role: "Freelance Web Developer", quote: "I add a chatbot to every website I build now. It's an easy $99/month upsell. My clients love it and I barely do any extra work.", rating: 5 },
         { name: "Marcus Chen", role: "Marketing Consultant", quote: "The lead capture feature alone is worth 10x the price. My restaurant clients went from losing leads to converting 40% more inquiries.", rating: 5 },
     ];
@@ -675,9 +675,9 @@ const Testimonials = () => {
 /* ═══ FAQ ═══ */
 const FAQ = () => {
     const items = [
-        { q: "What do I get for $99?", a: "Lifetime access to BotForge: 5 AI chatbots, 2,000 messages/month, full white-label branding, 7 industry themes, lead capture, knowledge base (PDF + web scraping), embed widget, Instagram DM automation, and all future updates. No monthly fees, ever." },
+        { q: "What do I get for $99?", a: "Lifetime access to Agent Forja: 5 AI chatbots, 2,000 messages/month, full white-label branding, 7 industry themes, lead capture, knowledge base (PDF + web scraping), embed widget, Instagram DM automation, and all future updates. No monthly fees, ever." },
         { q: "Is this really lifetime? No hidden charges?", a: "Yes. Pay $99 once, use forever. We host everything — AI models, servers, database. No per-seat charges, no usage overages, no hidden fees." },
-        { q: "What does white-label mean?", a: "Remove all BotForge branding. Replace with your own company name, logo, and colors. Your clients will never know you're using our platform." },
+        { q: "What does white-label mean?", a: "Remove all Agent Forja branding. Replace with your own company name, logo, and colors. Your clients will never know you're using our platform." },
         { q: "Can I charge my clients monthly?", a: "Absolutely. Set your own prices, handle your own billing (Stripe, PayPal, invoices). We don't take any cut. Most resellers charge $49-$299/month." },
         { q: "What happens at 2,000 messages?", a: "Chatbots pause until your quota resets on the 1st of next month. You can also purchase additional message packs." },
         { q: "What AI powers the chatbots?", a: "Self-hosted AI on dedicated GPUs — not OpenAI or third-party APIs. Faster responses, lower latency, no per-token costs eating your margins." },
@@ -768,7 +768,7 @@ const Footer = () => (
                 <div>
                     <div className="flex items-center gap-2 mb-4">
                         <Zap className="w-6 h-6 text-violet-400" />
-                        <span className="text-xl font-bold text-white">BotForge</span>
+                        <span className="text-xl font-bold text-white">Agent Forja</span>
                     </div>
                     <p className="text-zinc-500 text-sm">White-label AI chatbot platform for agencies and resellers.</p>
                 </div>
@@ -798,7 +798,7 @@ const Footer = () => (
                 </div>
             </div>
             <div className="pt-8 border-t border-zinc-800 text-center text-zinc-500 text-sm">
-                <p>© {new Date().getFullYear()} BotForge. All rights reserved.</p>
+                <p>© {new Date().getFullYear()} Agent Forja. All rights reserved.</p>
             </div>
         </div>
     </footer>

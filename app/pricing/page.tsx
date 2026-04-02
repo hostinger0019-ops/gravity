@@ -74,7 +74,7 @@ const plans = [
 const faqs = [
   {
     q: "What is a credit?",
-    a: "Credits are the currency for using BotForge. Each chat message (user sends + AI replies) costs 1 credit. Each minute of voice interaction costs 10 credits.",
+    a: "Credits are the currency for using Agent Forja. Each chat message (user sends + AI replies) costs 1 credit. Each minute of voice interaction costs 10 credits.",
   },
   {
     q: "Do unused credits roll over?",
@@ -90,7 +90,7 @@ const faqs = [
   },
   {
     q: "Is there a free trial?",
-    a: "Yes! Every new account gets 50 free credits to try BotForge. No credit card required.",
+    a: "Yes! Every new account gets 50 free credits to try Agent Forja. No credit card required.",
   },
 ];
 
@@ -101,7 +101,7 @@ export default function PricingPage() {
       <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">B</div>
-          <span className="text-xl font-bold">BotForge</span>
+          <span className="text-xl font-bold">Agent Forja</span>
         </Link>
         <div className="flex items-center gap-4">
           <Link href="/login" className="text-sm text-slate-300 hover:text-white transition-colors">Log in</Link>
@@ -227,7 +227,7 @@ export default function PricingPage() {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-sm text-slate-500">
-          <span>© 2026 BotForge. All rights reserved.</span>
+          <span>© 2026 Agent Forja. All rights reserved.</span>
           <div className="flex gap-6">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>

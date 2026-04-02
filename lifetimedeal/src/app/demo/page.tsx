@@ -18,7 +18,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 // Change this to your production domain when deploying
 const MAIN_APP_URL = "http://localhost:4010";
 // Change this to your demo chatbot's slug
-const DEMO_SLUG = "botforge-demo";
+const DEMO_SLUG = "Agent Forja-demo";
 
 export default function DemoPage() {
     const [started, setStarted] = useState(false);
@@ -37,12 +37,12 @@ export default function DemoPage() {
         setStarted(true);
         // Show greeting first
         setMessages([
-            { role: "assistant", content: "Hey! 👋 I'm a BotForge AI assistant. I'm about to show you exactly what your clients' customers will experience. Let me tell you how BotForge can help your agency earn recurring revenue..." },
+            { role: "assistant", content: "Hey! 👋 I'm a Agent Forja AI assistant. I'm about to show you exactly what your clients' customers will experience. Let me tell you how Agent Forja can help your agency earn recurring revenue..." },
         ]);
 
         // Auto-send a message after a short delay
         setTimeout(() => {
-            sendMessage("Tell me how BotForge works and how I can make money with it as an agency owner", true);
+            sendMessage("Tell me how Agent Forja works and how I can make money with it as an agency owner", true);
         }, 1500);
     }
 
@@ -101,7 +101,7 @@ export default function DemoPage() {
         } catch {
             setMessages((prev) => [
                 ...prev,
-                { role: "assistant", content: "⚠️ Couldn't connect to the AI. Make sure the main BotForge app is running on port 4010 with a chatbot slug set to `botforge-demo`." },
+                { role: "assistant", content: "⚠️ Couldn't connect to the AI. Make sure the main Agent Forja app is running on port 4010 with a chatbot slug set to `Agent Forja-demo`." },
             ]);
         } finally {
             setLoading(false);
@@ -116,7 +116,7 @@ export default function DemoPage() {
                 <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-16">
                     <a href="/" className="flex items-center gap-2">
                         <Zap className="w-6 h-6 text-violet-400" />
-                        <span className="font-bold text-white">BotForge</span>
+                        <span className="font-bold text-white">Agent Forja</span>
                         <span className="text-[10px] text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full ml-1">LIVE DEMO</span>
                     </a>
                     <a
@@ -168,7 +168,7 @@ export default function DemoPage() {
                                 </p>
 
                                 <p className="text-sm text-zinc-500 mb-10">
-                                    Tap below and watch the AI introduce itself and explain how BotForge works.
+                                    Tap below and watch the AI introduce itself and explain how Agent Forja works.
                                 </p>
 
                                 {/* Big CTA */}
@@ -215,7 +215,7 @@ export default function DemoPage() {
                                         <Bot className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-white text-sm">BotForge AI</p>
+                                        <p className="font-semibold text-white text-sm">Agent Forja AI</p>
                                         <p className="text-xs text-emerald-400 flex items-center gap-1">
                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                             Live Demo
@@ -324,7 +324,7 @@ export default function DemoPage() {
                                 <div className="flex items-end gap-3">
                                     <input
                                         className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
-                                        placeholder="Ask anything about BotForge..."
+                                        placeholder="Ask anything about Agent Forja..."
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
                                         onKeyDown={(e) => e.key === "Enter" && !loading && sendMessage()}
@@ -339,7 +339,7 @@ export default function DemoPage() {
                                     </button>
                                 </div>
                                 <p className="text-center text-zinc-600 text-[10px] mt-3">
-                                    Powered by BotForge AI · Self-hosted on dedicated GPUs ·{" "}
+                                    Powered by Agent Forja AI · Self-hosted on dedicated GPUs ·{" "}
                                     <a href="/#pricing" className="text-violet-500 hover:text-violet-400">
                                         Get lifetime access for $99 →
                                     </a>

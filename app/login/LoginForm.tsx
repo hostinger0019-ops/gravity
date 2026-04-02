@@ -39,7 +39,7 @@ export default function LoginForm({ fallbackNext }: { fallbackNext: string }) {
 
   return (
     <div className="w-full max-w-md border border-white/10 rounded-xl p-6 bg-white/5">
-      <h1 className="text-2xl font-semibold mb-2">Welcome to BotForge</h1>
+      <h1 className="text-2xl font-semibold mb-2">Welcome to Agent Forja</h1>
       <p className="text-sm text-slate-400 mb-6">Sign in to create and manage your AI chatbots</p>
 
       {/* Google Sign In */}

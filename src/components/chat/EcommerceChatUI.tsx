@@ -190,12 +190,12 @@ export default function EcommerceChatUI({
                 }}
             >
                 <div className={`max-w-5xl mx-auto ${isEmbed ? 'px-3 py-2' : 'px-6 py-3'}`}>
-                    {/* Top line: BotForge label — hidden in embed */}
+                    {/* Top line: Agent Forja label — hidden in embed */}
                     {!isEmbed && (
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <span className="text-[11px] font-medium tracking-widest uppercase" style={{ color: "#8B9CC0" }}>
-                                BotForge · AI Assistant Platform
+                                Agent Forja · AI Assistant Platform
                             </span>
                         </div>
                         <a

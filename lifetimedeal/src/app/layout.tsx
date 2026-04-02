@@ -2,7 +2,7 @@ import "@/app/globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "BotForge Lifetime Deal — Build & Sell AI Chatbots | $99 One-Time",
+  title: "Agent Forja Lifetime Deal — Build & Sell AI Chatbots | $99 One-Time",
   description:
     "Get lifetime access to the AI chatbot builder platform. White-label, resell, and earn recurring revenue from your clients. One-time $99 payment.",
   keywords: "AI chatbot, white-label chatbot, lifetime deal, chatbot builder, reseller",

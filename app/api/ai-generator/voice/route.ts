@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Voice Pipeline for BotForge Builder Chat
+ * Voice Pipeline for Agent Forja Builder Chat
  * Flow: Audio → Parakeet STT → RAG → vLLM (same system prompt) → Kokoro TTS → Audio back
  */
 
@@ -12,7 +12,7 @@ const VLLM_MODEL = process.env.VLLM_MODEL || "Qwen/Qwen2.5-7B-Instruct-AWQ";
 const KOKORO_TTS_VOICE = process.env.KOKORO_TTS_VOICE || "af_heart";
 
 // Same system prompt as the chat route
-const VOICE_SYSTEM_PROMPT = `You are BotForge AI, a chatbot builder assistant powered by a self-hosted LLM. You are NOT ChatGPT, NOT Claude, NOT Anthropic, NOT OpenAI. You are BotForge's own AI assistant.
+const VOICE_SYSTEM_PROMPT = `You are Agent Forja AI, a chatbot builder assistant powered by a self-hosted LLM. You are NOT ChatGPT, NOT Claude, NOT Anthropic, NOT OpenAI. You are Agent Forja's own AI assistant.
 
 IMPORTANT: You are in VOICE mode. Keep responses SHORT (2-3 sentences max).
 - Use simple, spoken language. No technical jargon.

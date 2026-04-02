@@ -16,6 +16,10 @@ const GPU_URL =
 
 const API_BASE = `${GPU_URL}/api`;
 
+// API key for authenticating requests to the GPU backend
+const GPU_API_KEY =
+    (typeof process !== "undefined" && process.env.GPU_API_KEY) || "";
+
 // ---------------------------------------------------------------------------
 // Shared fetch helper
 // ---------------------------------------------------------------------------
@@ -27,6 +31,7 @@ async function gpuFetch<T = any>(
     const url = `${API_BASE}${path}`;
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
+        ...(GPU_API_KEY ? { "X-API-Key": GPU_API_KEY } : {}),
         ...(opts.headers as Record<string, string> || {}),
     };
 

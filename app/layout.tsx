@@ -8,7 +8,7 @@ import AuthProvider from "@/components/AuthProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BotForge — Build AI Chatbots & Voicebots in Seconds",
+  title: "Agent Forja — Build AI Chatbots & Voicebots in Seconds",
   description: "Create powerful AI chatbots and voicebots for your business.",
 };
 

@@ -567,7 +567,7 @@ export default function Home() {
           mode: "stream",
           sample_rate: 16000,
           chatbot_id: createdBotRef.current?.id || null,
-          system_prompt: `You are BotForge AI, a chatbot builder assistant powered by a self-hosted LLM. You are NOT ChatGPT, NOT Claude, NOT Anthropic, NOT OpenAI. You are BotForge's own AI assistant. If asked what model you are, say "I'm BotForge AI, a self-hosted assistant." Help users create and manage their chatbots.
+          system_prompt: `You are Agent Forja AI, a chatbot builder assistant powered by a self-hosted LLM. You are NOT ChatGPT, NOT Claude, NOT Anthropic, NOT OpenAI. You are Agent Forja's own AI assistant. If asked what model you are, say "I'm Agent Forja AI, a self-hosted assistant." Help users create and manage their chatbots.
 
 LANGUAGE RULE:
 - ALWAYS reply in English, no matter what language the user speaks.
@@ -837,7 +837,7 @@ CRITICAL RULES:
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
           </div>
-          BotForge
+          Agent Forja
         </a>
 
         <div className="nav-links">
@@ -1095,7 +1095,7 @@ CRITICAL RULES:
               <textarea
                 ref={textareaRef}
                 className="prompt-textarea"
-                placeholder="Ask BotForge to create a chatbot for my..."
+                placeholder="Ask Agent Forja to create a chatbot for my..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
@@ -1337,7 +1337,7 @@ CRITICAL RULES:
             <textarea
               ref={textareaRef}
               className="prompt-textarea"
-              placeholder="Ask BotForge to create a chatbot for my..."
+              placeholder="Ask Agent Forja to create a chatbot for my..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
