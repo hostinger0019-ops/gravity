@@ -48,6 +48,7 @@ export default function Home() {
   const [knowledgeFiles, setKnowledgeFiles] = useState<{name: string; content: string; size: number}[]>([]);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [showSolutions, setShowSolutions] = useState(false);
   const [scrapeJobId, setScrapeJobId] = useState<string | null>(null);
   const knowledgeInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -842,7 +843,51 @@ CRITICAL RULES:
         </a>
 
         <div className="nav-links">
-          <a href="#">Solutions</a>
+          <div style={{ position: "relative" }}>
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setShowSolutions(!showSolutions); }}
+              style={{ display: "flex", alignItems: "center", gap: "4px" }}
+            >
+              Solutions
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transition: "transform 0.2s", transform: showSolutions ? "rotate(180deg)" : "rotate(0)" }}><path d="M6 9l6 6 6-6" /></svg>
+            </a>
+            {showSolutions && (
+              <>
+                <div style={{ position: "fixed", inset: 0, zIndex: 40 }} onClick={() => setShowSolutions(false)} />
+                <div className="solutions-dropdown">
+                  <div className="solutions-dropdown-header">
+                    <span style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "1.5px", color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>Digital Employees</span>
+                  </div>
+                  {[
+                    { icon: "💬", title: "AI Customer Support", desc: "24/7 automated chat support for your website visitors", color: "#3b82f6" },
+                    { icon: "📈", title: "AI Sales Agent", desc: "Convert visitors into customers with smart conversations", color: "#10b981" },
+                    { icon: "🎯", title: "AI Lead Capture", desc: "Qualify & capture leads automatically from every channel", color: "#f59e0b" },
+                    { icon: "🎙️", title: "AI Voice Agent", desc: "Voice-powered assistant for calls and real-time support", color: "#8b5cf6" },
+                    { icon: "📱", title: "AI Social Media Agent", desc: "Automate DMs, comments & engagement on social platforms", color: "#ec4899" },
+                  ].map((item) => (
+                    <a
+                      key={item.title}
+                      href="#"
+                      className="solutions-dropdown-item"
+                      onClick={(e) => { e.preventDefault(); setShowSolutions(false); }}
+                    >
+                      <div className="solutions-dropdown-icon" style={{ background: `${item.color}20`, color: item.color }}>
+                        {item.icon}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 500, fontSize: "13.5px", color: "#fff" }}>{item.title}</div>
+                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", marginTop: "2px", lineHeight: 1.3 }}>{item.desc}</div>
+                      </div>
+                    </a>
+                  ))}
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: "6px", paddingTop: "8px", padding: "8px 12px" }}>
+                    <a href="#" style={{ fontSize: "12.5px", color: "#3b82f6", textDecoration: "none", fontWeight: 500 }} onClick={(e) => { e.preventDefault(); setShowSolutions(false); }}>View all solutions →</a>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           <a href="#">Resources</a>
           <a href="#">Enterprise</a>
           <a href="/pricing">Pricing</a>

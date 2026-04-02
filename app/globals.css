@@ -172,6 +172,58 @@ body {
   background: rgba(255, 255, 255, 0.06);
 }
 
+/* Solutions Dropdown */
+.solutions-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 50;
+  width: 340px;
+  background: rgba(18, 18, 18, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.05);
+  padding: 6px;
+  animation: solutionsSlideIn 0.2s ease;
+}
+
+@keyframes solutionsSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.solutions-dropdown-header {
+  padding: 10px 12px 6px;
+}
+
+.solutions-dropdown-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none !important;
+  transition: all 0.15s ease;
+  border-left: 2px solid transparent;
+}
+
+.solutions-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-left-color: #3b82f6;
+}
+
+.solutions-dropdown-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
 .botforge-landing .nav-right {
   display: flex;
   align-items: center;
