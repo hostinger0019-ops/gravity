@@ -2,7 +2,7 @@ import LegalLayout from "@/components/LegalLayout";
 
 export const metadata = {
   title: "Privacy Policy | Agent Forja",
-  description: "Privacy Policy for Agent Forja AI chatbot platform",
+  description: "Privacy Policy for Agent Forja AI agent platform",
 };
 
 export default function PrivacyPage() {
@@ -10,7 +10,7 @@ export default function PrivacyPage() {
     <LegalLayout title="Privacy Policy" active="/privacy">
       <h2>1. Introduction</h2>
       <p>
-        Agent Forja ("we", "us", "our"), a product operated by <strong>Tarik Fashion Company</strong>, respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, store, and protect your information when you use our AI chatbot platform at <strong>agentforja.com</strong>.
+        Agent Forja ("we", "us", "our"), a product operated by <strong>Tarik Fashion Company</strong>, respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, store, and protect your information when you use our AI-powered chat agent platform at <strong>agentforja.com</strong>.
       </p>
 
       <h2>2. Information We Collect</h2>
@@ -22,11 +22,11 @@ export default function PrivacyPage() {
         <li><strong>Payment information</strong> — processed by <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener noreferrer">Lemon Squeezy</a>, our Merchant of Record; we do not store card or payment details</li>
       </ul>
 
-      <h3>2.2 Chatbot Data</h3>
+      <h3>2.2 AI Agent Data</h3>
       <ul>
-        <li><strong>Knowledge base content</strong> — documents, URLs, and text you upload to train your chatbots</li>
-        <li><strong>Chatbot configurations</strong> — name, theme, system prompts, personality settings</li>
-        <li><strong>Conversation logs</strong> — messages between your chatbot and its end users</li>
+        <li><strong>Knowledge base content</strong> — documents, URLs, and text you upload to train your AI agents</li>
+        <li><strong>Agent configurations</strong> — name, theme, system prompts, personality settings</li>
+        <li><strong>Conversation logs</strong> — messages between your AI agent and its end users</li>
         <li><strong>Lead capture data</strong> — names, emails, and other data collected through lead forms</li>
       </ul>
 
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
 
       <h2>3. How We Use Your Information</h2>
       <ul>
-        <li><strong>Provide the Service</strong> — process your chatbot queries, manage your account</li>
+        <li><strong>Provide the Service</strong> — process your AI agent queries, manage your account</li>
         <li><strong>Authentication</strong> — verify your identity via email OTP or Google OAuth</li>
         <li><strong>Communication</strong> — send OTP codes, service updates, and billing notifications</li>
         <li><strong>Improvement</strong> — analyze usage patterns to improve features and performance</li>
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
 
       <h2>4. Administrative Access to Your Data</h2>
       <p>
-        Our authorized personnel may access your account data, chatbot configurations, knowledge base content, and conversation logs for the following purposes:
+        Our authorized personnel may access your account data, agent configurations, knowledge base content, and conversation logs for the following purposes:
       </p>
       <ul>
         <li><strong>Service delivery</strong> — providing, maintaining, and improving the Service</li>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
 
       <h3>5.1 Where We Store Your Data</h3>
       <p>
-        Your data is stored on secure servers located in <strong>Canada</strong>. AI processing occurs on our dedicated GPU infrastructure hosted in Canada. We use industry-standard security measures including:
+        Your data is stored on secure servers located in <strong>Canada</strong>. AI inference occurs on our dedicated GPU infrastructure hosted in Canada. We use industry-standard security measures including:
       </p>
       <ul>
         <li>HTTPS/TLS encryption for all data in transit</li>
@@ -79,22 +79,22 @@ export default function PrivacyPage() {
       <h3>5.2 Data Retention</h3>
       <ul>
         <li><strong>Account data</strong> — retained while your account is active, deleted within 30 days of account closure</li>
-        <li><strong>Conversation logs</strong> — retained while your chatbot is active; you can delete conversations at any time</li>
-        <li><strong>Knowledge base</strong> — retained while your chatbot is active; deleted when the chatbot is removed</li>
+        <li><strong>Conversation logs</strong> — retained while your AI agent is active; you can delete conversations at any time</li>
+        <li><strong>Knowledge base</strong> — retained while your AI agent is active; deleted when the agent is removed</li>
       </ul>
 
       <h2>6. AI Processing &amp; Third-Party Services</h2>
 
       <h3>6.1 AI Model Providers</h3>
       <p>
-        To generate chatbot responses, we may route queries through third-party AI inference providers including:
+        To generate AI agent responses, we may route queries through third-party AI inference providers including:
       </p>
       <ul>
         <li><strong>Groq</strong> — for fast AI inference (<a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener noreferrer">Groq Privacy Policy</a>)</li>
         <li><strong>Self-hosted models</strong> — running on our dedicated GPU servers in Canada</li>
       </ul>
       <p>
-        When using Groq, your chatbot queries are sent to their servers for processing. Groq does not use your data for model training. We do not share your data with any other third parties for AI processing.
+        When using Groq, your AI agent queries are sent to their servers for processing. Groq does not use your data for model training. We do not share your data with any other third parties for AI processing.
       </p>
 
       <h3>6.2 Other Third-Party Services</h3>
@@ -113,7 +113,7 @@ export default function PrivacyPage() {
         <li><strong>Access</strong> — request a copy of your personal data</li>
         <li><strong>Correction</strong> — update or correct inaccurate data</li>
         <li><strong>Deletion</strong> — request deletion of your account and data</li>
-        <li><strong>Export</strong> — download your chatbot data and conversation logs</li>
+        <li><strong>Export</strong> — download your AI agent data and conversation logs</li>
         <li><strong>Restrict processing</strong> — limit how we use your data</li>
         <li><strong>Withdraw consent</strong> — opt out of optional data processing</li>
       </ul>
