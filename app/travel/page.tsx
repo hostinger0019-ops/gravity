@@ -464,7 +464,7 @@ const Pricing = () => {
     const plans = [
         {
             name: "Small Property",
-            price: "$59",
+            price: "$49",
             period: "/month",
             description: "For boutique hotels & B&Bs",
             features: [

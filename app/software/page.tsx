@@ -463,7 +463,7 @@ const Pricing = () => {
     const plans = [
         {
             name: "Startup",
-            price: "$79",
+            price: "$49",
             period: "/month",
             description: "For early-stage products",
             features: [
@@ -477,7 +477,7 @@ const Pricing = () => {
         },
         {
             name: "Growth",
-            price: "$199",
+            price: "$149",
             period: "/month",
             description: "For scaling SaaS companies",
             features: [

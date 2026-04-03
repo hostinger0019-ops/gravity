@@ -383,11 +383,11 @@ export default function InstagramLanding() {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
                         {[
                             {
                                 name: "Starter",
-                                price: "$19",
+                                price: "$49",
                                 period: "/month",
                                 features: [
                                     "1,000 DM replies/month",
@@ -401,33 +401,19 @@ export default function InstagramLanding() {
                             },
                             {
                                 name: "Pro",
-                                price: "$39",
+                                price: "$149",
                                 period: "/month",
                                 features: [
-                                    "5,000 DM replies/month",
+                                    "Unlimited DM replies",
                                     "Advanced analytics",
                                     "Custom branding",
                                     "Priority support",
                                     "Zapier integration",
-                                    "Comment automation"
+                                    "Comment automation",
+                                    "API access"
                                 ],
                                 cta: "Start Free Trial",
                                 popular: true
-                            },
-                            {
-                                name: "Agency",
-                                price: "$99",
-                                period: "/month",
-                                features: [
-                                    "Unlimited DMs",
-                                    "Manage 5 Instagram accounts",
-                                    "White-label option",
-                                    "Dedicated support",
-                                    "API access",
-                                    "Custom integrations"
-                                ],
-                                cta: "Contact Sales",
-                                popular: false
                             }
                         ].map((plan, idx) => (
                             <motion.div

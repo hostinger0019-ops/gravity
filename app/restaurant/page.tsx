@@ -439,7 +439,7 @@ const Pricing = () => {
         },
         {
             name: "Professional",
-            price: "$99",
+            price: "$149",
             period: "/month",
             description: "For growing restaurants",
             features: [

@@ -462,7 +462,7 @@ const Pricing = () => {
     const plans = [
         {
             name: "Solo Tutor",
-            price: "$29",
+            price: "$49",
             period: "/month",
             description: "For individual educators",
             features: [
@@ -476,7 +476,7 @@ const Pricing = () => {
         },
         {
             name: "Professional",
-            price: "$79",
+            price: "$149",
             period: "/month",
             description: "For serious educators",
             features: [
