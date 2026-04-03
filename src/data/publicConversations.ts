@@ -1,8 +1,9 @@
-export async function listPublicConversations(slug: string, opts?: { page?: number; pageSize?: number; q?: string }) {
+export async function listPublicConversations(slug: string, opts?: { page?: number; pageSize?: number; q?: string; visitorId?: string }) {
   const params = new URLSearchParams();
   if (opts?.page) params.set("page", String(opts.page));
   if (opts?.pageSize) params.set("pageSize", String(opts.pageSize));
   if (opts?.q) params.set("q", opts.q);
+  if (opts?.visitorId) params.set("visitorId", opts.visitorId);
   const res = await fetch(`/api/bots/${encodeURIComponent(slug)}/conversations?${params.toString()}`, { cache: "no-store" });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(json?.error || `Failed to load conversations (${res.status})`);

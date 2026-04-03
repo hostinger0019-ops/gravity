@@ -131,12 +131,13 @@ const chatbots = {
 // ---------------------------------------------------------------------------
 
 const conversations = {
-    async listByBot(botId: string, opts?: { page?: number; pageSize?: number; q?: string }): Promise<ConversationRecord[]> {
+    async listByBot(botId: string, opts?: { page?: number; pageSize?: number; q?: string; visitorId?: string }): Promise<ConversationRecord[]> {
         const res = await gpuFetch<{ conversations: ConversationRecord[] }>(`/conversations${qs({
             botId,
             page: opts?.page,
             pageSize: opts?.pageSize,
             q: opts?.q,
+            visitorId: opts?.visitorId,
         })}`);
         return res.conversations;
     },
@@ -155,19 +156,21 @@ const conversations = {
         return gpuFetch<ConversationRecord>(`/conversations/${id}`);
     },
 
-    async create(botIdOrPayload: string | { bot_id: string; title?: string }, title?: string): Promise<ConversationRecord> {
+    async create(botIdOrPayload: string | { bot_id: string; title?: string; visitor_id?: string }, title?: string): Promise<ConversationRecord> {
         let botId: string;
         let t: string;
+        let visitorId: string | undefined;
         if (typeof botIdOrPayload === "object") {
             botId = botIdOrPayload.bot_id;
             t = botIdOrPayload.title ?? "New Chat";
+            visitorId = botIdOrPayload.visitor_id;
         } else {
             botId = botIdOrPayload;
             t = title ?? "New Chat";
         }
         const res = await gpuFetch<{ conversation: ConversationRecord }>("/conversations/json", {
             method: "POST",
-            body: JSON.stringify({ botId, title: t }),
+            body: JSON.stringify({ botId, title: t, ...(visitorId ? { visitor_id: visitorId } : {}) }),
         });
         return res.conversation;
     },

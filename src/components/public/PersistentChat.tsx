@@ -43,6 +43,18 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
   const [chatName, setChatName] = useState<string>("New Chat");
   const storageKey = useMemo(() => `public-chat:${slug}:active`, [slug]);
   const sessionsKey = useMemo(() => `public-chat:${slug}:sessions:v1`, [slug]);
+  const visitorKey = useMemo(() => `bf_visitor:${slug}`, [slug]);
+
+  // Generate or retrieve a unique visitor ID for this browser + bot
+  const visitorId = useMemo(() => {
+    if (typeof window === 'undefined') return '';
+    let vid = localStorage.getItem(visitorKey);
+    if (!vid) {
+      vid = crypto?.randomUUID ? crypto.randomUUID() : `v-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(visitorKey, vid);
+    }
+    return vid;
+  }, [visitorKey]);
 
   // Detect embed mode from URL query param (?embed=1)
   const [isEmbed, setIsEmbed] = useState(false);
@@ -115,7 +127,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
             } catch { }
           }
         }
-        const rows = await listPublicConversations(slug, { pageSize: 50 });
+        const rows = await listPublicConversations(slug, { pageSize: 50, visitorId });
         // Merge server rows with any locally cached convs (e.g., fallback-created)
         const byId: Record<string, { id: string; title: string; updated_at: string }> = {};
         for (const r of rows as any) byId[r.id] = r;
@@ -135,7 +147,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         console.warn('load convs failed', e);
       }
     })();
-  }, [slug, storageKey, sessionsKey, greeting]);
+  }, [slug, storageKey, sessionsKey, greeting, visitorId]);
 
   // Persist active conversation id
   useEffect(() => {
@@ -179,7 +191,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       const resp = await fetch(`/api/bots/${encodeURIComponent(slug)}/conversations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: chatName || 'New Chat' }),
+        body: JSON.stringify({ title: chatName || 'New Chat', visitor_id: visitorId }),
       });
       const json = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(json?.error || 'Failed to create conversation');
@@ -552,7 +564,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       const resp = await fetch(`/api/bots/${encodeURIComponent(slug)}/conversations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: titleSuggestion }),
+        body: JSON.stringify({ title: titleSuggestion, visitor_id: visitorId }),
       });
       const json = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(json?.error || 'Failed to create conversation');
