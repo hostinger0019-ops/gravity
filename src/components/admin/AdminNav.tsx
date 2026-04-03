@@ -26,9 +26,13 @@ export default function AdminNav() {
         } catch { }
     }, []);
 
-    const handleSignOut = () => {
+    const handleSignOut = async () => {
         localStorage.removeItem("user_email");
-        window.location.href = "/login";
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("user_name");
+        localStorage.removeItem("user_avatar");
+        const { signOut } = await import("next-auth/react");
+        await signOut({ callbackUrl: "/login" });
     };
 
     return (
