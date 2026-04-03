@@ -6,14 +6,15 @@ interface PromptConfig {
   landing_prompt: string;
   chat_prompt: string;
   voice_prompt: string;
+  vllm_voice_prompt: string;
 }
 
 const PROMPT_SECTIONS = [
   {
     key: "landing_prompt",
-    label: "Landing Page Chat Prompt",
-    description: "System prompt for the AI assistant on the main landing page (agentforja.com). Controls how the landing chatbot greets and assists visitors.",
-    rows: 12,
+    label: "Landing Page — Voice AI Prompt",
+    description: "System prompt for the voice AI on the main landing page (agentforja.com). Controls how the AI greets and assists visitors via mic.",
+    rows: 14,
   },
   {
     key: "chat_prompt",
@@ -26,6 +27,12 @@ const PROMPT_SECTIONS = [
     label: "AI Agent Builder — Voice Prompt",
     description: "System prompt for the voice-based AI builder. Controls how the AI responds in voice mode.",
     rows: 12,
+  },
+  {
+    key: "vllm_voice_prompt",
+    label: "vLLM Chatbot Voice — Default Prompt",
+    description: "Default system prompt used by the GPU voice orchestrator (orchestrator_chatbot.py) when no bot-specific directive is available.",
+    rows: 10,
   },
 ];
 
