@@ -75,26 +75,16 @@ export default function LoginForm({ fallbackNext }: { fallbackNext: string }) {
     setOtpLoading(true);
     setOtpError("");
     try {
-      const res = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: otpCode }),
+      // Let NextAuth CredentialsProvider handle verification directly
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        otp: otpCode,
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        // Sign in via NextAuth credentials provider
-        const result = await signIn("credentials", {
-          redirect: false,
-          email,
-          otp: otpCode,
-        });
-        if (result?.ok) {
-          router.replace(next);
-        } else {
-          setOtpError("Login failed. Try again.");
-        }
+      if (result?.ok) {
+        router.replace(next);
       } else {
-        setOtpError(data.error || "Invalid or expired code");
+        setOtpError("Invalid or expired code. Try again.");
       }
     } catch {
       setOtpError("Network error. Try again.");
