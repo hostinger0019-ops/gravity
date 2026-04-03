@@ -46,7 +46,7 @@ function LegalLayout({ title, children, active }: { title: string; children: Rea
       </main>
 
       <footer className="border-t border-slate-800 py-8 text-center text-sm text-slate-500">
-        <p>© {new Date().getFullYear()} Agent Forja. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Agent Forja, operated by Tarik Fashion Company. All rights reserved.</p>
         <div className="mt-2 flex justify-center gap-4">
           {NAV_ITEMS.map((item) => (
             <Link key={item.href} href={item.href} className="hover:text-white transition-colors">{item.label}</Link>

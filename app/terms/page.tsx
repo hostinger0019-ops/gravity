@@ -10,7 +10,7 @@ export default function TermsPage() {
     <LegalLayout title="Terms of Service" active="/terms">
       <h2>1. Acceptance of Terms</h2>
       <p>
-        By accessing or using Agent Forja ("Service"), operated by Agent Forja ("Company", "we", "us"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.
+        By accessing or using Agent Forja ("Service"), a product operated by <strong>Tarik Fashion Company</strong> ("Company", "we", "us"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.
       </p>
 
       <h2>2. Description of Service</h2>
@@ -134,7 +134,7 @@ export default function TermsPage() {
 
       <h2>14. Contact</h2>
       <p>
-        For questions about these Terms, contact us at: <strong>support@agentforja.com</strong>
+        Agent Forja is operated by <strong>Tarik Fashion Company</strong>. For questions about these Terms, contact us at: <strong>support@agentforja.com</strong>
       </p>
     </LegalLayout>
   );

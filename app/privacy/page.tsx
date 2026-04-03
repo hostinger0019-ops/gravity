@@ -10,7 +10,7 @@ export default function PrivacyPage() {
     <LegalLayout title="Privacy Policy" active="/privacy">
       <h2>1. Introduction</h2>
       <p>
-        Agent Forja ("we", "us", "our") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, store, and protect your information when you use our AI chatbot platform at <strong>agentforja.com</strong>.
+        Agent Forja ("we", "us", "our"), a product operated by <strong>Tarik Fashion Company</strong>, respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, store, and protect your information when you use our AI chatbot platform at <strong>agentforja.com</strong>.
       </p>
 
       <h2>2. Information We Collect</h2>
@@ -19,7 +19,7 @@ export default function PrivacyPage() {
       <ul>
         <li><strong>Email address</strong> — required for account creation and OTP login</li>
         <li><strong>Name and profile picture</strong> — if you sign in via Google OAuth</li>
-        <li><strong>Payment information</strong> — processed by our payment provider (Stripe/Razorpay); we do not store card details</li>
+        <li><strong>Payment information</strong> — processed by <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener noreferrer">Lemon Squeezy</a>, our Merchant of Record; we do not store card or payment details</li>
       </ul>
 
       <h3>2.2 Chatbot Data</h3>
@@ -48,11 +48,26 @@ export default function PrivacyPage() {
         <li><strong>Legal compliance</strong> — comply with applicable laws and regulations</li>
       </ul>
 
-      <h2>4. Data Storage & Security</h2>
-
-      <h3>4.1 Where We Store Your Data</h3>
+      <h2>4. Administrative Access to Your Data</h2>
       <p>
-        Your data is stored on secure servers. AI processing occurs on our dedicated GPU infrastructure. We use industry-standard security measures including:
+        Our authorized personnel may access your account data, chatbot configurations, knowledge base content, and conversation logs for the following purposes:
+      </p>
+      <ul>
+        <li><strong>Service delivery</strong> — providing, maintaining, and improving the Service</li>
+        <li><strong>Technical support</strong> — diagnosing and resolving technical issues reported by you</li>
+        <li><strong>Abuse prevention</strong> — detecting, investigating, and preventing fraud, spam, or violations of our Terms of Service</li>
+        <li><strong>Plan enforcement</strong> — monitoring usage against subscription limits</li>
+        <li><strong>Legal obligations</strong> — complying with lawful requests from authorities</li>
+      </ul>
+      <p>
+        Access is restricted to employees and contractors who require it to perform their job functions, on a <strong>minimum necessary basis</strong>. We do not access your data for marketing purposes, sell your data, or share it with third parties except as described in this policy.
+      </p>
+
+      <h2>5. Data Storage &amp; Security</h2>
+
+      <h3>5.1 Where We Store Your Data</h3>
+      <p>
+        Your data is stored on secure servers located in <strong>Canada</strong>. AI processing occurs on our dedicated GPU infrastructure hosted in Canada. We use industry-standard security measures including:
       </p>
       <ul>
         <li>HTTPS/TLS encryption for all data in transit</li>
@@ -61,35 +76,38 @@ export default function PrivacyPage() {
         <li>Regular security audits and updates</li>
       </ul>
 
-      <h3>4.2 Data Retention</h3>
+      <h3>5.2 Data Retention</h3>
       <ul>
         <li><strong>Account data</strong> — retained while your account is active, deleted within 30 days of account closure</li>
         <li><strong>Conversation logs</strong> — retained while your chatbot is active; you can delete conversations at any time</li>
         <li><strong>Knowledge base</strong> — retained while your chatbot is active; deleted when the chatbot is removed</li>
       </ul>
 
-      <h2>5. AI Processing & Third-Party Services</h2>
+      <h2>6. AI Processing &amp; Third-Party Services</h2>
 
-      <h3>5.1 AI Model Providers</h3>
+      <h3>6.1 AI Model Providers</h3>
       <p>
         To generate chatbot responses, we may route queries through third-party AI inference providers including:
       </p>
       <ul>
-        <li><strong>Groq</strong> — for fast AI inference</li>
-        <li><strong>Self-hosted models</strong> — running on our dedicated GPU servers</li>
+        <li><strong>Groq</strong> — for fast AI inference (<a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener noreferrer">Groq Privacy Policy</a>)</li>
+        <li><strong>Self-hosted models</strong> — running on our dedicated GPU servers in Canada</li>
       </ul>
       <p>
-        When using third-party providers, your chatbot queries are sent to their servers for processing. These providers have their own privacy policies and do not use your data for training.
+        When using Groq, your chatbot queries are sent to their servers for processing. Groq does not use your data for model training. We do not share your data with any other third parties for AI processing.
       </p>
 
-      <h3>5.2 Other Third-Party Services</h3>
+      <h3>6.2 Other Third-Party Services</h3>
       <ul>
-        <li><strong>Google OAuth</strong> — for social login (governed by Google's Privacy Policy)</li>
-        <li><strong>Hostinger SMTP</strong> — for sending OTP emails</li>
-        <li><strong>Payment processors</strong> — for handling payments (Stripe/Razorpay)</li>
+        <li><strong>Lemon Squeezy</strong> — Merchant of Record for all payments, billing, and tax collection (<a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener noreferrer">Lemon Squeezy Privacy Policy</a>)</li>
+        <li><strong>Google OAuth</strong> — for social login (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>)</li>
+        <li><strong>Hostinger SMTP</strong> — for sending OTP and transactional emails</li>
       </ul>
+      <p>
+        We do not sell, rent, or share your personal data with any third parties for advertising or marketing purposes.
+      </p>
 
-      <h2>6. Your Rights</h2>
+      <h2>7. Your Rights</h2>
       <p>You have the right to:</p>
       <ul>
         <li><strong>Access</strong> — request a copy of your personal data</li>
@@ -102,8 +120,11 @@ export default function PrivacyPage() {
       <p>
         To exercise these rights, contact us at <strong>support@agentforja.com</strong>. We will respond within 30 days.
       </p>
+      <p>
+        If you are located in the European Union, you have additional rights under the GDPR including the right to data portability and the right to lodge a complaint with a supervisory authority. If you are a California resident, you have rights under the CCPA including the right to know what personal information is collected and the right to opt out of the sale of personal information (we do not sell your data).
+      </p>
 
-      <h2>7. Cookies</h2>
+      <h2>8. Cookies</h2>
       <p>We use the following cookies:</p>
       <ul>
         <li><strong>Authentication cookies</strong> — essential for keeping you logged in (next-auth.session-token)</li>
@@ -111,24 +132,24 @@ export default function PrivacyPage() {
       </ul>
       <p>We do not use advertising or third-party tracking cookies.</p>
 
-      <h2>8. Children's Privacy</h2>
+      <h2>9. Children&apos;s Privacy</h2>
       <p>
         Agent Forja is not intended for users under 18 years of age. We do not knowingly collect data from minors. If we learn that a minor has provided personal information, we will delete it promptly.
       </p>
 
-      <h2>9. International Data Transfers</h2>
+      <h2>10. International Data Transfers</h2>
       <p>
-        If you access the Service from outside India, your data may be transferred to and processed in India. By using the Service, you consent to this transfer.
+        Your data is stored and processed on servers located in <strong>Canada</strong>. If you access the Service from outside Canada, your data will be transferred to and processed in Canada. Canada has been recognized by the European Commission as providing an adequate level of data protection. By using the Service, you consent to this transfer.
       </p>
 
-      <h2>10. Changes to This Policy</h2>
+      <h2>11. Changes to This Policy</h2>
       <p>
         We may update this Privacy Policy from time to time. Material changes will be notified via email or in-app notification. The "Last updated" date at the top reflects the most recent revision.
       </p>
 
-      <h2>11. Contact Us</h2>
+      <h2>12. Contact Us</h2>
       <p>
-        For privacy-related questions or requests, contact us at:
+        Agent Forja is operated by <strong>Tarik Fashion Company</strong>. For privacy-related questions or requests, contact us at:
       </p>
       <ul>
         <li><strong>Email:</strong> support@agentforja.com</li>
