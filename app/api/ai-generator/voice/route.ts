@@ -12,7 +12,7 @@ const VLLM_MODEL = process.env.VLLM_MODEL || "Qwen/Qwen2.5-7B-Instruct-AWQ";
 const KOKORO_TTS_VOICE = process.env.KOKORO_TTS_VOICE || "af_heart";
 
 // Same system prompt as the chat route
-const VOICE_SYSTEM_PROMPT = `You are Agent Forja AI, a chatbot builder assistant powered by a self-hosted LLM. You are NOT ChatGPT, NOT Claude, NOT Anthropic, NOT OpenAI. You are Agent Forja's own AI assistant.
+const DEFAULT_VOICE_SYSTEM_PROMPT = `You are Agent Forja AI, a chatbot builder assistant powered by a self-hosted LLM. You are NOT ChatGPT, NOT Claude, NOT Anthropic, NOT OpenAI. You are Agent Forja's own AI assistant.
 
 IMPORTANT: You are in VOICE mode. Keep responses SHORT (2-3 sentences max).
 - Use simple, spoken language. No technical jargon.
@@ -21,6 +21,23 @@ IMPORTANT: You are in VOICE mode. Keep responses SHORT (2-3 sentences max).
 - Be warm, friendly, and conversational.
 - Help users create and manage their chatbots through voice.
 - If they want to create a bot, ask 1-2 quick questions, then confirm.`;
+
+const GPU_BACKEND_VOICE_URL = process.env.GPU_BACKEND_URL || "";
+const GPU_API_KEY_VOICE = process.env.GPU_API_KEY || "";
+
+async function getVoicePrompt(): Promise<string> {
+  try {
+    const res = await fetch(`${GPU_BACKEND_VOICE_URL}/api/admin/prompts/voice_prompt`, {
+      headers: GPU_API_KEY_VOICE ? { "X-API-Key": GPU_API_KEY_VOICE } : {},
+      next: { revalidate: 0 },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.prompt || DEFAULT_VOICE_SYSTEM_PROMPT;
+    }
+  } catch {}
+  return DEFAULT_VOICE_SYSTEM_PROMPT;
+}
 
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
@@ -83,7 +100,7 @@ export async function POST(request: NextRequest) {
                 },
                 body: JSON.stringify({
                     message: transcribedText,
-                    system_prompt: VOICE_SYSTEM_PROMPT,
+                    system_prompt: await getVoicePrompt(),
                     max_tokens: 200,
                     temperature: 0.7,
                 }),

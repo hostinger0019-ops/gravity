@@ -37,7 +37,7 @@ export default function SuperAdminPrompts() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/super-admin/config")
+    fetch("/api/super-admin/prompts")
       .then((r) => r.json())
       .then((data) => {
         if (data.error) {

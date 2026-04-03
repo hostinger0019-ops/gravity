@@ -9,7 +9,7 @@ const VLLM_API_URL = process.env.VLLM_API_URL || "";
 const VLLM_MODEL = process.env.VLLM_MODEL || "Qwen/Qwen2.5-7B-Instruct-AWQ";
 const ORCHESTRATOR_API_KEY = process.env.ORCHESTRATOR_API_KEY || "test-key-1";
 
-const SYSTEM_PROMPT = `You are Agent Forja AI — a friendly, sharp chatbot builder. You help users create custom chatbots through natural conversation.
+const DEFAULT_SYSTEM_PROMPT = `You are Agent Forja AI — a friendly, sharp chatbot builder. You help users create custom chatbots through natural conversation.
 
 ## YOUR PERSONALITY:
 - Warm, human, concise. Not robotic. Not salesy.
@@ -60,6 +60,23 @@ FIELD DEFINITIONS:
 - You are Agent Forja AI. Not ChatGPT, not Claude, not OpenAI. If asked, say "I'm Agent Forja AI, a self-hosted assistant."
 - When updating, read the CURRENT BOT SETTINGS and improve them — don't replace with generic defaults.
 `;
+
+const GPU_BACKEND_URL = process.env.GPU_BACKEND_URL || "";
+const GPU_API_KEY = process.env.GPU_API_KEY || "";
+
+async function getSystemPrompt(): Promise<string> {
+  try {
+    const res = await fetch(`${GPU_BACKEND_URL}/api/admin/prompts/chat_prompt`, {
+      headers: GPU_API_KEY ? { "X-API-Key": GPU_API_KEY } : {},
+      next: { revalidate: 0 },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.prompt || DEFAULT_SYSTEM_PROMPT;
+    }
+  } catch {}
+  return DEFAULT_SYSTEM_PROMPT;
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -139,6 +156,7 @@ When ready to create, ALWAYS use these values:
 When updating, improve upon these existing values. For example if user says "make it more professional", rewrite the EXISTING directive above in a professional tone — don't create a generic one.`;
         }
 
+        const SYSTEM_PROMPT = await getSystemPrompt();
         const llmMessages = [
             { role: "system", content: SYSTEM_PROMPT + templateContext + botSettingsContext },
             ...messages.map((m: { role: string; content: string }) => ({

@@ -562,15 +562,19 @@ export default function Home() {
         audio.play().catch(() => { currentAudio = null; isPlayingAudio = false; playNextAudio(); });
       };
 
-      ws.onopen = () => {
+      ws.onopen = async () => {
         console.log("[Voice] WS connected, streaming 16kHz PCM via AudioWorklet...");
-        // Send config with 16kHz sample rate
-        ws.send(JSON.stringify({
-          type: "config",
-          mode: "stream",
-          sample_rate: 16000,
-          chatbot_id: createdBotRef.current?.id || null,
-          system_prompt: `You are Agent Forja AI, a chatbot builder assistant powered by a self-hosted LLM. You are NOT ChatGPT, NOT Claude, NOT Anthropic, NOT OpenAI. You are Agent Forja's own AI assistant. If asked what model you are, say "I'm Agent Forja AI, a self-hosted assistant." Help users create and manage their chatbots.
+        // Fetch live landing prompt from admin config
+        let landingPrompt = "";
+        try {
+          const promptRes = await fetch("/api/admin-prompt");
+          if (promptRes.ok) {
+            const promptData = await promptRes.json();
+            landingPrompt = promptData.prompt;
+          }
+        } catch {}
+        if (!landingPrompt) {
+          landingPrompt = `You are Agent Forja AI, a chatbot builder assistant powered by a self-hosted LLM. You are NOT ChatGPT, NOT Claude, NOT Anthropic, NOT OpenAI. You are Agent Forja's own AI assistant. If asked what model you are, say "I'm Agent Forja AI, a self-hosted assistant." Help users create and manage their chatbots.
 
 LANGUAGE RULE:
 - ALWAYS reply in English, no matter what language the user speaks.
@@ -617,7 +621,15 @@ CRITICAL RULES:
 - For questions or conversation, respond with plain spoken text only. No JSON.
 - Do NOT mix JSON and text in the same response.
 - NEVER ask for confirmation before making changes. When the user asks to change something, IMMEDIATELY output the update JSON. Do NOT say "Would you like to proceed?" or "Shall I go ahead?" — just do it right away.
-- Always reply in English only.`,
+- Always reply in English only.`;
+        }
+        // Send config with 16kHz sample rate
+        ws.send(JSON.stringify({
+          type: "config",
+          mode: "stream",
+          sample_rate: 16000,
+          chatbot_id: createdBotRef.current?.id || null,
+          system_prompt: landingPrompt,
           history: messages.slice(-20).map(m => ({
             role: m.role,
             content: m.content.replace(/^🎤\s*/, ""),
