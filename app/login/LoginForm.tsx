@@ -10,10 +10,16 @@ export default function LoginForm({ fallbackNext }: { fallbackNext: string }) {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
 
+  // Email OTP state
+  const [email, setEmail] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
   useEffect(() => {
-    // If already authenticated, redirect
     if (status === "authenticated" && session?.user) {
-      // Store user info for legacy components that check localStorage
       localStorage.setItem("user_email", session.user.email || "");
       localStorage.setItem("user_id", (session.user as any).gpu_id || "");
       localStorage.setItem("user_name", session.user.name || "");
@@ -22,9 +28,79 @@ export default function LoginForm({ fallbackNext }: { fallbackNext: string }) {
     }
   }, [status, session, router, next]);
 
+  // Countdown timer for resend
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
   async function handleGoogleSignIn() {
     setLoading(true);
     await signIn("google", { callbackUrl: next });
+  }
+
+  async function handleSendOTP() {
+    if (!email || !email.includes("@")) {
+      setOtpError("Please enter a valid email");
+      return;
+    }
+    setOtpLoading(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setOtpSent(true);
+        setCountdown(60);
+      } else {
+        setOtpError(data.error || "Failed to send code");
+      }
+    } catch {
+      setOtpError("Network error. Try again.");
+    } finally {
+      setOtpLoading(false);
+    }
+  }
+
+  async function handleVerifyOTP() {
+    if (otpCode.length !== 6) {
+      setOtpError("Enter the 6-digit code");
+      return;
+    }
+    setOtpLoading(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code: otpCode }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        // Sign in via NextAuth credentials provider
+        const result = await signIn("credentials", {
+          redirect: false,
+          email,
+          otp: otpCode,
+        });
+        if (result?.ok) {
+          router.replace(next);
+        } else {
+          setOtpError("Login failed. Try again.");
+        }
+      } else {
+        setOtpError(data.error || "Invalid or expired code");
+      }
+    } catch {
+      setOtpError("Network error. Try again.");
+    } finally {
+      setOtpLoading(false);
+    }
   }
 
   if (status === "loading") {
@@ -63,18 +139,72 @@ export default function LoginForm({ fallbackNext }: { fallbackNext: string }) {
         <div className="h-px bg-white/10 flex-1"></div>
       </div>
 
-      {/* Email/password - coming soon */}
-      <div className="space-y-3 opacity-50 pointer-events-none">
-        <div>
-          <label className="block text-sm mb-1">Email</label>
-          <input type="email" className="w-full rounded bg-black/40 border border-white/10 px-3 py-2 outline-none" placeholder="you@example.com" disabled />
+      {/* Email OTP Login */}
+      {!otpSent ? (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSendOTP()}
+              className="w-full rounded bg-black/40 border border-white/10 px-3 py-2.5 outline-none focus:border-blue-500/50 transition-colors"
+              placeholder="you@example.com"
+            />
+          </div>
+          {otpError && <p className="text-red-400 text-sm">{otpError}</p>}
+          <button
+            onClick={handleSendOTP}
+            disabled={otpLoading}
+            className="w-full rounded bg-blue-600 hover:bg-blue-500 py-2.5 font-medium transition-colors disabled:opacity-50"
+          >
+            {otpLoading ? "Sending..." : "Send verification code"}
+          </button>
         </div>
-        <div>
-          <label className="block text-sm mb-1">Password</label>
-          <input type="password" className="w-full rounded bg-black/40 border border-white/10 px-3 py-2 outline-none" placeholder="••••••••" disabled />
+      ) : (
+        <div className="space-y-3">
+          <p className="text-sm text-slate-400">
+            We sent a 6-digit code to <span className="text-white font-medium">{email}</span>
+          </p>
+          <div>
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+              onKeyDown={(e) => e.key === "Enter" && handleVerifyOTP()}
+              className="w-full rounded bg-black/40 border border-white/10 px-3 py-2.5 outline-none focus:border-blue-500/50 transition-colors text-center text-2xl tracking-[0.5em] font-mono"
+              placeholder="000000"
+              autoFocus
+            />
+          </div>
+          {otpError && <p className="text-red-400 text-sm">{otpError}</p>}
+          <button
+            onClick={handleVerifyOTP}
+            disabled={otpLoading || otpCode.length !== 6}
+            className="w-full rounded bg-blue-600 hover:bg-blue-500 py-2.5 font-medium transition-colors disabled:opacity-50"
+          >
+            {otpLoading ? "Verifying..." : "Verify & sign in"}
+          </button>
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => { setOtpSent(false); setOtpCode(""); setOtpError(""); }}
+              className="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              ← Change email
+            </button>
+            <button
+              onClick={handleSendOTP}
+              disabled={countdown > 0 || otpLoading}
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors disabled:text-slate-600 disabled:cursor-not-allowed"
+            >
+              {countdown > 0 ? `Resend in ${countdown}s` : "Resend code"}
+            </button>
+          </div>
         </div>
-        <button disabled className="w-full rounded bg-blue-600/50 py-2 font-medium">Sign in with Email (Coming Soon)</button>
-      </div>
+      )}
 
       <p className="mt-6 text-xs text-center text-slate-500">
         By signing in, you agree to our Terms of Service and Privacy Policy.

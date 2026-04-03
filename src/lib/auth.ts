@@ -1,4 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
 
 const GPU_URL = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || "http://localhost:8000";
@@ -9,38 +10,83 @@ export const authOptions: NextAuthOptions = {
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         }),
+        CredentialsProvider({
+            name: "Email OTP",
+            credentials: {
+                email: { label: "Email", type: "email" },
+                otp: { label: "OTP", type: "text" },
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.otp) return null;
+
+                // Verify OTP via GPU backend
+                try {
+                    const verifyRes = await fetch(`${GPU_URL}/api/otp/verify`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: credentials.email, code: credentials.otp }),
+                    });
+                    const data = await verifyRes.json();
+                    if (!data.valid) return null;
+
+                    // Sync user
+                    const syncRes = await fetch(`${GPU_URL}/api/users/sync`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            email: credentials.email,
+                            name: credentials.email.split("@")[0],
+                            avatar_url: null,
+                        }),
+                    });
+                    const userData = syncRes.ok ? await syncRes.json() : null;
+
+                    return {
+                        id: userData?.id || credentials.email,
+                        email: credentials.email,
+                        name: credentials.email.split("@")[0],
+                        image: null,
+                        gpu_id: userData?.id,
+                        credit_balance: userData?.credit_balance,
+                        plan: userData?.plan,
+                    } as any;
+                } catch (e) {
+                    console.error("[OTP Auth] Error:", e);
+                    return null;
+                }
+            },
+        }),
     ],
     pages: {
         signIn: "/login",
     },
     callbacks: {
         async signIn({ user }) {
-            // Sync user to GPU backend on every login
-            try {
-                const res = await fetch(`${GPU_URL}/api/users/sync`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        email: user.email,
-                        name: user.name,
-                        avatar_url: user.image,
-                    }),
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    // Attach GPU user_id to the user object
-                    (user as any).gpu_id = data.id;
-                    (user as any).credit_balance = data.credit_balance;
-                    (user as any).plan = data.plan;
+            // Sync user to GPU backend on every login (Google flow)
+            if (!(user as any).gpu_id) {
+                try {
+                    const res = await fetch(`${GPU_URL}/api/users/sync`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            email: user.email,
+                            name: user.name,
+                            avatar_url: user.image,
+                        }),
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        (user as any).gpu_id = data.id;
+                        (user as any).credit_balance = data.credit_balance;
+                        (user as any).plan = data.plan;
+                    }
+                } catch (e) {
+                    console.error("[NextAuth] GPU sync failed:", e);
                 }
-            } catch (e) {
-                console.error("[NextAuth] GPU sync failed:", e);
-                // Still allow login even if GPU sync fails
             }
             return true;
         },
         async jwt({ token, user }) {
-            // On first sign-in, persist GPU data in the JWT
             if (user) {
                 token.gpu_id = (user as any).gpu_id;
                 token.credit_balance = (user as any).credit_balance;
@@ -49,7 +95,6 @@ export const authOptions: NextAuthOptions = {
             return token;
         },
         async session({ session, token }) {
-            // Expose GPU data in the client session
             if (session.user) {
                 (session.user as any).gpu_id = token.gpu_id;
                 (session.user as any).credit_balance = token.credit_balance;
@@ -60,3 +105,4 @@ export const authOptions: NextAuthOptions = {
     },
     secret: process.env.NEXTAUTH_SECRET,
 };
+
