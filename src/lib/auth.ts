@@ -3,6 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
 
 const GPU_URL = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || "http://localhost:8000";
+const GPU_API_KEY = process.env.GPU_API_KEY || "";
+
+const gpuHeaders = (): Record<string, string> => ({
+    "Content-Type": "application/json",
+    ...(GPU_API_KEY ? { "X-API-Key": GPU_API_KEY } : {}),
+});
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -19,20 +25,18 @@ export const authOptions: NextAuthOptions = {
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.otp) return null;
 
-                // Verify OTP via GPU backend
                 try {
                     const verifyRes = await fetch(`${GPU_URL}/api/otp/verify`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: gpuHeaders(),
                         body: JSON.stringify({ email: credentials.email, code: credentials.otp }),
                     });
                     const data = await verifyRes.json();
                     if (!data.valid) return null;
 
-                    // Sync user
                     const syncRes = await fetch(`${GPU_URL}/api/users/sync`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: gpuHeaders(),
                         body: JSON.stringify({
                             email: credentials.email,
                             name: credentials.email.split("@")[0],
@@ -62,12 +66,11 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async signIn({ user }) {
-            // Sync user to GPU backend on every login (Google flow)
             if (!(user as any).gpu_id) {
                 try {
                     const res = await fetch(`${GPU_URL}/api/users/sync`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: gpuHeaders(),
                         body: JSON.stringify({
                             email: user.email,
                             name: user.name,
