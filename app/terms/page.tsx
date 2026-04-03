@@ -39,15 +39,21 @@ export default function TermsPage() {
       </ul>
 
       <h2>4. Subscription Plans & Billing</h2>
-      <h3>4.1 Free Tier</h3>
-      <p>New users receive <strong>50 free credits</strong> upon signup. Free credits do not expire but are non-transferable.</p>
 
-      <h3>4.2 Paid Plans</h3>
+      <h3>4.1 Merchant of Record</h3>
       <p>
-        Paid subscriptions are billed according to the plan selected at the time of purchase. Prices are displayed on our <a href="/pricing">Pricing page</a> and may be updated with 30 days' notice.
+        All payments for Agent Forja are processed by <strong>Lemon Squeezy</strong> ("Lemon Squeezy"), which acts as our Merchant of Record. Lemon Squeezy is the authorized reseller of the Service and handles all billing, invoicing, tax collection (including VAT, GST, and sales tax), and payment processing. Your purchase constitutes a transaction between you and Lemon Squeezy, governed by <a href="https://www.lemonsqueezy.com/terms" target="_blank" rel="noopener noreferrer">Lemon Squeezy's Terms of Service</a>.
       </p>
 
-      <h3>4.3 Lifetime Deals</h3>
+      <h3>4.2 Free Tier</h3>
+      <p>New users receive <strong>50 free credits</strong> upon signup. Free credits do not expire but are non-transferable.</p>
+
+      <h3>4.3 Paid Plans</h3>
+      <p>
+        Paid subscriptions are billed according to the plan selected at the time of purchase. Prices are displayed on our <a href="/pricing">Pricing page</a> and may be updated with 30 days' notice. All prices are exclusive of taxes; Paddle will add applicable taxes at checkout.
+      </p>
+
+      <h3>4.4 Lifetime Deals</h3>
       <p>
         Lifetime deal purchases grant access to the Service for the lifetime of the product, subject to fair usage limits specified in the plan. "Lifetime" refers to the operational life of the Service, not the purchaser's lifetime.
       </p>
@@ -121,9 +127,9 @@ export default function TermsPage() {
         We may update these Terms at any time. Material changes will be communicated via email or in-app notification. Continued use after changes constitutes acceptance.
       </p>
 
-      <h2>13. Governing Law</h2>
+      <h2>13. Governing Law & Disputes</h2>
       <p>
-        These Terms are governed by the laws of India. Any disputes shall be resolved in the courts of New Delhi, India.
+        These Terms are governed by and construed in accordance with applicable law. For any billing or payment disputes, Lemon Squeezy's dispute resolution process applies as they are the Merchant of Record. For all other disputes related to the use of the Service, the parties agree to first attempt resolution through good-faith negotiation. If unresolved, disputes shall be submitted to binding arbitration.
       </p>
 
       <h2>14. Contact</h2>

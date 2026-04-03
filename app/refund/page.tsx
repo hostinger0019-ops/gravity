@@ -10,7 +10,7 @@ export default function RefundPage() {
     <LegalLayout title="Refund Policy" active="/refund">
       <h2>1. Overview</h2>
       <p>
-        We want you to be fully satisfied with Agent Forja. This Refund Policy outlines the conditions under which refunds are available for our products and services.
+        We want you to be fully satisfied with Agent Forja. All payments are processed by <strong>Lemon Squeezy</strong>, our Merchant of Record. Refund requests are handled in accordance with this policy and processed through Lemon Squeezy.
       </p>
 
       <h2>2. Subscription Plans</h2>
