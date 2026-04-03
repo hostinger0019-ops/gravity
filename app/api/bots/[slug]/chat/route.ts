@@ -88,6 +88,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
     // GPU STREAM PROXY — all AI logic handled by GPU backend
     // ============================================================================
     const gpuUrl = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || "http://localhost:8000";
+    const gpuApiKey = process.env.GPU_API_KEY || "";
 
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -99,7 +100,10 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
           // system prompt, Groq streaming, and conversation logging
           const gpuRes = await fetch(`${gpuUrl}/api/chat/stream`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(gpuApiKey ? { "X-API-Key": gpuApiKey } : {}),
+            },
             body: JSON.stringify({
               chatbot_id: bot.id,
               messages: messages.map(m => ({ role: m.role, content: String(m.content) })),

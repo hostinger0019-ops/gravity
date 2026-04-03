@@ -29,8 +29,12 @@ export async function GET(req: NextRequest) {
     }
 
     // Connect to GPU SSE stream
+    const gpuApiKey = process.env.GPU_API_KEY || "";
     const gpuRes = await fetch(`${GPU_URL}/api/scrape/stream/${jobId}`, {
-        headers: { Accept: "text/event-stream" },
+        headers: {
+            Accept: "text/event-stream",
+            ...(gpuApiKey ? { "X-API-Key": gpuApiKey } : {}),
+        },
     });
 
     if (!gpuRes.ok) {

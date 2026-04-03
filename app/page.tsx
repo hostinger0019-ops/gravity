@@ -170,8 +170,9 @@ export default function Home() {
       saveLocalSessions(updated);
       return updated;
     });
-    // Save new messages to backend
-    if (userEmail && messages.length > lastSavedMsgCount.current && !isLoading) {
+    // Save new messages to backend (only if activeSessionId is a valid UUID from backend)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (userEmail && activeSessionId && isUUID.test(activeSessionId) && messages.length > lastSavedMsgCount.current && !isLoading) {
       const newMsgs = messages.slice(lastSavedMsgCount.current);
       lastSavedMsgCount.current = messages.length;
       fetch(`/api/builder-sessions/${activeSessionId}/messages`, {

@@ -42,7 +42,7 @@ export default function AdminNav() {
                     {/* Logo/Brand */}
                     <Link href="/admin/chatbots" className="flex items-center gap-2 font-bold text-lg">
                         <span className="text-2xl">🤖</span>
-                        <span className="hidden sm:inline">Institute AI Chatbots</span>
+                        <span className="hidden sm:inline">Agent Forja</span>
                     </Link>
 
                     {/* Navigation */}

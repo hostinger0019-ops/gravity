@@ -70,7 +70,7 @@ export default function ChatbotsListPage() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/admin/ai"
+              href="/"
               className="inline-flex items-center gap-2 rounded-xl bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-gray-200 transition-all duration-200"
             >
               ✨ Create with AI

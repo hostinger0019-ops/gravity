@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { gpu } from "@/lib/gpuBackend";
 
 const GPU_URL = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || "http://localhost:8000";
+const GPU_API_KEY = process.env.GPU_API_KEY || "";
 
 /** Resolve the user's gpu_id from session, syncing if needed */
 async function getGpuId(session: any): Promise<string | null> {
@@ -12,7 +13,10 @@ async function getGpuId(session: any): Promise<string | null> {
         try {
             const res = await fetch(`${GPU_URL}/api/users/sync`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(GPU_API_KEY ? { "X-API-Key": GPU_API_KEY } : {}),
+                },
                 body: JSON.stringify({
                     email: session.user.email,
                     name: session.user.name || "",
