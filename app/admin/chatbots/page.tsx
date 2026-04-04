@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Fetch through Next.js API proxy (server-side) instead of direct GPU call
@@ -46,8 +48,16 @@ const ExternalLinkIcon = () => (
 );
 
 export default function ChatbotsListPage() {
+  const router = useRouter();
   const qc = useQueryClient();
   const { data: bots, isLoading } = useQuery({ queryKey: ["chatbots"], queryFn: getChatbots });
+
+  // Redirect new users to onboarding wizard
+  useEffect(() => {
+    if (!isLoading && bots && bots.length === 0 && !localStorage.getItem("onboarding_completed")) {
+      router.replace("/admin/onboarding");
+    }
+  }, [isLoading, bots, router]);
 
   const del = useMutation({
     mutationFn: softDeleteChatbot,
