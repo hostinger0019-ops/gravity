@@ -30,7 +30,13 @@ async function createChatbot(payload: any) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to create chatbot");
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 403 && data.error?.toLowerCase().includes("limit")) {
+      throw new Error(`LIMIT_REACHED: ${data.error}`);
+    }
+    throw new Error(data.error || "Failed to create chatbot");
+  }
   return res.json();
 }
 
@@ -126,6 +132,9 @@ export function BuilderPage({ id }: { id?: string }) {
     },
     onError: (_err, _patch, ctx) => {
       if (ctx?.prev) qc.setQueryData(["chatbot", draftId || id], ctx.prev);
+      if (_err instanceof Error && _err.message.startsWith("LIMIT_REACHED:")) {
+        alert(_err.message.replace("LIMIT_REACHED: ", "") + "\n\nVisit the Pricing page to upgrade.");
+      }
     },
     onSuccess: (rec) => {
       if (rec) qc.setQueryData(["chatbot", rec.id], rec);

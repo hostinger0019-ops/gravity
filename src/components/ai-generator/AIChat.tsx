@@ -277,11 +277,15 @@ Be warm, welcoming, and knowledgeable about the restaurant. If someone wants to 
             const data = await response.json();
 
             if (data.error) {
+                // Check if it's a chatbot limit error
+                const isLimitError = response.status === 403 || (data.error && data.error.toLowerCase().includes("limit"));
                 setMessages(prev => {
                     const newMsgs = [...prev];
                     newMsgs[newMsgs.length - 1] = {
                         role: "assistant",
-                        content: "❌ Error creating chatbot: " + data.error
+                        content: isLimitError
+                            ? `⚠️ **Chatbot Limit Reached**\n\n${data.error}\n\n🚀 [Upgrade your plan](/pricing) to create more chatbots and unlock additional features!`
+                            : "❌ Error creating chatbot: " + data.error
                     };
                     return newMsgs;
                 });

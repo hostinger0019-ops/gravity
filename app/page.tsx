@@ -275,7 +275,8 @@ export default function Home() {
       const res = await fetch("/api/ai-generator/create", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ config }) });
       const data = await res.json();
       if (data.error) {
-        setMessages((prev) => { const m = [...prev]; m[m.length - 1] = { role: "assistant", content: "❌ Error: " + data.error }; return m; });
+        const isLimitError = res.status === 403 || (data.error && data.error.toLowerCase().includes("limit"));
+        setMessages((prev) => { const m = [...prev]; m[m.length - 1] = { role: "assistant", content: isLimitError ? `⚠️ **Chatbot Limit Reached**\n\n${data.error}\n\n🚀 [Upgrade your plan](/pricing) to create more chatbots!` : "❌ Error: " + data.error }; return m; });
         return;
       }
       if (data.chatbot) {

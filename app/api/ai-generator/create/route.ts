@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { gpu } from "@/lib/gpuBackend";
 
 const GPU_URL = process.env.GPU_BACKEND_URL || process.env.NEXT_PUBLIC_GPU_BACKEND_URL || "http://localhost:8000";
+const GPU_API_KEY = process.env.GPU_API_KEY || "";
 
 export async function POST(req: NextRequest) {
     try {
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
             try {
                 const syncRes = await fetch(`${GPU_URL}/api/users/sync`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", ...(GPU_API_KEY ? { "X-API-Key": GPU_API_KEY } : {}) },
                     body: JSON.stringify({
                         email: session.user.email,
                         name: session.user.name || "",
@@ -59,6 +60,23 @@ export async function POST(req: NextRequest) {
         }
 
         console.log("Creating chatbot with ownerId:", ownerId);
+
+        // ── Chatbot limit enforcement ──
+        // Check if user has reached the chatbot limit for their plan
+        try {
+            const currentBots = await gpu.chatbots.list({ ownerId });
+            const planData = await gpu.userPlan.get(ownerId).catch(() => ({ plan: { chatbot_limit: 1 } }));
+            const limit = planData?.plan?.chatbot_limit ?? 1;
+
+            if (limit > 0 && currentBots.length >= limit) {
+                return NextResponse.json(
+                    { error: `Chatbot limit reached. Your plan allows ${limit} chatbot(s). Upgrade your plan to create more.` },
+                    { status: 403 }
+                );
+            }
+        } catch (limitErr) {
+            console.warn("[ai-generator/create] Limit check failed, allowing creation:", limitErr);
+        }
 
         // Generate a unique slug
         const baseSlug = config.slug || config.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'bot';
