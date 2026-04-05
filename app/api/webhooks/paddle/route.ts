@@ -1,17 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
-// Map Paddle price IDs to internal plan IDs
-const PRICE_TO_PLAN: Record<string, string> = {
-  // LTD Starter ($99)
-  "pri_01knejrb72m2jkfs6n50t3yc4v": "ltd_starter",
-  // Add more price IDs here as you create products:
-  // "pri_xxx": "ltd_reseller_pro",
-  // "pri_yyy": "ltd_agency_elite",
-  // "pri_zzz": "starter",
-  // "pri_www": "pro",
-};
-
 const GPU_BACKEND_URL = process.env.GPU_BACKEND_URL || "http://69.19.137.175:8000";
 const PADDLE_WEBHOOK_SECRET = process.env.PADDLE_WEBHOOK_SECRET || "";
 
@@ -22,7 +11,7 @@ const PADDLE_WEBHOOK_SECRET = process.env.PADDLE_WEBHOOK_SECRET || "";
 function verifyPaddleSignature(rawBody: string, signature: string): boolean {
   if (!PADDLE_WEBHOOK_SECRET) {
     console.warn("[Paddle Webhook] No PADDLE_WEBHOOK_SECRET set — skipping verification");
-    return true; // Allow in dev if no secret configured
+    return true;
   }
 
   try {
@@ -36,7 +25,6 @@ function verifyPaddleSignature(rawBody: string, signature: string): boolean {
     const h1 = parts["h1"];
     if (!ts || !h1) return false;
 
-    // Build the signed payload: timestamp:body
     const signedPayload = `${ts}:${rawBody}`;
     const expectedSignature = crypto
       .createHmac("sha256", PADDLE_WEBHOOK_SECRET)
@@ -58,9 +46,10 @@ function verifyPaddleSignature(rawBody: string, signature: string): boolean {
  */
 async function findUserByEmail(email: string): Promise<string | null> {
   try {
-    const res = await fetch(`${GPU_BACKEND_URL}/api/users/by-email?email=${encodeURIComponent(email)}`, {
-      headers: { "X-API-Key": "test-key-1" },
-    });
+    const res = await fetch(
+      `${GPU_BACKEND_URL}/api/users/by-email?email=${encodeURIComponent(email)}`,
+      { headers: { "X-API-Key": "test-key-1" } }
+    );
     if (!res.ok) return null;
     const data = await res.json();
     return data?.id || data?.user_id || null;
@@ -104,36 +93,30 @@ export async function POST(req: NextRequest) {
 
     console.log(`[Paddle Webhook] Received: ${eventType}`);
 
-    // Handle transaction completed (one-time payment or first subscription payment)
+    // Handle transaction completed
     if (eventType === "transaction.completed") {
       const data = event.data;
-      const customerEmail = data?.customer?.email || data?.checkout?.customer?.email;
-      const items = data?.items || [];
+
+      // Get customer email
+      const customerEmail =
+        data?.custom_data?.user_email ||
+        data?.customer?.email ||
+        data?.checkout?.customer?.email;
+
+      // Get plan ID from custom_data (set during transaction creation)
+      const planId = data?.custom_data?.plan_id || "ltd_starter";
 
       if (!customerEmail) {
-        console.error("[Paddle Webhook] No customer email in transaction");
+        console.error("[Paddle Webhook] No customer email found");
         return NextResponse.json({ error: "No customer email" }, { status: 400 });
       }
 
-      console.log(`[Paddle Webhook] Payment from: ${customerEmail}`);
-
-      // Find the plan from the price ID
-      let planId = "free";
-      for (const item of items) {
-        const priceId = item?.price?.id;
-        if (priceId && PRICE_TO_PLAN[priceId]) {
-          planId = PRICE_TO_PLAN[priceId];
-          break;
-        }
-      }
-
-      console.log(`[Paddle Webhook] Assigning plan: ${planId} to ${customerEmail}`);
+      console.log(`[Paddle Webhook] Payment from: ${customerEmail}, Plan: ${planId}`);
 
       // Find user by email
       const userId = await findUserByEmail(customerEmail);
       if (!userId) {
-        console.error(`[Paddle Webhook] User not found for email: ${customerEmail}`);
-        // Still return 200 so Paddle doesn't retry — log for manual resolution
+        console.error(`[Paddle Webhook] User not found: ${customerEmail}`);
         return NextResponse.json({
           received: true,
           warning: "User not found — needs manual plan assignment",
@@ -163,11 +146,10 @@ export async function POST(req: NextRequest) {
     // Handle subscription events
     if (eventType === "subscription.created" || eventType === "subscription.updated") {
       console.log(`[Paddle Webhook] Subscription event: ${eventType}`, event.data?.id);
-      // For now, log it. Subscription handling can be added later.
       return NextResponse.json({ received: true, event: eventType });
     }
 
-    // Accept all other events silently
+    // Accept all other events
     return NextResponse.json({ received: true, event: eventType });
   } catch (err) {
     console.error("[Paddle Webhook] Error:", err);

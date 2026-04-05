@@ -1,5 +1,6 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 declare global {
@@ -29,7 +30,7 @@ const plans = [
     popular: false,
     gradient: "from-slate-800 to-slate-900",
     border: "border-white/10",
-    paddlePriceId: "pri_01knejrb72m2jkfs6n50t3yc4v",
+    planId: "starter",
   },
   {
     name: "Pro",
@@ -53,7 +54,7 @@ const plans = [
     popular: true,
     gradient: "from-blue-600 to-violet-600",
     border: "border-blue-500/50",
-    paddlePriceId: "pri_01knejrb72m2jkfs6n50t3yc4v",
+    planId: "pro",
   },
   {
     name: "Enterprise",
@@ -77,7 +78,7 @@ const plans = [
     popular: false,
     gradient: "from-slate-800 to-slate-900",
     border: "border-white/10",
-    paddlePriceId: "",
+    planId: "",
   },
 ];
 
@@ -105,6 +106,10 @@ const faqs = [
 ];
 
 export default function PricingPage() {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email || "";
+  const [loading, setLoading] = useState<string | null>(null);
+
   useEffect(() => {
     // Initialize Paddle.js
     const interval = setInterval(() => {
@@ -113,7 +118,6 @@ export default function PricingPage() {
           token: "live_a35bedce7f295b00afc720a33e5",
           eventCallback: function (data: any) {
             if (data.name === "checkout.completed") {
-              // Payment successful — redirect to dashboard
               console.log("[Paddle] Payment completed!", data);
               setTimeout(() => {
                 window.location.href = "/admin/chatbots?upgraded=true";
@@ -127,18 +131,45 @@ export default function PricingPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const openCheckout = (priceId: string) => {
-    if (!priceId) {
+  const openCheckout = async (planId: string) => {
+    if (!planId) {
       window.location.href = "mailto:support@agentforja.com?subject=Enterprise Plan Inquiry";
       return;
     }
-    if (window.Paddle) {
-      window.Paddle.Checkout.open({
-        items: [{ priceId, quantity: 1 }],
-        settings: {
-          successUrl: "https://agentforja.com/admin/chatbots?upgraded=true",
-        },
+
+    const email = userEmail || prompt("Enter your email to continue:");
+    if (!email) return;
+
+    setLoading(planId);
+    try {
+      // Create transaction via our API (dynamic pricing)
+      const res = await fetch("/api/paddle/create-transaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId, email }),
       });
+
+      const data = await res.json();
+      if (!res.ok || !data.transactionId) {
+        alert("Failed to create checkout. Please try again.");
+        console.error("[Paddle] Transaction error:", data);
+        return;
+      }
+
+      // Open Paddle checkout with the transaction ID
+      if (window.Paddle) {
+        window.Paddle.Checkout.open({
+          transactionId: data.transactionId,
+          settings: {
+            successUrl: "https://agentforja.com/admin/chatbots?upgraded=true",
+          },
+        });
+      }
+    } catch (err) {
+      console.error("[Paddle] Checkout error:", err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(null);
     }
   };
 
@@ -217,14 +248,15 @@ export default function PricingPage() {
               </div>
 
               <button
-                onClick={() => openCheckout(plan.paddlePriceId)}
+                onClick={() => openCheckout(plan.planId)}
+                disabled={loading === plan.planId}
                 className={`w-full py-3 rounded-xl font-medium text-center transition-all mb-8 block cursor-pointer ${
                   plan.popular
                     ? "bg-white text-black hover:bg-gray-100"
                     : "bg-white/10 text-white hover:bg-white/20"
-                }`}
+                } ${loading === plan.planId ? "opacity-50 cursor-wait" : ""}`}
               >
-                {plan.cta}
+                {loading === plan.planId ? "Processing..." : plan.cta}
               </button>
 
               <div className="space-y-3 flex-1">
