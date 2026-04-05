@@ -573,7 +573,7 @@ const Pricing = () => {
         <>
         {/* Trust banner — shows when checkout opens */}
         {showTrust && (
-            <div className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-center py-3 px-4 text-sm font-medium shadow-lg animate-pulse">
+            <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-center py-3 px-4 text-sm font-medium shadow-lg">
                 🔒 Secure checkout powered by <strong>Paddle.com</strong> · Agent Forja is a product by <strong>Tarik</strong>
             </div>
         )}
