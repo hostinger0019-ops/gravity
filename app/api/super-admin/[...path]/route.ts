@@ -37,11 +37,22 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     const searchParams = req.nextUrl.searchParams.toString();
     const fullUrl = searchParams ? `${url}?${searchParams}` : url;
 
+    console.log(`[SuperAdmin] ${req.method} ${fullUrl} (API key: ${GPU_API_KEY ? "set" : "MISSING"})`);
+
     const res = await fetch(fullUrl, fetchOptions);
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const text = await res.text();
+
+    console.log(`[SuperAdmin] Response ${res.status}: ${text.substring(0, 200)}`);
+
+    // Try to parse as JSON, fallback to wrapping in error object
+    try {
+      const data = JSON.parse(text);
+      return NextResponse.json(data, { status: res.status });
+    } catch {
+      return NextResponse.json({ error: text || "Unknown backend error" }, { status: res.status });
+    }
   } catch (error: any) {
-    console.error("[SuperAdmin API]", error);
+    console.error("[SuperAdmin API] Connection error:", error?.message || error);
     return NextResponse.json({ error: "Backend unavailable" }, { status: 502 });
   }
 }
