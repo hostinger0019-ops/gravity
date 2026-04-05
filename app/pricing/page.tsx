@@ -22,7 +22,7 @@ const plans = [
     popular: false,
     gradient: "from-slate-800 to-slate-900",
     border: "border-white/10",
-    checkoutUrl: "https://agentforja.lemonsqueezy.com/buy/REPLACE_STARTER_ID?embed=1",
+    checkoutUrl: "https://agentforja.lemonsqueezy.com/checkout/buy/3b7c2406-e181-42d0-bc11-954a3211ca21?embed=1",
   },
   {
     name: "Pro",
@@ -46,7 +46,7 @@ const plans = [
     popular: true,
     gradient: "from-blue-600 to-violet-600",
     border: "border-blue-500/50",
-    checkoutUrl: "https://agentforja.lemonsqueezy.com/buy/REPLACE_PRO_ID?embed=1",
+    checkoutUrl: "https://agentforja.lemonsqueezy.com/checkout/buy/3b7c2406-e181-42d0-bc11-954a3211ca21?embed=1",
   },
   {
     name: "Enterprise",
