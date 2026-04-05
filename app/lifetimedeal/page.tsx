@@ -2,6 +2,12 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+declare global {
+    interface Window {
+        Paddle?: any;
+    }
+}
 import {
     Zap,
     ArrowRight,
@@ -432,9 +438,28 @@ const BuiltFor = () => {
 
 /* ═══ Pricing ═══ */
 const Pricing = () => {
+    const [loading, setLoading] = useState<string | null>(null);
+
     const plans = [
         {
+            name: "Test Deal",
+            planId: "ltd_test",
+            price: "$10",
+            oldPrice: "$99",
+            description: "Test plan — for demo/testing only",
+            badge: "TEST",
+            highlighted: false,
+            features: [
+                "2,000 messages per month",
+                "3 AI chatbots included",
+                "Standard AI model",
+                "White-label branding",
+                "For testing only",
+            ],
+        },
+        {
             name: "Starter",
+            planId: "ltd_starter",
             price: "$99",
             oldPrice: "$588",
             description: "Perfect for getting started with AI chatbots",
@@ -454,6 +479,7 @@ const Pricing = () => {
         },
         {
             name: "Reseller Pro",
+            planId: "ltd_reseller_pro",
             price: "$199",
             oldPrice: "$1,188",
             description: "Smarter AI with higher limits for growing agencies",
@@ -475,6 +501,7 @@ const Pricing = () => {
         },
         {
             name: "Agency Elite",
+            planId: "ltd_agency_elite",
             price: "$399",
             oldPrice: "$2,388",
             description: "Maximum power with your own API keys",
@@ -498,6 +525,42 @@ const Pricing = () => {
         },
     ];
 
+    const openCheckout = async (planId: string) => {
+        const email = prompt("Enter your email to purchase:");
+        if (!email) return;
+
+        setLoading(planId);
+        try {
+            const res = await fetch("/api/paddle/create-transaction", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ planId, email }),
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.transactionId) {
+                alert("Failed to create checkout. Please try again.");
+                console.error("[Paddle] Transaction error:", data);
+                return;
+            }
+
+            if (window.Paddle) {
+                window.Paddle.Checkout.open({
+                    transactionId: data.transactionId,
+                    customer: { email },
+                    settings: {
+                        successUrl: "https://agentforja.com/admin/chatbots?upgraded=true",
+                    },
+                });
+            }
+        } catch (err) {
+            console.error("[Paddle] Checkout error:", err);
+            alert("Something went wrong. Please try again.");
+        } finally {
+            setLoading(null);
+        }
+    };
+
     return (
         <section id="pricing" className="relative py-24 px-6">
             <div className="max-w-7xl mx-auto">
@@ -508,7 +571,7 @@ const Pricing = () => {
                     <p className="text-lg text-zinc-400">No subscriptions. No per-seat pricing. Choose your tier.</p>
                 </motion.div>
 
-                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto items-start">
                     {plans.map((plan, index) => (
                         <motion.div
                             key={index}
@@ -531,6 +594,8 @@ const Pricing = () => {
                                     <div className={`text-white text-xs font-semibold px-4 py-1.5 rounded-full inline-flex items-center gap-2 mb-5 ${
                                         plan.highlighted
                                             ? "bg-gradient-to-r from-violet-600 to-fuchsia-600"
+                                            : plan.badge === "TEST"
+                                            ? "bg-gradient-to-r from-rose-600 to-red-600"
                                             : "bg-gradient-to-r from-amber-600 to-orange-600"
                                     }`}>
                                         <Zap className="w-3.5 h-3.5" />
@@ -546,16 +611,17 @@ const Pricing = () => {
                                 </div>
                                 <p className="text-zinc-500 text-sm mb-8">One-time payment · Lifetime access</p>
 
-                                <a
-                                    href="#"
-                                    className={`w-full block text-center font-bold py-4 rounded-xl transition-all hover:scale-[1.02] text-base mb-6 ${
+                                <button
+                                    onClick={() => openCheckout(plan.planId)}
+                                    disabled={loading === plan.planId}
+                                    className={`w-full block text-center font-bold py-4 rounded-xl transition-all hover:scale-[1.02] text-base mb-6 cursor-pointer ${
                                         plan.highlighted
                                             ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:shadow-lg hover:shadow-violet-500/40"
                                             : "bg-white text-zinc-900 hover:bg-zinc-100"
-                                    }`}
+                                    } ${loading === plan.planId ? "opacity-50 cursor-wait" : ""}`}
                                 >
-                                    Get {plan.name} — {plan.price}
-                                </a>
+                                    {loading === plan.planId ? "Processing..." : `Get ${plan.name} — ${plan.price}`}
+                                </button>
 
                                 <ul className="space-y-3">
                                     {plan.features.map((f, i) => (
@@ -805,6 +871,27 @@ const Footer = () => (
 
 /* ═══ Main Page ═══ */
 export default function LifetimeDealPage() {
+    useEffect(() => {
+        // Initialize Paddle.js
+        const interval = setInterval(() => {
+            if (window.Paddle) {
+                window.Paddle.Initialize({
+                    token: "live_a35bedce7f295b00afc720a33e5",
+                    eventCallback: function (data: any) {
+                        if (data.name === "checkout.completed") {
+                            console.log("[Paddle] Payment completed!", data);
+                            setTimeout(() => {
+                                window.location.href = "/admin/chatbots?upgraded=true";
+                            }, 2000);
+                        }
+                    },
+                });
+                clearInterval(interval);
+            }
+        }, 200);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div className="bg-black text-zinc-200 min-h-screen">
             <Header />

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 const PLANS: Record<string, { name: string; priceCents: number; category: string }> = {
   starter:          { name: "Starter Plan",          priceCents: 4900,  category: "monthly" },
   pro:              { name: "Pro Plan",              priceCents: 14900, category: "monthly" },
+  ltd_test:         { name: "LTD Test ($10)",        priceCents: 1000,  category: "lifetime" },
   ltd_starter:      { name: "LTD Starter",           priceCents: 9900,  category: "lifetime" },
   ltd_reseller_pro: { name: "LTD Reseller Pro",      priceCents: 19900, category: "lifetime" },
   ltd_agency_elite: { name: "LTD Agency Elite",      priceCents: 39900, category: "lifetime" },
