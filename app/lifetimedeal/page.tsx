@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 
 declare global {
@@ -525,8 +526,11 @@ const Pricing = () => {
         },
     ];
 
+    const { data: session } = useSession();
+    const userEmail = session?.user?.email || "";
+
     const openCheckout = async (planId: string) => {
-        const email = prompt("Enter your email to purchase:");
+        const email = userEmail || prompt("Enter your email to purchase:");
         if (!email) return;
 
         setLoading(planId);
