@@ -160,6 +160,7 @@ export default function PricingPage() {
       if (window.Paddle) {
         window.Paddle.Checkout.open({
           transactionId: data.transactionId,
+          customer: { email: email },
           settings: {
             successUrl: "https://agentforja.com/admin/chatbots?upgraded=true",
           },
