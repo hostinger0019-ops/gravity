@@ -571,12 +571,6 @@ const Pricing = () => {
 
     return (
         <>
-        {/* Trust banner — shows when checkout opens */}
-        {showTrust && (
-            <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-center py-3 px-4 text-sm font-medium shadow-lg">
-                🔒 Secure checkout powered by <strong>Paddle.com</strong> · Agent Forja is a product by <strong>Tarik</strong>
-            </div>
-        )}
         <section id="pricing" className="relative py-24 px-6">
             <div className="max-w-7xl mx-auto">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
@@ -654,6 +648,13 @@ const Pricing = () => {
                             </div>
                         </motion.div>
                     ))}
+                </div>
+
+                {/* Trust signal */}
+                <div className="text-center mt-10 pt-6 border-t border-zinc-800/50">
+                    <p className="text-zinc-500 text-xs tracking-wide">
+                        🔒 All transactions are securely processed by <span className="text-zinc-400">Paddle.com</span> · Agent Forja is a product by <span className="text-zinc-400">Tarik</span>
+                    </p>
                 </div>
             </div>
         </section>

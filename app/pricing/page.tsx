@@ -184,12 +184,6 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Trust banner — shows when checkout opens */}
-      {showTrust && (
-        <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-center py-3 px-4 text-sm font-medium shadow-lg">
-          🔒 Secure checkout powered by <strong>Paddle.com</strong> · Agent Forja is a product by <strong>Tarik</strong>
-        </div>
-      )}
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-2">
@@ -286,6 +280,13 @@ export default function PricingPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Trust signal */}
+        <div className="text-center mt-10 pt-6 border-t border-white/5">
+          <p className="text-slate-500 text-xs tracking-wide">
+            🔒 All transactions are securely processed by <span className="text-slate-400">Paddle.com</span> · Agent Forja is a product by <span className="text-slate-400">Tarik</span>
+          </p>
         </div>
       </div>
 
