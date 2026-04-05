@@ -2,6 +2,47 @@
 
 import { useEffect, useState } from "react";
 
+interface LlmConfig {
+  landing_provider: string;
+  landing_model: string;
+  chatbot_provider: string;
+  chatbot_model: string;
+}
+
+const PROVIDERS: Record<string, { label: string; models: { value: string; label: string }[] }> = {
+  groq: {
+    label: "Groq (Free, Ultra-fast)",
+    models: [
+      { value: "moonshotai/kimi-k2-instruct-0905", label: "Kimi K2 (Default)" },
+      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B" },
+      { value: "qwen-qwq-32b", label: "Qwen QwQ 32B" },
+      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B (Fast)" },
+    ],
+  },
+  openai: {
+    label: "OpenAI (Paid)",
+    models: [
+      { value: "gpt-4o-mini", label: "GPT-4o Mini" },
+      { value: "gpt-4o", label: "GPT-4o" },
+      { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
+    ],
+  },
+  claude: {
+    label: "Claude (Paid)",
+    models: [
+      { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
+      { value: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku" },
+    ],
+  },
+};
+
+const DEFAULT_LLM: LlmConfig = {
+  landing_provider: "groq",
+  landing_model: "moonshotai/kimi-k2-instruct-0905",
+  chatbot_provider: "groq",
+  chatbot_model: "moonshotai/kimi-k2-instruct-0905",
+};
+
 interface PricingPlan {
   id: string;
   name: string;
@@ -77,6 +118,11 @@ export default function SuperAdminSettings() {
   const [saved, setSaved] = useState(false);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
 
+  // LLM Config
+  const [llm, setLlm] = useState<LlmConfig>(DEFAULT_LLM);
+  const [llmSaving, setLlmSaving] = useState(false);
+  const [llmSaved, setLlmSaved] = useState(false);
+
   useEffect(() => {
     // Try to load from backend
     fetch("/api/super-admin/config?key=pricing")
@@ -85,6 +131,18 @@ export default function SuperAdminSettings() {
         if (data.value) {
           try {
             setPlans(JSON.parse(data.value));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    // Load LLM config
+    fetch("/api/super-admin/config?key=llm_config")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.value) {
+          try {
+            setLlm({ ...DEFAULT_LLM, ...JSON.parse(data.value) });
           } catch {}
         }
       })
@@ -103,6 +161,29 @@ export default function SuperAdminSettings() {
       setTimeout(() => setSaved(false), 3000);
     } catch {}
     setSaving(false);
+  };
+
+  const handleSaveLlm = async () => {
+    setLlmSaving(true);
+    try {
+      await fetch("/api/super-admin/config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "llm_config", value: JSON.stringify(llm) }),
+      });
+      setLlmSaved(true);
+      setTimeout(() => setLlmSaved(false), 3000);
+    } catch {}
+    setLlmSaving(false);
+  };
+
+  const handleProviderChange = (target: "landing" | "chatbot", provider: string) => {
+    const firstModel = PROVIDERS[provider]?.models[0]?.value || "";
+    setLlm((prev) => ({
+      ...prev,
+      [`${target}_provider`]: provider,
+      [`${target}_model`]: firstModel,
+    }));
   };
 
   const updatePlan = (id: string, field: string, value: string) => {
@@ -171,6 +252,92 @@ export default function SuperAdminSettings() {
           <div className="flex justify-between py-2 border-b border-slate-800">
             <span className="text-slate-400">Database</span>
             <span className="text-white">PostgreSQL (GPU Server)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* LLM Configuration */}
+      <div className="bg-[#0a0f1e] border border-slate-800 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-semibold">LLM Configuration</h2>
+            <p className="text-slate-400 text-xs mt-1">Choose AI provider and model for each chat flow</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {llmSaved && <span className="text-green-400 text-xs">✅ Saved</span>}
+            <button
+              onClick={handleSaveLlm}
+              disabled={llmSaving}
+              className="px-5 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg text-sm font-medium transition-colors"
+            >
+              {llmSaving ? "Saving..." : "Save LLM Config"}
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Landing Page (Bot Builder) */}
+          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-slate-300 mb-1">Landing Page (Bot Builder)</h3>
+            <p className="text-xs text-slate-500 mb-4">Model used for the AI chatbot builder on the main page</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Provider</label>
+                <select
+                  value={llm.landing_provider}
+                  onChange={(e) => handleProviderChange("landing", e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                >
+                  {Object.entries(PROVIDERS).map(([key, p]) => (
+                    <option key={key} value={key}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Model</label>
+                <select
+                  value={llm.landing_model}
+                  onChange={(e) => setLlm((prev) => ({ ...prev, landing_model: e.target.value }))}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                >
+                  {PROVIDERS[llm.landing_provider]?.models.map((m) => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Public Chatbot */}
+          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-slate-300 mb-1">Public Chatbots</h3>
+            <p className="text-xs text-slate-500 mb-4">Model used for all user-created chatbots</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Provider</label>
+                <select
+                  value={llm.chatbot_provider}
+                  onChange={(e) => handleProviderChange("chatbot", e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                >
+                  {Object.entries(PROVIDERS).map(([key, p]) => (
+                    <option key={key} value={key}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Model</label>
+                <select
+                  value={llm.chatbot_model}
+                  onChange={(e) => setLlm((prev) => ({ ...prev, chatbot_model: e.target.value }))}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                >
+                  {PROVIDERS[llm.chatbot_provider]?.models.map((m) => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
         </div>
       </div>
