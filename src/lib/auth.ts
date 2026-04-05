@@ -95,6 +95,28 @@ export const authOptions: NextAuthOptions = {
                 token.credit_balance = (user as any).credit_balance;
                 token.plan = (user as any).plan;
             }
+
+            // Refresh plan & credits from GPU on every token refresh (real-time admin updates)
+            if (token.email) {
+                try {
+                    const res = await fetch(`${GPU_URL}/api/users/sync`, {
+                        method: "POST",
+                        headers: gpuHeaders(),
+                        body: JSON.stringify({
+                            email: token.email,
+                            name: token.name || "",
+                            avatar_url: token.picture || null,
+                        }),
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        token.gpu_id = data.id || token.gpu_id;
+                        token.credit_balance = data.credit_balance;
+                        token.plan = data.plan;
+                    }
+                } catch {}
+            }
+
             return token;
         },
         async session({ session, token }) {
