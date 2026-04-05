@@ -15,7 +15,7 @@ import {
 type Msg = { role: "user" | "assistant"; content: string };
 
 // Demo chatbot slug
-const DEMO_SLUG = "Agent Forja-demo";
+const DEMO_SLUG = "agentforja-demo-mnm40cly";
 
 export default function DemoPage() {
     const [started, setStarted] = useState(false);
