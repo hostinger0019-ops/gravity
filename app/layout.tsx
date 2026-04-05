@@ -23,6 +23,7 @@ export default function RootLayout({
         <AuthProvider>
           <QueryProvider>{children}</QueryProvider>
         </AuthProvider>
+        <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
       </body>
     </html>
   );

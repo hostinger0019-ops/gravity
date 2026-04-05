@@ -22,6 +22,7 @@ const plans = [
     popular: false,
     gradient: "from-slate-800 to-slate-900",
     border: "border-white/10",
+    checkoutUrl: "https://agentforja.lemonsqueezy.com/buy/REPLACE_STARTER_ID?embed=1",
   },
   {
     name: "Pro",
@@ -45,6 +46,7 @@ const plans = [
     popular: true,
     gradient: "from-blue-600 to-violet-600",
     border: "border-blue-500/50",
+    checkoutUrl: "https://agentforja.lemonsqueezy.com/buy/REPLACE_PRO_ID?embed=1",
   },
   {
     name: "Enterprise",
@@ -64,10 +66,11 @@ const plans = [
       "On-premise deployment",
       "24/7 phone support",
     ],
-    cta: "Let's Talk",
+    cta: "Contact Sales",
     popular: false,
     gradient: "from-slate-800 to-slate-900",
     border: "border-white/10",
+    checkoutUrl: "mailto:support@agentforja.com?subject=Enterprise Plan Inquiry",
   },
 ];
 
@@ -169,16 +172,16 @@ export default function PricingPage() {
                 <div className="text-sm text-blue-400 mt-1 font-medium">{plan.credits} credits/month</div>
               </div>
 
-              <Link
-                href={plan.name === "Enterprise" ? "mailto:support@tarik.business?subject=Enterprise Plan" : "/login"}
-                className={`w-full py-3 rounded-xl font-medium text-center transition-all mb-8 block ${
+              <a
+                href={plan.checkoutUrl}
+                className={`lemonsqueezy-button w-full py-3 rounded-xl font-medium text-center transition-all mb-8 block ${
                   plan.popular
                     ? "bg-white text-black hover:bg-gray-100"
                     : "bg-white/10 text-white hover:bg-white/20"
                 }`}
               >
                 {plan.cta}
-              </Link>
+              </a>
 
               <div className="space-y-3 flex-1">
                 {plan.features.map((feature, i) => (
