@@ -1,5 +1,12 @@
 "use client";
+import { useEffect } from "react";
 import Link from "next/link";
+
+declare global {
+  interface Window {
+    Paddle?: any;
+  }
+}
 
 const plans = [
   {
@@ -22,7 +29,7 @@ const plans = [
     popular: false,
     gradient: "from-slate-800 to-slate-900",
     border: "border-white/10",
-    checkoutUrl: "https://agentforja.lemonsqueezy.com/checkout/buy/3b7c2406-e181-42d0-bc11-954a3211ca21?embed=1",
+    paddlePriceId: "pri_01knejrb72m2jkfs6n50t3yc4v",
   },
   {
     name: "Pro",
@@ -46,7 +53,7 @@ const plans = [
     popular: true,
     gradient: "from-blue-600 to-violet-600",
     border: "border-blue-500/50",
-    checkoutUrl: "https://agentforja.lemonsqueezy.com/checkout/buy/3b7c2406-e181-42d0-bc11-954a3211ca21?embed=1",
+    paddlePriceId: "pri_01knejrb72m2jkfs6n50t3yc4v",
   },
   {
     name: "Enterprise",
@@ -70,7 +77,7 @@ const plans = [
     popular: false,
     gradient: "from-slate-800 to-slate-900",
     border: "border-white/10",
-    checkoutUrl: "mailto:support@agentforja.com?subject=Enterprise Plan Inquiry",
+    paddlePriceId: "",
   },
 ];
 
@@ -98,6 +105,29 @@ const faqs = [
 ];
 
 export default function PricingPage() {
+  useEffect(() => {
+    // Initialize Paddle.js
+    const interval = setInterval(() => {
+      if (window.Paddle) {
+        window.Paddle.Initialize({ token: "live_a35bedce7f295b00afc720a33e5" });
+        clearInterval(interval);
+      }
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
+
+  const openCheckout = (priceId: string) => {
+    if (!priceId) {
+      window.location.href = "mailto:support@agentforja.com?subject=Enterprise Plan Inquiry";
+      return;
+    }
+    if (window.Paddle) {
+      window.Paddle.Checkout.open({
+        items: [{ priceId, quantity: 1 }],
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Nav */}
@@ -172,16 +202,16 @@ export default function PricingPage() {
                 <div className="text-sm text-blue-400 mt-1 font-medium">{plan.credits} credits/month</div>
               </div>
 
-              <a
-                href={plan.checkoutUrl}
-                className={`lemonsqueezy-button w-full py-3 rounded-xl font-medium text-center transition-all mb-8 block ${
+              <button
+                onClick={() => openCheckout(plan.paddlePriceId)}
+                className={`w-full py-3 rounded-xl font-medium text-center transition-all mb-8 block cursor-pointer ${
                   plan.popular
                     ? "bg-white text-black hover:bg-gray-100"
                     : "bg-white/10 text-white hover:bg-white/20"
                 }`}
               >
                 {plan.cta}
-              </a>
+              </button>
 
               <div className="space-y-3 flex-1">
                 {plan.features.map((feature, i) => (

@@ -23,7 +23,7 @@ export default function RootLayout({
         <AuthProvider>
           <QueryProvider>{children}</QueryProvider>
         </AuthProvider>
-        <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
+        <script src="https://cdn.paddle.com/paddle/v2/paddle.js" defer></script>
       </body>
     </html>
   );
