@@ -109,7 +109,18 @@ export default function PricingPage() {
     // Initialize Paddle.js
     const interval = setInterval(() => {
       if (window.Paddle) {
-        window.Paddle.Initialize({ token: "live_a35bedce7f295b00afc720a33e5" });
+        window.Paddle.Initialize({
+          token: "live_a35bedce7f295b00afc720a33e5",
+          eventCallback: function (data: any) {
+            if (data.name === "checkout.completed") {
+              // Payment successful — redirect to dashboard
+              console.log("[Paddle] Payment completed!", data);
+              setTimeout(() => {
+                window.location.href = "/admin/chatbots?upgraded=true";
+              }, 2000);
+            }
+          },
+        });
         clearInterval(interval);
       }
     }, 200);
@@ -124,6 +135,9 @@ export default function PricingPage() {
     if (window.Paddle) {
       window.Paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
+        settings: {
+          successUrl: "https://agentforja.com/admin/chatbots?upgraded=true",
+        },
       });
     }
   };
