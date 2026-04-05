@@ -440,6 +440,7 @@ const BuiltFor = () => {
 /* ═══ Pricing ═══ */
 const Pricing = () => {
     const [loading, setLoading] = useState<string | null>(null);
+    const [showTrust, setShowTrust] = useState(false);
 
     const plans = [
         {
@@ -534,6 +535,7 @@ const Pricing = () => {
         if (!email) return;
 
         setLoading(planId);
+        setShowTrust(true);
         try {
             const res = await fetch("/api/paddle/create-transaction", {
                 method: "POST",
@@ -545,6 +547,7 @@ const Pricing = () => {
             if (!res.ok || !data.transactionId) {
                 alert("Failed to create checkout. Please try again.");
                 console.error("[Paddle] Transaction error:", data);
+                setShowTrust(false);
                 return;
             }
 
@@ -560,12 +563,20 @@ const Pricing = () => {
         } catch (err) {
             console.error("[Paddle] Checkout error:", err);
             alert("Something went wrong. Please try again.");
+            setShowTrust(false);
         } finally {
             setLoading(null);
         }
     };
 
     return (
+        <>
+        {/* Trust banner — shows when checkout opens */}
+        {showTrust && (
+            <div className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-center py-3 px-4 text-sm font-medium shadow-lg animate-pulse">
+                🔒 Secure checkout powered by <strong>Paddle.com</strong> · Agent Forja is a product by <strong>Tarik</strong>
+            </div>
+        )}
         <section id="pricing" className="relative py-24 px-6">
             <div className="max-w-7xl mx-auto">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
@@ -646,6 +657,7 @@ const Pricing = () => {
                 </div>
             </div>
         </section>
+        </>
     );
 };
 

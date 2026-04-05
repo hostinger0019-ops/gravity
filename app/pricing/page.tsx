@@ -109,6 +109,7 @@ export default function PricingPage() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
   const [loading, setLoading] = useState<string | null>(null);
+  const [showTrust, setShowTrust] = useState(false);
 
   useEffect(() => {
     // Initialize Paddle.js
@@ -119,9 +120,13 @@ export default function PricingPage() {
           eventCallback: function (data: any) {
             if (data.name === "checkout.completed") {
               console.log("[Paddle] Payment completed!", data);
+              setShowTrust(false);
               setTimeout(() => {
                 window.location.href = "/admin/chatbots?upgraded=true";
               }, 2000);
+            }
+            if (data.name === "checkout.closed") {
+              setShowTrust(false);
             }
           },
         });
@@ -141,6 +146,7 @@ export default function PricingPage() {
     if (!email) return;
 
     setLoading(planId);
+    setShowTrust(true);
     try {
       // Create transaction via our API (dynamic pricing)
       const res = await fetch("/api/paddle/create-transaction", {
@@ -153,6 +159,7 @@ export default function PricingPage() {
       if (!res.ok || !data.transactionId) {
         alert("Failed to create checkout. Please try again.");
         console.error("[Paddle] Transaction error:", data);
+        setShowTrust(false);
         return;
       }
 
@@ -169,6 +176,7 @@ export default function PricingPage() {
     } catch (err) {
       console.error("[Paddle] Checkout error:", err);
       alert("Something went wrong. Please try again.");
+      setShowTrust(false);
     } finally {
       setLoading(null);
     }
@@ -176,6 +184,12 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Trust banner — shows when checkout opens */}
+      {showTrust && (
+        <div className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-center py-3 px-4 text-sm font-medium shadow-lg animate-pulse">
+          🔒 Secure checkout powered by <strong>Paddle.com</strong> · Agent Forja is a product by <strong>Tarik</strong>
+        </div>
+      )}
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-2">
