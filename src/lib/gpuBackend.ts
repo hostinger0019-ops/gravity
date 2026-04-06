@@ -411,6 +411,28 @@ const reservations = {
 };
 
 // ---------------------------------------------------------------------------
+// Bookings (universal appointment system)
+// ---------------------------------------------------------------------------
+
+const bookings = {
+    async list(botId?: string, opts?: { status?: string; dateFrom?: string; dateTo?: string; page?: number; pageSize?: number }): Promise<{ bookings: any[]; total: number }> {
+        return gpuFetch(`/bookings${qs({ botId, status: opts?.status, dateFrom: opts?.dateFrom, dateTo: opts?.dateTo, page: opts?.page, pageSize: opts?.pageSize })}`);
+    },
+    async getById(id: string): Promise<any> { return gpuFetch(`/bookings/${id}`); },
+    async create(payload: any): Promise<any> { return gpuFetch("/bookings", { method: "POST", body: JSON.stringify(payload) }); },
+    async update(id: string, patch: any): Promise<any> { return gpuFetch(`/bookings/${id}`, { method: "PATCH", body: JSON.stringify(patch) }); },
+    async delete(id: string): Promise<void> { await gpuFetch(`/bookings/${id}`, { method: "DELETE" }); },
+    async getAvailability(botId: string, date: string, service?: string): Promise<any> {
+        return gpuFetch(`/bookings/availability${qs({ botId, date, service })}`);
+    },
+    settings: {
+        async get(chatbotId: string): Promise<any> { return gpuFetch(`/bookings/settings/${chatbotId}`); },
+        async update(chatbotId: string, patch: any): Promise<any> { return gpuFetch(`/bookings/settings/${chatbotId}`, { method: "PUT", body: JSON.stringify(patch) }); },
+    },
+    async stats(chatbotId: string): Promise<any> { return gpuFetch(`/bookings/stats/${chatbotId}`); },
+};
+
+// ---------------------------------------------------------------------------
 // Leads
 // ---------------------------------------------------------------------------
 
@@ -800,6 +822,7 @@ export const gpu = {
     userPlan,
     usage,
     addons,
+    bookings,
 };
 
 export default gpu;
