@@ -478,7 +478,7 @@ export default function ModernChatUI({
             <div className="flex items-end gap-2">
               <input
                 className="flex-1 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-base outline-none focus:ring-2 focus:ring-sky-300"
-                placeholder={tagline || "Ask your AI Teacher…"}
+                placeholder={tagline || "Ask me Anything…"}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={onKeyDown}

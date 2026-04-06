@@ -62,7 +62,7 @@ export async function createChatbot(payload: Omit<ChatbotDraft, "slug"> & { name
     ],
     tagline: (payload as any).tagline && String((payload as any).tagline).trim().length > 0
       ? String((payload as any).tagline).trim()
-      : "Ask your AI Teacher…",
+      : "Ask me Anything…",
     rules: base.rules ?? [],
     integrations: base.integrations ?? {
       google_drive: false,

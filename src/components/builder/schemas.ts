@@ -81,7 +81,7 @@ export const settingsSchema = z.object({
   name: z.string().min(3).max(60),
   slug: z.string().min(3).regex(/^[a-z0-9-]+$/),
   is_public: z.boolean().default(false),
-  tagline: z.string().optional().default("Ask your AI Teacher…"),
+  tagline: z.string().optional().default("Ask me Anything…"),
 });
 
 export type InstructionsValues = z.infer<typeof instructionsSchema>;

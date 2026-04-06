@@ -1335,7 +1335,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         {/* Composer */}
         <form onSubmit={onSubmit} className={`p-2 md:p-3 ${bgPanel} border-t ${borderClr}`}>
           <div className="flex items-center gap-2">
-            <input ref={inputRef} className={`flex-1 min-w-0 border ${borderInput} ${light ? "bg-white text-black" : "bg-[#141414] text-white"} rounded-xl px-2 sm:px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 text-sm transition-shadow focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} placeholder={tagline || "Ask your AI Teacher…"} />
+            <input ref={inputRef} className={`flex-1 min-w-0 border ${borderInput} ${light ? "bg-white text-black" : "bg-[#141414] text-white"} rounded-xl px-2 sm:px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 text-sm transition-shadow focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} placeholder={tagline || "Ask me Anything…"} />
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
             <button
               type="button"

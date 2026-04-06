@@ -175,7 +175,7 @@ export function BuilderPage({ id }: { id?: string }) {
         "Help me write a message",
         "Explain this concept simply",
       ],
-      tagline: (record as any)?.tagline || "Ask your AI Teacher�",
+      tagline: (record as any)?.tagline || "Ask me Anything…",
       // Normalize rules: if it's an array, null, or missing settings, convert to proper object structure
       rules: (() => {
         const defaultRules = { settings: { auto_suggest: true, wait_for_reply: false, knowledge_fallback_mode: "ai" as const, knowledge_fallback_message: "", allow_image_plus_text: true }, kv: [] };
