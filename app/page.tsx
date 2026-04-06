@@ -58,7 +58,7 @@ export default function Home() {
   // Keep ref in sync with state for WebSocket closures
   useEffect(() => { createdBotRef.current = createdBot; }, [createdBot]);
 
-  const SUBTITLE = "Create AI chatbots and voicebots by chatting with AI";
+  const SUBTITLE = "Create AI chat agents and voice agents by chatting with AI";
 
   // ── Multi-session storage (GPU backend + localStorage fallback) ──
   type BuilderSession = { id: string; title: string; messages: Message[]; createdBot: CreatedChatbot | null; createdAtIndex: number | null; updatedAt: string };
