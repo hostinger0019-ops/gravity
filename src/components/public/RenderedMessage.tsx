@@ -345,10 +345,11 @@ function normalizeMath(raw: string): string {
   let txt = raw;
   // 0a) Escape currency dollar signs BEFORE any math processing
   // Matches $123, $99.99, $1,000 — real currency, not LaTeX
+  // Preserve any trailing space/punctuation so adjacent markdown (* for bold/italic) stays separated
   const currencyPlaceholders: string[] = [];
   txt = txt.replace(/\$(\d[\d,]*\.?\d*)/g, (_m, amount) => {
     const i = currencyPlaceholders.push(amount) - 1;
-    return `@@CURRENCY_${i}@@`;
+    return `@@CURRENCY_${i}@@ `;
   });
   // 0) Protect fenced code blocks and inline code from any math normalization
   type CodeFenceEntry = { lang: string; body: string };
@@ -511,7 +512,7 @@ function normalizeMath(raw: string): string {
   });
   txt = txt.replace(/@@INLINE_CODE_(\d+)@@/g, (_m, d) => '`' + (inlineCodePlaceholders[Number(d)] || '') + '`');
   // Restore currency dollar signs
-  txt = txt.replace(/@@CURRENCY_(\d+)@@/g, (_m, d) => '$' + (currencyPlaceholders[Number(d)] || ''));
+  txt = txt.replace(/@@CURRENCY_(\d+)@@\s?/g, (_m, d) => '$' + (currencyPlaceholders[Number(d)] || ''));
   return txt;
 }
 

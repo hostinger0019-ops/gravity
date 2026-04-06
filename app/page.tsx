@@ -962,11 +962,11 @@ CRITICAL RULES:
             </div>
           )}
           {inChat && (
-            <button className="btn-login" onClick={resetChat}>✨ New Bot</button>
+            <button className="btn-login" onClick={resetChat}>✨ New Agent</button>
           )}
           {authStatus === "authenticated" && session?.user ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <a href="/admin/chatbots" className="btn-login" style={{ fontSize: "13px" }}>My Bots</a>
+              <a href="/admin/chatbots" className="btn-login" style={{ fontSize: "13px" }}>My Agents</a>
               <div style={{ position: "relative" }}>
                 <button
                   onClick={() => setShowAccountMenu(!showAccountMenu)}
@@ -1069,7 +1069,7 @@ CRITICAL RULES:
                       {/* Quick links */}
                       <div style={{ padding: "6px" }}>
                         {[
-                          { label: "My Bots", icon: "🤖", href: "/admin/chatbots" },
+                          { label: "My Agents", icon: "🤖", href: "/admin/chatbots" },
                           { label: "Billing & Plans", icon: "💳", href: "/admin/billing" },
                           { label: "Admin Dashboard", icon: "📊", href: "/admin/conversations" },
                         ].map((item) => (
@@ -1155,7 +1155,7 @@ CRITICAL RULES:
               <textarea
                 ref={textareaRef}
                 className="prompt-textarea"
-                placeholder="Ask Agent Forja to create a chatbot for my..."
+                placeholder="Ask Agent Forja to create an agent for my..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
@@ -1397,7 +1397,7 @@ CRITICAL RULES:
             <textarea
               ref={textareaRef}
               className="prompt-textarea"
-              placeholder="Ask Agent Forja to create a chatbot for my..."
+              placeholder="Ask Agent Forja to create an agent for my..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
@@ -1474,17 +1474,17 @@ CRITICAL RULES:
       {/* Suggestion Chips — only on landing */}
       {!inChat && (
         <div className="suggestions">
-          <button className="chip" onClick={() => handleChip("Create a customer support chatbot for my e-commerce store")}>
-            🛒 E-commerce support bot
+          <button className="chip" onClick={() => handleChip("Create a customer support agent for my e-commerce store")}>
+            🛒 E-commerce support agent
           </button>
-          <button className="chip" onClick={() => handleChip("Build a reservation booking bot for my restaurant")}>
-            🍽️ Restaurant booking bot
+          <button className="chip" onClick={() => handleChip("Build a reservation booking agent for my restaurant")}>
+            🍽️ Restaurant booking agent
           </button>
-          <button className="chip" onClick={() => handleChip("Create a lead generation chatbot for my SaaS product")}>
-            🎯 Lead gen bot
+          <button className="chip" onClick={() => handleChip("Create a lead generation agent for my SaaS product")}>
+            🎯 Lead gen agent
           </button>
-          <button className="chip" onClick={() => handleChip("Build a voice-enabled FAQ bot from my website")}>
-            🎙️ Voice FAQ bot
+          <button className="chip" onClick={() => handleChip("Build a voice-enabled FAQ agent from my website")}>
+            🎙️ Voice FAQ agent
           </button>
         </div>
       )}

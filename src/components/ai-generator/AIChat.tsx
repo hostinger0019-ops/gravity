@@ -796,7 +796,7 @@ Be warm, welcoming, and knowledgeable about the restaurant. If someone wants to 
                             onKeyDown={handleKeyDown}
                             placeholder={createdBot
                                 ? "Ask me to make changes... (e.g., 'Change the greeting to...' or 'Make the tone more friendly')"
-                                : "Describe your chatbot... (e.g., 'I need a support bot for my shoe store at www.myshoes.com')"
+                                : "Describe your agent... (e.g., 'I need a support agent for my shoe store at www.myshoes.com')"
                             }
                             rows={2}
                             disabled={isLoading || isCreating}

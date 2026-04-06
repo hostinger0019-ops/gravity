@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 const devNoAuth = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true";
 
 const navItems = [
-    { href: "/admin/chatbots", label: "My Chatbots", icon: "🤖" },
+    { href: "/admin/chatbots", label: "My Agents", icon: "🤖" },
     { href: "/admin/ai", label: "AI Generator", icon: "✨" },
 ];
 

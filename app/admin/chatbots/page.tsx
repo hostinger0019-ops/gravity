@@ -74,7 +74,7 @@ export default function ChatbotsListPage() {
               <BotIcon />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">My Chatbots</h1>
+              <h1 className="text-3xl font-bold text-white">My Agents</h1>
               <p className="text-gray-500">Create and manage your AI assistants</p>
             </div>
           </div>
