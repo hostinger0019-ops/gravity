@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -11,153 +11,227 @@ const PLANS: Record<string, {
   monthlyEquiv: number;
   features: string[];
   badge: string;
-  badgeColor: string;
+  gradient: string;
+  glow: string;
 }> = {
   ltd_starter: {
     name: "Starter",
     price: 99,
     monthlyEquiv: 49,
-    features: ["5 AI Agents", "10,000 credits", "Website embed", "Lead capture", "Free updates forever", "Priority support"],
-    badge: "Lifetime Starter",
-    badgeColor: "from-blue-500 to-cyan-400",
+    features: ["5 AI Agents", "10,000 Credits", "Website Embed", "Lead Capture", "Lifetime Updates", "Priority Support"],
+    badge: "LIFETIME STARTER",
+    gradient: "from-sky-400 via-blue-500 to-indigo-500",
+    glow: "rgba(56,189,248,0.15)",
   },
   ltd_pro: {
     name: "Pro",
     price: 199,
     monthlyEquiv: 149,
-    features: ["Unlimited AI Agents", "50,000 credits", "Instagram integration", "Voice agent", "Advanced CRM", "Free updates forever"],
-    badge: "Lifetime Pro",
-    badgeColor: "from-purple-500 to-pink-500",
+    features: ["Unlimited Agents", "50,000 Credits", "Instagram Bot", "Voice Agent", "Advanced CRM", "Lifetime Updates"],
+    badge: "LIFETIME PRO",
+    gradient: "from-violet-400 via-purple-500 to-fuchsia-500",
+    glow: "rgba(167,139,250,0.15)",
   },
   ltd_agency: {
     name: "Agency",
     price: 399,
     monthlyEquiv: 149,
-    features: ["Unlimited AI Agents", "200,000 credits", "White-label branding", "Resell to clients", "All integrations", "Dedicated manager"],
-    badge: "Lifetime Agency",
-    badgeColor: "from-amber-400 to-orange-500",
+    features: ["Unlimited Agents", "200,000 Credits", "White-Label", "Resell Access", "All Integrations", "Dedicated Manager"],
+    badge: "LIFETIME AGENCY",
+    gradient: "from-amber-300 via-orange-400 to-rose-400",
+    glow: "rgba(251,191,36,0.15)",
   },
 };
 
-/* ─── Confetti ─── */
-interface Particle { x: number; y: number; vx: number; vy: number; color: string; size: number; rotation: number; rotSpeed: number; opacity: number; }
+/* ─── Floating Particles ─── */
+function FloatingOrbs({ color }: { color: string }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full blur-3xl opacity-20"
+          style={{
+            width: 120 + i * 40,
+            height: 120 + i * 40,
+            background: color,
+            left: `${15 + i * 14}%`,
+            top: `${10 + (i % 3) * 30}%`,
+            animation: `float${i % 3} ${8 + i * 2}s ease-in-out infinite`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes float0 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-20px) scale(1.1); } }
+        @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-20px,30px) scale(0.9); } }
+        @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1.05); } 50% { transform: translate(15px,15px) scale(0.95); } }
+      `}</style>
+    </div>
+  );
+}
 
-function ConfettiCanvas() {
+/* ─── Confetti Burst ─── */
+function ConfettiBurst() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
     if (!ctx) return;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const colors = ["#FFD700","#FF6B6B","#4ECDC4","#45B7D1","#96CEB4","#FFEAA7","#DDA0DD","#FF8C00","#00CED1","#FF69B4","#7B68EE","#00FA9A"];
-    const particles: Particle[] = [];
-    for (let i = 0; i < 120; i++) {
-      particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height, vx: (Math.random() - 0.5) * 4, vy: Math.random() * 3 + 2, color: colors[Math.floor(Math.random() * colors.length)], size: Math.random() * 7 + 3, rotation: Math.random() * 360, rotSpeed: (Math.random() - 0.5) * 10, opacity: 1 });
-    }
-    let frame = 0;
-    const maxFrames = 160;
-    function animate() {
-      if (!ctx || !canvas) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      frame++;
-      const fadeStart = maxFrames * 0.6;
-      for (const p of particles) {
-        p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.rotation += p.rotSpeed;
-        if (frame > fadeStart) p.opacity = Math.max(0, 1 - (frame - fadeStart) / (maxFrames - fadeStart));
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((p.rotation * Math.PI) / 180); ctx.globalAlpha = p.opacity; ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.4); ctx.restore();
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    const cols = ["#FFD700","#FF6B6B","#4ECDC4","#45B7D1","#DDA0DD","#FF8C00","#7B68EE","#00FA9A"];
+    const ps: { x:number;y:number;vx:number;vy:number;c:string;s:number;r:number;rs:number;o:number }[] = [];
+    for (let i = 0; i < 100; i++) ps.push({ x: c.width/2, y: c.height/2, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12-4, c: cols[~~(Math.random()*cols.length)], s: Math.random()*6+3, r: Math.random()*360, rs: (Math.random()-0.5)*12, o: 1 });
+    let f = 0;
+    function draw() {
+      if (!ctx||!c) return;
+      ctx.clearRect(0,0,c.width,c.height);
+      f++;
+      for (const p of ps) {
+        p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; p.r+=p.rs; p.vx*=0.99;
+        if (f>60) p.o=Math.max(0,p.o-0.02);
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r*Math.PI/180); ctx.globalAlpha=p.o; ctx.fillStyle=p.c;
+        ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); ctx.restore();
       }
-      if (frame < maxFrames) requestAnimationFrame(animate);
+      if (f<150) requestAnimationFrame(draw);
     }
-    animate();
-    const h = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-    window.addEventListener("resize", h);
-    return () => window.removeEventListener("resize", h);
+    draw();
   }, []);
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 50 }} />;
 }
 
-/* ─── Main Content ─── */
-function SuccessContent() {
-  const searchParams = useSearchParams();
-  const planId = searchParams.get("plan") || "ltd_starter";
-  const plan = PLANS[planId] || PLANS.ltd_starter;
-  const savings = plan.monthlyEquiv * 12 * 3 - plan.price;
+/* ─── Shimmer Border Card ─── */
+function ShimmerCard({ children, gradient }: { children: React.ReactNode; gradient: string }) {
+  return (
+    <div className="relative rounded-2xl p-[1.5px] overflow-hidden">
+      <div className={`absolute inset-0 bg-gradient-to-r ${gradient}`} style={{ animation: "shimmer 3s linear infinite" }} />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" style={{ animation: "shimmerSlide 2.5s ease-in-out infinite", transform: "skewX(-20deg)" }} />
+      <div className="relative rounded-2xl bg-[#0a0e1a]/95 backdrop-blur-xl">
+        {children}
+      </div>
+      <style>{`
+        @keyframes shimmerSlide { 0% { transform: translateX(-200%) skewX(-20deg); } 100% { transform: translateX(200%) skewX(-20deg); } }
+      `}</style>
+    </div>
+  );
+}
 
-  const [mounted, setMounted] = useState(false);
-  const [checkShow, setCheckShow] = useState(false);
-  useEffect(() => { setTimeout(() => setMounted(true), 100); setTimeout(() => setCheckShow(true), 300); }, []);
+/* ─── Main ─── */
+function SuccessContent() {
+  const sp = useSearchParams();
+  const planId = sp.get("plan") || "ltd_starter";
+  const plan = PLANS[planId] || PLANS.ltd_starter;
+  const savings = plan.monthlyEquiv * 36 - plan.price;
+
+  const [m, setM] = useState(false);
+  const [ck, setCk] = useState(false);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => { setTimeout(() => setM(true), 100); setTimeout(() => setCk(true), 400); }, []);
+  useEffect(() => {
+    const dur = 1800, st = Date.now();
+    const t = setInterval(() => {
+      const p = Math.min((Date.now() - st) / dur, 1);
+      setCount(Math.round((1 - Math.pow(1 - p, 3)) * savings));
+      if (p >= 1) clearInterval(t);
+    }, 16);
+    return () => clearInterval(t);
+  }, [savings]);
 
   return (
-    <div className="h-screen relative overflow-hidden flex flex-col" style={{ background: "linear-gradient(135deg, #030712 0%, #0a0f1e 40%, #0d1117 100%)", fontFamily: "'Inter', sans-serif" }}>
-      <ConfettiCanvas />
+    <div className="h-screen relative overflow-hidden flex flex-col items-center justify-center" style={{ background: "#050810", fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      <ConfettiBurst />
+      <FloatingOrbs color={plan.glow} />
 
-      {/* Background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] opacity-20 pointer-events-none" style={{ background: "radial-gradient(ellipse, rgba(168,85,247,0.4) 0%, rgba(59,130,246,0.2) 40%, transparent 70%)" }} />
+      {/* Radial glow behind content */}
+      <div className="absolute w-[500px] h-[500px] rounded-full opacity-30 pointer-events-none" style={{ background: `radial-gradient(circle, ${plan.glow} 0%, transparent 70%)`, top: "20%", left: "50%", transform: "translateX(-50%)" }} />
 
-      <div className="relative z-10 flex-1 flex flex-col justify-center max-w-2xl mx-auto px-4 w-full">
+      <div className="relative z-10 w-full max-w-lg px-5">
 
-        {/* Check + Title Row */}
-        <div className="text-center mb-5 transition-all duration-700" style={{ opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(20px)" }}>
-          {/* Animated Check */}
-          <div className="relative mx-auto mb-4" style={{ width: 64, height: 64 }}>
-            <div className="absolute inset-0 rounded-full transition-all duration-1000" style={{ background: "radial-gradient(circle, rgba(74,222,128,0.3) 0%, transparent 70%)", transform: checkShow ? "scale(1.5)" : "scale(0)", opacity: checkShow ? 1 : 0 }} />
-            <div className="absolute inset-0 rounded-full border-[3px] border-green-400 flex items-center justify-center transition-all duration-700" style={{ transform: checkShow ? "scale(1)" : "scale(0)", opacity: checkShow ? 1 : 0, boxShadow: checkShow ? "0 0 30px rgba(74,222,128,0.4)" : "none" }}>
-              <svg viewBox="0 0 24 24" width={32} height={32}><path d="M5 13l4 4L19 7" fill="none" stroke="#4ade80" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" style={{ strokeDasharray: 30, strokeDashoffset: checkShow ? 0 : 30, transition: "stroke-dashoffset 0.6s ease 0.5s" }} /></svg>
+        {/* ✓ Check */}
+        <div className="flex justify-center mb-5">
+          <div className="relative" style={{ width: 56, height: 56 }}>
+            <div className="absolute inset-0 rounded-full transition-all duration-1000" style={{ background: "radial-gradient(circle, rgba(74,222,128,0.35) 0%, transparent 70%)", transform: ck ? "scale(2)" : "scale(0)", opacity: ck ? 1 : 0 }} />
+            <div className="absolute inset-0 rounded-full border-2 border-emerald-400/80 flex items-center justify-center transition-all duration-700 backdrop-blur-sm" style={{ transform: ck ? "scale(1)" : "scale(0)", opacity: ck ? 1 : 0, boxShadow: "0 0 20px rgba(52,211,153,0.3), inset 0 0 20px rgba(52,211,153,0.1)" }}>
+              <svg viewBox="0 0 24 24" width={28} height={28}>
+                <path d="M5 13l4 4L19 7" fill="none" stroke="#34d399" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ strokeDasharray: 30, strokeDashoffset: ck ? 0 : 30, transition: "stroke-dashoffset 0.5s ease 0.4s" }} />
+              </svg>
             </div>
           </div>
+        </div>
 
-          <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight">
-            Welcome to Agent Forja <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">— Forever.</span>
+        {/* Title */}
+        <div className="text-center mb-6 transition-all duration-700" style={{ opacity: m ? 1 : 0, transform: m ? "translateY(0)" : "translateY(16px)" }}>
+          <h1 className="text-[1.7rem] md:text-[2.2rem] font-extrabold text-white tracking-tight leading-[1.15]">
+            Welcome to Agent Forja
           </h1>
-          <p className="text-slate-400 text-sm md:text-base mt-2">
-            Your <span className="text-white font-semibold">{plan.name} Lifetime Deal</span> is now active.
+          <h2 className={`text-[1.7rem] md:text-[2.2rem] font-extrabold tracking-tight leading-[1.15] bg-gradient-to-r ${plan.gradient} bg-clip-text text-transparent`}>
+            — Forever.
+          </h2>
+          <p className="text-white/40 text-sm mt-2.5 font-medium">
+            Your <span className="text-white/80">{plan.name} Lifetime Deal</span> is activated
           </p>
         </div>
 
-        {/* Badge + Savings Row */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 transition-all duration-700" style={{ opacity: mounted ? 1 : 0, transitionDelay: "400ms" }}>
-          {/* Badge */}
-          <div className="p-[1px] rounded-xl bg-gradient-to-r from-amber-400/60 via-yellow-300/40 to-orange-500/60">
-            <div className="rounded-xl bg-[#0a0f1e]/95 px-5 py-3 text-center">
-              <div className="text-[10px] text-amber-400/70 uppercase tracking-[0.15em] font-semibold">Exclusive Member</div>
-              <div className={`text-base font-black bg-gradient-to-r ${plan.badgeColor} bg-clip-text text-transparent`}>{plan.badge}</div>
+        {/* Badge Card */}
+        <div className="mb-5 transition-all duration-700" style={{ opacity: m ? 1 : 0, transform: m ? "scale(1)" : "scale(0.95)", transitionDelay: "300ms" }}>
+          <ShimmerCard gradient={plan.gradient}>
+            <div className="flex items-center justify-between px-5 py-4">
+              <div>
+                <div className="text-[9px] text-white/30 uppercase tracking-[0.2em] font-bold mb-0.5">Exclusive Member</div>
+                <div className={`text-sm font-black bg-gradient-to-r ${plan.gradient} bg-clip-text text-transparent tracking-wide`}>{plan.badge}</div>
+                <div className="text-[10px] text-white/25 mt-0.5">One-time · Lifetime · All Updates</div>
+              </div>
+              <div className="text-right">
+                <div className="text-[9px] text-white/30 uppercase tracking-wider font-bold">You saved</div>
+                <div className="text-xl font-black bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent">
+                  ${count.toLocaleString()}
+                </div>
+                <div className="text-[9px] text-white/20">vs ${plan.monthlyEquiv}/mo · 3 yrs</div>
+              </div>
             </div>
-          </div>
-          {/* Savings */}
-          <div className="text-center">
-            <div className="text-[10px] text-slate-500 uppercase tracking-wider">Saved over 3 years</div>
-            <div className="text-2xl font-black bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">${savings.toLocaleString()}</div>
-          </div>
+          </ShimmerCard>
         </div>
 
-        {/* Features Grid */}
-        <div className="mb-6 transition-all duration-700" style={{ opacity: mounted ? 1 : 0, transitionDelay: "500ms" }}>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {/* Features */}
+        <div className="mb-5 transition-all duration-700" style={{ opacity: m ? 1 : 0, transitionDelay: "450ms" }}>
+          <div className="grid grid-cols-3 gap-1.5">
             {plan.features.map((f, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" className="flex-shrink-0"><path d="M5 13l4 4L19 7" stroke="#4ade80" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span className="text-white/90 text-xs md:text-sm">{f}</span>
+              <div
+                key={i}
+                className="group rounded-xl border border-white/[0.05] bg-white/[0.02] backdrop-blur-sm px-3 py-2.5 text-center hover:border-white/[0.12] hover:bg-white/[0.04] transition-all duration-300"
+              >
+                <div className="text-emerald-400/70 mb-1">
+                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" className="mx-auto"><path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </div>
+                <div className="text-white/70 text-[11px] font-medium leading-tight group-hover:text-white/90 transition-colors">{f}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4 transition-all duration-700" style={{ opacity: mounted ? 1 : 0, transitionDelay: "600ms" }}>
-          <a href="/" className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 px-6 py-3 text-white font-semibold text-sm transition-all duration-300 shadow-lg shadow-purple-500/20">
+        {/* CTAs */}
+        <div className="flex gap-2.5 mb-4 transition-all duration-700" style={{ opacity: m ? 1 : 0, transitionDelay: "550ms" }}>
+          <a
+            href="/"
+            className={`flex-1 text-center rounded-xl bg-gradient-to-r ${plan.gradient} px-5 py-3 text-white font-bold text-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]`}
+            style={{ boxShadow: `0 8px 24px ${plan.glow}` }}
+          >
             🚀 Create Your First Bot
           </a>
-          <a href="/dashboard" className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.06] px-6 py-3 text-white font-semibold text-sm transition-all duration-300">
-            📊 Go to Dashboard
+          <a
+            href="/dashboard"
+            className="flex-1 text-center rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm px-5 py-3 text-white/80 font-bold text-sm hover:border-white/[0.15] hover:bg-white/[0.06] hover:text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            📊 Dashboard
           </a>
         </div>
 
         {/* Footer */}
-        <div className="text-center text-slate-600 text-[11px] transition-all duration-700" style={{ opacity: mounted ? 1 : 0, transitionDelay: "700ms" }}>
-          Receipt sent by Paddle · <a href="mailto:support@agentforja.com" className="text-purple-400 hover:text-purple-300">support@agentforja.com</a>
-        </div>
+        <p className="text-center text-white/15 text-[10px] font-medium transition-all duration-700" style={{ opacity: m ? 1 : 0, transitionDelay: "650ms" }}>
+          Receipt sent by Paddle · <a href="mailto:support@agentforja.com" className="text-white/25 hover:text-white/50 transition-colors underline decoration-white/10">support@agentforja.com</a>
+        </p>
       </div>
     </div>
   );
@@ -165,7 +239,7 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center" style={{ background: "#030712" }}><div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center" style={{ background: "#050810" }}><div className="w-7 h-7 border-2 border-purple-500/50 border-t-transparent rounded-full animate-spin" /></div>}>
       <SuccessContent />
     </Suspense>
   );
