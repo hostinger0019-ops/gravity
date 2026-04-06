@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 const devNoAuth = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true";
 
 const navItems = [
-    { href: "/admin/chatbots", label: "My Agents", icon: "🤖" },
+    { href: "/admin/agents", label: "My Agents", icon: "🤖" },
     { href: "/admin/ai", label: "AI Generator", icon: "✨" },
 ];
 
@@ -40,7 +40,7 @@ export default function AdminNav() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-14">
                     {/* Logo/Brand */}
-                    <Link href="/admin/chatbots" className="flex items-center gap-2 font-bold text-lg">
+                    <Link href="/admin/agents" className="flex items-center gap-2 font-bold text-lg">
                         <span className="text-2xl">🤖</span>
                         <span className="hidden sm:inline">Agent Forja</span>
                     </Link>

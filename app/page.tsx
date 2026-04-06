@@ -966,7 +966,7 @@ CRITICAL RULES:
           )}
           {authStatus === "authenticated" && session?.user ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <a href="/admin/chatbots" className="btn-login" style={{ fontSize: "13px" }}>My Agents</a>
+              <a href="/admin/agents" className="btn-login" style={{ fontSize: "13px" }}>My Agents</a>
               <div style={{ position: "relative" }}>
                 <button
                   onClick={() => setShowAccountMenu(!showAccountMenu)}
@@ -1069,7 +1069,7 @@ CRITICAL RULES:
                       {/* Quick links */}
                       <div style={{ padding: "6px" }}>
                         {[
-                          { label: "My Agents", icon: "🤖", href: "/admin/chatbots" },
+                          { label: "My Agents", icon: "🤖", href: "/admin/agents" },
                           { label: "Billing & Plans", icon: "💳", href: "/admin/billing" },
                           { label: "Admin Dashboard", icon: "📊", href: "/admin/conversations" },
                         ].map((item) => (

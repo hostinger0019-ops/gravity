@@ -159,7 +159,7 @@ export default function BillingPage() {
               <span className="text-xs text-white/50 font-medium">{session?.user?.email?.split("@")[0]}</span>
             </div>
             <Link
-              href="/admin/chatbots"
+              href="/admin/agents"
               className="text-xs text-white/40 hover:text-white/70 px-3 py-1.5 rounded-lg border border-white/[0.06] hover:border-white/[0.12] bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-200 font-medium no-underline"
             >
               ← My Agents

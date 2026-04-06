@@ -99,7 +99,7 @@ export default function ChatbotsListPage() {
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="rounded-xl p-5 border border-white/[0.08] bg-white/[0.02]">
             <div className="text-3xl font-bold text-white">{bots?.length || 0}</div>
-            <div className="text-sm text-gray-500">Total Chatbots</div>
+            <div className="text-sm text-gray-500">Total Agents</div>
           </div>
           <div className="rounded-xl p-5 border border-white/[0.08] bg-white/[0.02]">
             <div className="text-3xl font-bold text-emerald-400">{bots?.filter(b => b.is_public).length || 0}</div>
