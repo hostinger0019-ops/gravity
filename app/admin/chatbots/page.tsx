@@ -139,16 +139,16 @@ export default function ChatbotsListPage() {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-gray-400">
               <BotIcon />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">No chatbots yet</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">No agents yet</h2>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Create your first AI chatbot and start engaging with your users instantly.
+              Create your first AI agent and start engaging with your users instantly.
             </p>
             <a
               href="/admin/chatbots/new"
               className="inline-flex items-center gap-2 rounded-xl bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-gray-200 transition-all"
             >
               <PlusIcon />
-              Create Your First Chatbot
+              Create Your First Agent
             </a>
           </div>
         )}
@@ -262,12 +262,12 @@ export default function ChatbotsListPage() {
                   </div>
                   <button
                     onClick={() => {
-                      if (confirm('Are you sure you want to delete this chatbot?')) {
+                      if (confirm('Are you sure you want to delete this agent?')) {
                         del.mutate(b.id);
                       }
                     }}
                     className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/15 px-3 py-2 text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/25 transition-all"
-                    title="Delete chatbot"
+                    title="Delete agent"
                   >
                     <TrashIcon />
                     Delete
@@ -284,7 +284,7 @@ export default function ChatbotsListPage() {
               <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center mb-4">
                 <PlusIcon />
               </div>
-              <span className="font-medium">Create New Chatbot</span>
+              <span className="font-medium">Create New Agent</span>
             </a>
           </div>
         )}

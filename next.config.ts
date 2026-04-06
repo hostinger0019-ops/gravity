@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   // Use default output file tracing root to avoid Vercel path issues
+  async rewrites() {
+    return [
+      { source: "/admin/agents", destination: "/admin/chatbots" },
+      { source: "/admin/agents/:path*", destination: "/admin/chatbots/:path*" },
+    ];
+  },
 };
 
 export default nextConfig;
