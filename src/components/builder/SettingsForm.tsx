@@ -95,7 +95,7 @@ export function SettingsForm({ botId }: { botId?: string }) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             {...form.register("name")}
             placeholder="My Chatbot"
           />
@@ -105,7 +105,7 @@ export function SettingsForm({ botId }: { botId?: string }) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
           <input
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             {...form.register("tagline")}
             placeholder="Ask your AI..."
           />
@@ -118,7 +118,7 @@ export function SettingsForm({ botId }: { botId?: string }) {
         <div className="flex items-center gap-2">
           <span className="text-gray-500 text-sm">/chat/</span>
           <input
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             {...form.register("slug")}
             placeholder="my-chatbot"
           />
