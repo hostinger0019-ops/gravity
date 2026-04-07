@@ -5,6 +5,7 @@ const VERIFY_TOKEN = 'agentforja_instagram_2026';
 
 // GPU Backend URL for processing DMs
 const GPU_BACKEND_URL = process.env.GPU_BACKEND_URL || 'http://69.19.137.175:8000';
+const GPU_API_KEY = process.env.GPU_API_KEY || '';
 
 // GET - Webhook verification (Meta sends this to verify your endpoint)
 export async function GET(request: NextRequest) {
@@ -80,6 +81,7 @@ async function forwardToGPU(senderId: string, messageText: string) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(GPU_API_KEY ? { 'X-API-Key': GPU_API_KEY } : {}),
       },
       body: JSON.stringify({
         sender_id: senderId,
