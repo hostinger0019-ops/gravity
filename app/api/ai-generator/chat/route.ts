@@ -284,32 +284,61 @@ When updating, improve upon these existing values. For example if user says "mak
             throw new Error(`GPU backend error (${gpuRes.status}): ${errText}`);
         }
 
-        // Read full response to detect JSON vs text
         const reader = gpuRes.body?.getReader();
         if (!reader) throw new Error("No response body from GPU");
         const decoder = new TextDecoder();
-        const chunks: string[] = [];
-        while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            chunks.push(decoder.decode(value, { stream: true }));
-        }
-        const fullReply = chunks.join("");
 
-        // Check if it's a JSON command (create/update)
-        let parsed = parseJsonFromReply(fullReply);
-        if (parsed?.config && templateId && templateId !== "custom") {
-            const t = getTemplateById(templateId);
-            if (t) parsed.config.theme = t.suggestedTheme;
+        // Peek at first chunk to detect JSON (create/update) vs text (conversation)
+        const firstRead = await reader.read();
+        if (firstRead.done) {
+            return new Response("", { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+        }
+        const firstChunk = decoder.decode(firstRead.value, { stream: true });
+        const trimmedStart = firstChunk.trimStart();
+
+        // If response starts with '{' or '"ready"' or '"update"', it's a JSON command → buffer fully
+        if (trimmedStart.startsWith("{") || trimmedStart.startsWith("[")) {
+            // Buffer the rest for JSON parsing
+            const chunks: string[] = [firstChunk];
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                chunks.push(decoder.decode(value, { stream: true }));
+            }
+            const fullReply = chunks.join("");
+
+            let parsed = parseJsonFromReply(fullReply);
+            if (parsed?.config && templateId && templateId !== "custom") {
+                const t = getTemplateById(templateId);
+                if (t) parsed.config.theme = t.suggestedTheme;
+            }
+
+            if (parsed) {
+                return NextResponse.json({ reply: getFriendlyReply(fullReply, parsed), parsed });
+            }
+
+            // Not valid JSON after all — return as text
+            return new Response(fullReply, {
+                headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type": "stream" },
+            });
         }
 
-        // JSON response → return as JSON (for create/update actions)
-        if (parsed) {
-            return NextResponse.json({ reply: getFriendlyReply(fullReply, parsed), parsed });
-        }
+        // Text response → stream through to browser in real-time
+        const stream = new ReadableStream({
+            async start(controller) {
+                // Send the first chunk immediately
+                controller.enqueue(new TextEncoder().encode(firstChunk));
+                // Pipe remaining chunks
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    controller.enqueue(value);
+                }
+                controller.close();
+            },
+        });
 
-        // Text response → pipe directly to browser (no buffering delay)
-        return new Response(fullReply, {
+        return new Response(stream, {
             headers: {
                 "Content-Type": "text/plain; charset=utf-8",
                 "X-Content-Type": "stream",
