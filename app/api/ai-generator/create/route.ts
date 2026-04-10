@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
                     // Use GPU scraper directly (returns job_id for progress tracking)
                     const scrapeRes = await fetch(`${GPU_URL}/api/scrape/start`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: { "Content-Type": "application/json", ...(GPU_API_KEY ? { "X-API-Key": GPU_API_KEY } : {}) },
                         body: JSON.stringify({
                             chatbot_id: chatbot.id,
                             url: config.websiteToScrape,
