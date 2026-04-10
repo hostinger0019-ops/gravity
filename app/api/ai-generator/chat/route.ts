@@ -342,6 +342,9 @@ When updating, improve upon these existing values. For example if user says "mak
             headers: {
                 "Content-Type": "text/plain; charset=utf-8",
                 "X-Content-Type": "stream",
+                "X-Accel-Buffering": "no",
+                "Cache-Control": "no-cache, no-transform",
+                "Content-Encoding": "none",
             },
         });
 
