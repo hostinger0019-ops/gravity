@@ -364,6 +364,19 @@ export default function Home() {
           streamedText += decoder.decode(value, { stream: true });
           setMessages([...newMsgs, { role: "assistant", content: streamedText }]);
         }
+        // Explicitly save final messages to backend after streaming completes
+        const finalMsgs = [...newMsgs, { role: "assistant" as const, content: streamedText }];
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (userEmail && activeSessionId && isUUID.test(activeSessionId)) {
+          const unsavedMsgs = finalMsgs.slice(lastSavedMsgCount.current);
+          lastSavedMsgCount.current = finalMsgs.length;
+          if (unsavedMsgs.length > 0) {
+            fetch(`/api/builder-sessions/${activeSessionId}/messages`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ messages: unsavedMsgs.map(m => ({ role: m.role, content: m.content })) }),
+            }).catch(e => console.warn("Failed to save streamed messages:", e));
+          }
+        }
         return;
       }
 
