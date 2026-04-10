@@ -161,8 +161,11 @@ export default function Home() {
 
   // ── Save messages to backend after each change ──
   const lastSavedMsgCount = useRef(0);
+  const isStreamingRef = useRef(false);
   useEffect(() => {
     if (!hasLoadedHistory || !activeSessionId || messages.length === 0) return;
+    // Don't save during streaming — the explicit save after streaming handles it
+    if (isStreamingRef.current) return;
     // Save to localStorage cache
     setSessions(prev => {
       const title = messages.find(m => m.role === "user")?.content.replace(/^🎤\s*/, "").slice(0, 45) || "New Chat";
@@ -355,6 +358,8 @@ export default function Home() {
         if (!reader) throw new Error("No stream body");
         const decoder = new TextDecoder();
         let streamedText = "";
+        // Block save effect during streaming to prevent truncated saves
+        isStreamingRef.current = true;
         // Add empty assistant message to fill
         setMessages([...newMsgs, { role: "assistant", content: "" }]);
         setIsLoading(false);
@@ -364,8 +369,12 @@ export default function Home() {
           streamedText += decoder.decode(value, { stream: true });
           setMessages([...newMsgs, { role: "assistant", content: streamedText }]);
         }
+        // Streaming done — unblock save effect
+        isStreamingRef.current = false;
+        // Set final messages with complete content
+        const finalMsgs: Message[] = [...newMsgs, { role: "assistant", content: streamedText }];
+        setMessages(finalMsgs);
         // Explicitly save final messages to backend after streaming completes
-        const finalMsgs = [...newMsgs, { role: "assistant" as const, content: streamedText }];
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (userEmail && activeSessionId && isUUID.test(activeSessionId)) {
           const unsavedMsgs = finalMsgs.slice(lastSavedMsgCount.current);
