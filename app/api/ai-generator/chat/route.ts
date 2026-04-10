@@ -296,8 +296,8 @@ When updating, improve upon these existing values. For example if user says "mak
         const firstChunk = decoder.decode(firstRead.value, { stream: true });
         const trimmedStart = firstChunk.trimStart();
 
-        // If response starts with '{' or '"ready"' or '"update"', it's a JSON command → buffer fully
-        if (trimmedStart.startsWith("{") || trimmedStart.startsWith("[")) {
+        // If response starts with '{', '[', or markdown code fence (```json), it's a JSON command → buffer fully
+        if (trimmedStart.startsWith("{") || trimmedStart.startsWith("[") || trimmedStart.startsWith("```")) {
             // Buffer the rest for JSON parsing
             const chunks: string[] = [firstChunk];
             while (true) {
