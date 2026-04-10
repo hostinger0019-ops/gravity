@@ -3,8 +3,8 @@ import { gpuHeaders, getGpuUrl } from "@/lib/gpu-fetch";
 
 const GPU = getGpuUrl();
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const body = await req.json();
   const res = await fetch(`${GPU}/api/builder-sessions/${id}/messages/batch`, {
     method: "POST",
