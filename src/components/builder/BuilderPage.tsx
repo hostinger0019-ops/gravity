@@ -339,35 +339,31 @@ export function BuilderPage({ id }: { id?: string }) {
       console.error("[ViewLive] failure", e);
     }
   }, [draftId, form, flush, router]);
-
   return (
-    <div className="flex h-[100dvh] bg-gray-50">
+    <div className="flex h-[100dvh] bg-[#0a0a0a]">
       <SectionNav items={nav as any} active={active} onChange={(k) => { if (k === "history") { router.push("/admin/conversations"); return; } setActive(k as any); }} />
 
       {/* Builder + Preview split */}
       <div className="flex-1 flex gap-6 p-6 min-h-0">
         {/* Left: Form Section - Scrollable */}
-        <div className="flex-1 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden flex flex-col min-h-0">
+        <div className="flex-1 bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] overflow-hidden flex flex-col min-h-0 builder-dark">
           <div className="flex-1 overflow-y-auto p-8 space-y-8">
             {/* Header bar */}
-            <div className="flex items-center justify-between pb-6 border-b border-gray-200">
-              <div className="text-xl font-bold text-gray-900">{form.getValues("name")}</div>
+            <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
+              <div className="text-xl font-bold text-white">{form.getValues("name")}</div>
               <div className="flex items-center gap-3">
-                {process.env.NEXT_PUBLIC_DEV_NO_AUTH === "true" && (
-                  <span className="text-xs rounded-full bg-amber-100 text-amber-800 px-3 py-1 font-medium">Dev mode: no auth</span>
-                )}
                 {saveMutation.isPending && (
-                  <span className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200 font-medium">Saving�</span>
+                  <span className="text-xs px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 font-medium">Saving…</span>
                 )}
                 {!saveMutation.isPending && savedAt && (
-                  <span className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 border border-green-200 font-medium">All changes saved</span>
+                  <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">All changes saved</span>
                 )}
                 <button
                   onClick={async () => {
                     try { await (async () => { /* flush autosave */ })(); } catch { }
                     try { await saveMutation.mutateAsync(form.getValues()); setSavedAt(Date.now()); } catch (e) { console.error('Save failed', e); }
                   }}
-                  className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg hover:from-indigo-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="inline-flex items-center px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25 hover:from-indigo-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-[#0a0a0a] transition-all"
                 >
                   Save
                 </button>
@@ -376,7 +372,7 @@ export function BuilderPage({ id }: { id?: string }) {
                     const currentId = draftId || record?.id;
                     if (currentId) router.push(`/admin/chatbots/${currentId}/conversations`);
                   }}
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 border border-white/10 rounded-xl hover:bg-white/[0.06] hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-[#0a0a0a] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   disabled={!(draftId || record?.id)}
                   title={!(draftId || record?.id) ? 'Save once to view history' : undefined}
                 >
@@ -384,7 +380,7 @@ export function BuilderPage({ id }: { id?: string }) {
                 </button>
                 <button
                   onClick={onViewLive}
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-teal-600 rounded-full shadow-lg hover:from-green-500 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-lg shadow-emerald-500/25 hover:from-emerald-500 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-[#0a0a0a] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   disabled={autoStatus === 'saving' || !!form.formState.errors.slug || saveMutation.isPending}
                   title={!!form.formState.errors.slug ? 'Fix slug to save' : undefined}
                 >
@@ -406,7 +402,7 @@ export function BuilderPage({ id }: { id?: string }) {
 
         {/* Right: Preview Section - Full Height */}
         <div className="w-[380px] flex-shrink-0 h-full">
-          <div className="bg-gray-900 rounded-xl shadow-2xl overflow-hidden h-full flex flex-col">
+          <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] overflow-hidden h-full flex flex-col">
             <ChatPreview {...preview} />
           </div>
         </div>
