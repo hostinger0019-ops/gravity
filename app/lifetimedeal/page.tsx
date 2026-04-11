@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Script from "next/script";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -925,6 +926,15 @@ export default function LifetimeDealPage() {
                 <FinalCTA />
             </main>
             <Footer />
+            {/* Chatbot Widget Embed */}
+            <Script
+                src="https://agentforja.com/embed/widget.js"
+                data-slug="test-bot-g2at"
+                data-mode="float"
+                data-theme="default"
+                data-brand-color="#8B5CF6"
+                strategy="lazyOnload"
+            />
         </div>
     );
 }
