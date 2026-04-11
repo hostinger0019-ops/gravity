@@ -1,16 +1,10 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 export function IntegrationsForm() {
   const form = useFormContext<any>();
-  const [mode, setMode] = useState<'float' | 'inline'>('float');
-  const [position, setPosition] = useState<'bottom-right' | 'bottom-left'>('bottom-right');
-  const [widgetSize, setWidgetSize] = useState<'default' | 'compact' | 'large'>('default');
-  const [bubbleIcon, setBubbleIcon] = useState('💬');
-  const [showPoweredBy, setShowPoweredBy] = useState(true);
-  const [autoOpen, setAutoOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -20,7 +14,15 @@ export function IntegrationsForm() {
   const avatarUrl = form.watch('avatar_url') as string | undefined;
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
-  const sizeMap = { default: { w: 400, h: 600 }, compact: { w: 360, h: 500 }, large: { w: 440, h: 700 } };
+  // Embed settings stored in form → integrations.embed.*
+  const mode = form.watch('integrations.embed.mode') || 'float';
+  const position = form.watch('integrations.embed.position') || 'bottom-right';
+  const widgetSize = form.watch('integrations.embed.size') || 'default';
+  const bubbleIcon = form.watch('integrations.embed.icon') || '💬';
+  const showPoweredBy = form.watch('integrations.embed.show_branding') ?? true;
+  const autoOpen = form.watch('integrations.embed.auto_open') ?? false;
+
+  const sizeMap: Record<string, { w: number; h: number }> = { default: { w: 400, h: 600 }, compact: { w: 360, h: 500 }, large: { w: 440, h: 700 } };
 
   const embedCode = useMemo(() => {
     const attrs = [
@@ -38,7 +40,7 @@ export function IntegrationsForm() {
     ].filter(Boolean).join('\n    ');
     const src = `${origin}/embed/widget.js`;
     if (mode === 'inline') {
-      const { w, h } = sizeMap[widgetSize];
+      const { h } = sizeMap[widgetSize] || sizeMap.default;
       return `<div id="my-chatbot" style="width:100%;height:${h}px"></div>\n<script src="${src}"\n    ${attrs}\n    data-container="#my-chatbot"></script>`;
     }
     return `<script src="${src}"\n    ${attrs}></script>`;
@@ -107,7 +109,7 @@ export function IntegrationsForm() {
                   <button
                     key={m}
                     type="button"
-                    onClick={() => setMode(m)}
+                    onClick={() => form.setValue('integrations.embed.mode', m, { shouldDirty: true })}
                     className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                       mode === m
                         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
@@ -129,7 +131,7 @@ export function IntegrationsForm() {
                     <button
                       key={p}
                       type="button"
-                      onClick={() => setPosition(p)}
+                      onClick={() => form.setValue('integrations.embed.position', p, { shouldDirty: true })}
                       className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         position === p
                           ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
@@ -152,7 +154,7 @@ export function IntegrationsForm() {
                     <button
                       key={s}
                       type="button"
-                      onClick={() => setWidgetSize(s)}
+                      onClick={() => form.setValue('integrations.embed.size', s, { shouldDirty: true })}
                       className={`flex-1 px-2 py-2 rounded-lg text-xs font-medium transition-all capitalize ${
                         widgetSize === s
                           ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
@@ -174,18 +176,18 @@ export function IntegrationsForm() {
               <div>
                 <label className="text-xs text-gray-400 font-medium mb-2 block">Bubble Icon</label>
                 <div className="flex flex-wrap gap-1.5">
-                  {iconOptions.map((icon) => (
+                  {iconOptions.map((ic) => (
                     <button
-                      key={icon}
+                      key={ic}
                       type="button"
-                      onClick={() => setBubbleIcon(icon)}
+                      onClick={() => form.setValue('integrations.embed.icon', ic, { shouldDirty: true })}
                       className={`w-9 h-9 rounded-lg text-lg flex items-center justify-center transition-all ${
-                        bubbleIcon === icon
+                        bubbleIcon === ic
                           ? 'bg-indigo-600 shadow-lg shadow-indigo-500/20 scale-110'
                           : 'bg-gray-800 hover:bg-gray-700 border border-gray-700'
                       }`}
                     >
-                      {icon}
+                      {ic}
                     </button>
                   ))}
                 </div>
@@ -199,7 +201,7 @@ export function IntegrationsForm() {
                     <button
                       key={s}
                       type="button"
-                      onClick={() => setWidgetSize(s)}
+                      onClick={() => form.setValue('integrations.embed.size', s, { shouldDirty: true })}
                       className={`flex-1 px-2 py-2 rounded-lg text-xs font-medium transition-all capitalize ${
                         widgetSize === s
                           ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
@@ -223,7 +225,12 @@ export function IntegrationsForm() {
                 <p className="text-[10px] text-gray-500">Open widget on page load</p>
               </div>
               <div className="relative">
-                <input type="checkbox" checked={autoOpen} onChange={(e) => setAutoOpen(e.target.checked)} className="sr-only peer" />
+                <input
+                  type="checkbox"
+                  checked={!!autoOpen}
+                  onChange={(e) => form.setValue('integrations.embed.auto_open', e.target.checked, { shouldDirty: true })}
+                  className="sr-only peer"
+                />
                 <div className="w-9 h-5 bg-gray-700 rounded-full peer-checked:bg-indigo-600 transition-colors" />
                 <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow" />
               </div>
@@ -236,7 +243,12 @@ export function IntegrationsForm() {
                 <p className="text-[10px] text-gray-500">"Powered by Agent Forja"</p>
               </div>
               <div className="relative">
-                <input type="checkbox" checked={showPoweredBy} onChange={(e) => setShowPoweredBy(e.target.checked)} className="sr-only peer" />
+                <input
+                  type="checkbox"
+                  checked={!!showPoweredBy}
+                  onChange={(e) => form.setValue('integrations.embed.show_branding', e.target.checked, { shouldDirty: true })}
+                  className="sr-only peer"
+                />
                 <div className="w-9 h-5 bg-gray-700 rounded-full peer-checked:bg-indigo-600 transition-colors" />
                 <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow" />
               </div>
@@ -320,7 +332,7 @@ export function IntegrationsForm() {
                 </div>
                 <button type="button" onClick={() => setShowPreview(false)} className="text-gray-500 hover:text-white text-sm">✕</button>
               </div>
-              <div style={{ height: mode === 'inline' ? `${sizeMap[widgetSize].h}px` : '600px' }}>
+              <div style={{ height: mode === 'inline' ? `${(sizeMap[widgetSize] || sizeMap.default).h}px` : '600px' }}>
                 <iframe
                   src={previewUrl}
                   className="w-full h-full border-0"
