@@ -428,7 +428,7 @@ export function KnowledgeForm({ botId }: { botId?: string }) {
                     value={scrapeUrl}
                     onChange={(e) => { setScrapeUrl(e.target.value); if (scrapeStep === 'select') { setScrapeStep('url'); setDiscoveredPages([]); } }}
                     placeholder="https://example.com"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     disabled={scrapeStep === 'importing'}
                   />
                 </div>
