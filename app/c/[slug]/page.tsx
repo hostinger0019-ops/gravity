@@ -39,6 +39,12 @@ export default async function PublicBotPage({ params, searchParams }: { params: 
     );
   }
 
+  // Override brand color from URL param (set by widget.js data-brand-color)
+  const brandOverride = sp?.brand as string | undefined;
+  if (brandOverride && bot) {
+    (bot as any).brand_color = brandOverride;
+  }
+
   // Helper to render the correct themed chat UI based on bot config
   function renderChatUI(b: NonNullable<typeof bot>) {
     const theme = String(((b as any).theme_template ?? (b as any).theme ?? "default")).toLowerCase();
@@ -169,22 +175,12 @@ export default async function PublicBotPage({ params, searchParams }: { params: 
     );
   }
 
-  // Embed mode: use compact premium widget UI
+  // Embed mode: fill the iframe container fully (PersistentChat handles hiding sidebar/admin)
   if (isEmbed) {
-    const brandOverride = sp?.brand as string | undefined;
     return (
-      <div className="w-full h-[100dvh] overflow-hidden" style={{ background: '#fff' }}>
+      <div className="w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden">
         <ErrorBoundary fallback={<div className="p-4 text-red-500">Something went wrong.</div>}>
-          <EmbedChatUI
-            slug={bot.slug}
-            name={bot.name ?? "Chatbot"}
-            greeting={bot.greeting ?? "Hi! How can I help you?"}
-            brandColor={brandOverride || bot.brand_color || "#6366F1"}
-            avatarUrl={bot.avatar_url ?? null}
-            starterQuestions={bot.starter_questions ?? []}
-            botId={bot.id}
-            tagline={(bot as any).tagline ?? "Ask me anything..."}
-          />
+          {renderChatUI(bot)}
         </ErrorBoundary>
       </div>
     );

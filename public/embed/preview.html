@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Widget Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+  }
+  .sim-nav {
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sim-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .sim-bar {
+    flex: 1;
+    height: 28px;
+    background: #f0f0f0;
+    border-radius: 6px;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 11px;
+    color: #999;
+  }
+  .sim-body {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 24px;
+  }
+  .sim-block {
+    background: #e8e8e8;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+  <!-- Simulated website chrome -->
+  <div class="sim-nav">
+    <span class="sim-dot" style="background:#ff5f57"></span>
+    <span class="sim-dot" style="background:#ffbd2e"></span>
+    <span class="sim-dot" style="background:#28c840"></span>
+    <div class="sim-bar">yourwebsite.com</div>
+  </div>
+  <div class="sim-body">
+    <div class="sim-block" style="height:40px"></div>
+    <div class="sim-block" style="height:120px"></div>
+    <div class="sim-block" style="height:60px"></div>
+    <div class="sim-block" style="height:80px"></div>
+  </div>
+
+  <script>
+    // Read settings from URL params and inject widget.js
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug') || '';
+    const brand = params.get('brand') || '';
+    const icon = params.get('icon') || '';
+    const size = params.get('size') || '';
+    const position = params.get('position') || '';
+    const branding = params.get('branding');
+    const autoOpen = params.get('open');
+    const avatar = params.get('avatar') || '';
+    const theme = params.get('theme') || '';
+
+    if (slug) {
+      const s = document.createElement('script');
+      s.src = '/embed/widget.js';
+      s.defer = true;
+      s.setAttribute('data-slug', slug);
+      s.setAttribute('data-mode', 'float');
+      if (brand) s.setAttribute('data-brand-color', brand);
+      if (icon) s.setAttribute('data-icon', icon);
+      if (size) s.setAttribute('data-size', size);
+      if (position) s.setAttribute('data-position', position);
+      if (branding === 'false') s.setAttribute('data-hide-branding', 'true');
+      if (autoOpen === 'true') s.setAttribute('data-open', 'true');
+      if (avatar) s.setAttribute('data-avatar', avatar);
+      if (theme) s.setAttribute('data-theme', theme);
+      document.body.appendChild(s);
+    }
+  </script>
+</body>
+</html>

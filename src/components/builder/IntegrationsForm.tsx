@@ -48,8 +48,18 @@ export function IntegrationsForm() {
 
   const previewUrl = useMemo(() => {
     if (!slug) return '';
-    return `${origin}/c/${slug}?embed=1`;
-  }, [slug, origin]);
+    const p = new URLSearchParams();
+    p.set('slug', slug);
+    if (brand) p.set('brand', brand);
+    if (bubbleIcon !== '💬') p.set('icon', bubbleIcon);
+    if (widgetSize !== 'default') p.set('size', widgetSize);
+    if (position !== 'bottom-right') p.set('position', position);
+    if (!showPoweredBy) p.set('branding', 'false');
+    if (autoOpen) p.set('open', 'true');
+    if (avatarUrl) p.set('avatar', avatarUrl);
+    if (theme) p.set('theme', theme);
+    return `${origin}/embed/preview.html?${p.toString()}`;
+  }, [slug, origin, brand, bubbleIcon, widgetSize, position, showPoweredBy, autoOpen, avatarUrl, theme]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode);
@@ -255,19 +265,43 @@ export function IntegrationsForm() {
             </label>
           </div>
 
-          {/* Brand Color display */}
-          <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-700/50 bg-gray-800/30">
-            <div className="w-8 h-8 rounded-lg border-2 border-gray-600 flex-shrink-0" style={{ background: brand || '#6366F1' }} />
-            <div>
+          {/* Brand Color — interactive */}
+          <div className="p-3 rounded-lg border border-gray-700/50 bg-gray-800/30 space-y-3">
+            <div className="flex items-center justify-between">
               <span className="text-sm text-gray-200 font-medium">Brand Color</span>
-              <p className="text-[10px] text-gray-500">Set in Theme tab → {brand || '#6366F1'}</p>
+              {avatarUrl && (
+                <div className="flex items-center gap-2">
+                  <img src={avatarUrl} alt="avatar" className="w-6 h-6 rounded-lg border border-gray-600 object-cover" />
+                  <span className="text-[10px] text-gray-500">Logo ✓</span>
+                </div>
+              )}
             </div>
-            {avatarUrl && (
-              <div className="ml-auto flex items-center gap-2">
-                <img src={avatarUrl} alt="avatar" className="w-7 h-7 rounded-lg border border-gray-600 object-cover" />
-                <span className="text-[10px] text-gray-500">Logo ✓</span>
+            <div className="flex items-center gap-3">
+              <label className="relative cursor-pointer">
+                <div className="w-10 h-10 rounded-xl border-2 border-gray-500 hover:border-gray-300 transition-colors shadow-lg" style={{ background: brand || '#6366F1' }} />
+                <input
+                  type="color"
+                  value={brand || '#6366F1'}
+                  onChange={(e) => form.setValue('brand_color', e.target.value, { shouldDirty: true })}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {['#3B82F6','#8B5CF6','#EC4899','#EF4444','#F59E0B','#10B981','#06B6D4','#6366F1','#F97316','#000000'].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => form.setValue('brand_color', c, { shouldDirty: true })}
+                    className={`w-7 h-7 rounded-lg border-2 transition-all hover:scale-110 ${
+                      brand === c ? 'border-white scale-110 shadow-lg' : 'border-gray-700 hover:border-gray-500'
+                    }`}
+                    style={{ background: c }}
+                    title={c}
+                  />
+                ))}
               </div>
-            )}
+            </div>
+            <div className="text-[10px] text-gray-500 font-mono">{brand || '#6366F1'}</div>
           </div>
 
           {/* ═══ Embed Code ═══ */}
