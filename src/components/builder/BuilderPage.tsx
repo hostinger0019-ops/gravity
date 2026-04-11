@@ -200,7 +200,7 @@ export function BuilderPage({ id }: { id?: string }) {
       typing_indicator: record?.typing_indicator ?? true,
       model: record?.model || "gpt-4o-mini",
       temperature: Number(record?.temperature ?? 0.6),
-      is_public: record?.is_public ?? false,
+      is_public: record?.is_public ?? true,
     };
   }, [record?.id]);
 

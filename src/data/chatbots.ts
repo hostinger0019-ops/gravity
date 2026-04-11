@@ -15,7 +15,16 @@ export function slugify(input: string): string {
 }
 
 export async function isSlugAvailable(slug: string, excludeId?: string) {
-  return gpu.chatbots.isSlugAvailable(slug, excludeId);
+  try {
+    const params = new URLSearchParams({ slug });
+    if (excludeId) params.set("exclude_id", excludeId);
+    const res = await fetch(`/api/admin/chatbots/check-slug?${params.toString()}`);
+    if (!res.ok) return true; // assume available on error
+    const data = await res.json();
+    return data.available !== false;
+  } catch {
+    return true; // assume available on network error
+  }
 }
 
 export async function getChatbots(): Promise<ChatbotRecord[]> {
@@ -75,7 +84,7 @@ export async function createChatbot(payload: Omit<ChatbotDraft, "slug"> & { name
     typing_indicator: base.typing_indicator ?? true,
     model: base.model ?? "gpt-4o-mini",
     temperature: base.temperature ?? 0.6,
-    is_public: base.is_public ?? false,
+    is_public: base.is_public ?? true,
   };
 
   return (await gpu.chatbots.create(insert)) as ChatbotRecord;
