@@ -2,7 +2,9 @@
   try {
     if (window.__AI_CODING_TUTOR_WIDGET__) return;
     window.__AI_CODING_TUTOR_WIDGET__ = true;
-    const script = document.currentScript;
+    const script = document.currentScript
+      || document.querySelector('script[src*="/embed/widget.js"]')
+      || document.querySelector('script[data-slug]');
     if (!script) return;
 
     // Helper to get dataset with both data-foo-bar and dataset.fooBar
@@ -14,11 +16,12 @@
     const position = (ds.position || 'bottom-right').toLowerCase(); // 'bottom-right' | 'bottom-left'
     const open = String(ds.open || 'false').toLowerCase() === 'true';
     const containerSelector = ds.container || null; // for inline mode
-    const base = ds.base || (new URL(script.src)).origin; // allow override via data-base
+    const base = ds.base || (script.src ? (new URL(script.src)).origin : window.location.origin);
     const icon = ds.icon || '💬';
     const avatarUrl = ds.avatar || '';
     const hideBranding = String(ds.hideBranding || ds['hidebranding'] || 'false').toLowerCase() === 'true';
     const size = (ds.size || 'default').toLowerCase(); // 'compact' | 'default' | 'large'
+    const uiType = ds.ui || ''; // 'basic' | 'full' | ''
 
     if (!slug) {
       console.warn('[widget] Missing data-slug attribute');
@@ -38,6 +41,7 @@
     params.set('embed', '1');
     if (theme) params.set('theme', theme);
     if (brandColor) params.set('brand', brandColor);
+    if (uiType) params.set('ui', uiType);
     const iframeSrc = `${base}/c/${encodeURIComponent(slug)}?${params.toString()}`;
 
     function makeInline() {

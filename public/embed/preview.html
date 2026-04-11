@@ -71,6 +71,7 @@
     const autoOpen = params.get('open');
     const avatar = params.get('avatar') || '';
     const theme = params.get('theme') || '';
+    const ui = params.get('ui') || '';
 
     if (slug) {
       const s = document.createElement('script');
@@ -86,6 +87,7 @@
       if (autoOpen === 'true') s.setAttribute('data-open', 'true');
       if (avatar) s.setAttribute('data-avatar', avatar);
       if (theme) s.setAttribute('data-theme', theme);
+      if (ui) s.setAttribute('data-ui', ui);
       document.body.appendChild(s);
     }
   </script>

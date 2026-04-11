@@ -199,6 +199,7 @@ export function BuilderPage({ id }: { id?: string }) {
           icon: '💬',
           show_branding: true,
           auto_open: false,
+          ui_type: 'full',
         },
       },
       theme_template: (record as any)?.theme_template || "default",

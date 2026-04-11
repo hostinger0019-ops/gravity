@@ -21,6 +21,7 @@ export function IntegrationsForm() {
   const bubbleIcon = form.watch('integrations.embed.icon') || '💬';
   const showPoweredBy = form.watch('integrations.embed.show_branding') ?? true;
   const autoOpen = form.watch('integrations.embed.auto_open') ?? false;
+  const uiType = form.watch('integrations.embed.ui_type') || 'full';
 
   const sizeMap: Record<string, { w: number; h: number }> = { default: { w: 400, h: 600 }, compact: { w: 360, h: 500 }, large: { w: 440, h: 700 } };
 
@@ -36,6 +37,7 @@ export function IntegrationsForm() {
       bubbleIcon !== '💬' ? `data-icon="${bubbleIcon}"` : null,
       !showPoweredBy ? `data-hide-branding="true"` : null,
       widgetSize !== 'default' ? `data-size="${widgetSize}"` : null,
+      uiType !== 'full' ? `data-ui="${uiType}"` : null,
       `defer`
     ].filter(Boolean).join('\n    ');
     const src = `${origin}/embed/widget.js`;
@@ -58,8 +60,9 @@ export function IntegrationsForm() {
     if (autoOpen) p.set('open', 'true');
     if (avatarUrl) p.set('avatar', avatarUrl);
     if (theme) p.set('theme', theme);
+    if (uiType !== 'full') p.set('ui', uiType);
     return `${origin}/embed/preview.html?${p.toString()}`;
-  }, [slug, origin, brand, bubbleIcon, widgetSize, position, showPoweredBy, autoOpen, avatarUrl, theme]);
+  }, [slug, origin, brand, bubbleIcon, widgetSize, position, showPoweredBy, autoOpen, avatarUrl, theme, uiType]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode);
@@ -109,6 +112,43 @@ export function IntegrationsForm() {
         </div>
 
         <div className="p-5 space-y-5 bg-gray-900/30">
+          {/* Chat Style */}
+          <div>
+            <label className="text-xs text-gray-400 font-medium mb-2 block">Chat Style</label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Basic Support */}
+              <button
+                type="button"
+                onClick={() => form.setValue('integrations.embed.ui_type', 'basic', { shouldDirty: true })}
+                className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                  uiType === 'basic'
+                    ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
+                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                }`}
+              >
+                {uiType === 'basic' && <span className="absolute top-2 right-2 text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-medium">Active</span>}
+                <div className="text-2xl mb-2">💬</div>
+                <div className="text-sm font-semibold text-white">Basic Support</div>
+                <p className="text-[10px] text-gray-400 mt-1 leading-relaxed">Clean & compact. Branded header, quick replies, streaming chat. Best for customer support widgets.</p>
+              </button>
+              {/* Full Premium */}
+              <button
+                type="button"
+                onClick={() => form.setValue('integrations.embed.ui_type', 'full', { shouldDirty: true })}
+                className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                  uiType === 'full'
+                    ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
+                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                }`}
+              >
+                {uiType === 'full' && <span className="absolute top-2 right-2 text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-medium">Active</span>}
+                <div className="text-2xl mb-2">🚀</div>
+                <div className="text-sm font-semibold text-white">Full Premium</div>
+                <p className="text-[10px] text-gray-400 mt-1 leading-relaxed">Voice support, photo display, math rendering, conversation history. Best for advanced AI assistants.</p>
+              </button>
+            </div>
+          </div>
+
           {/* Row 1: Mode + Position */}
           <div className="grid grid-cols-2 gap-4">
             {/* Widget Mode */}
