@@ -9,6 +9,7 @@ import RealEstateChatUI from "@/components/chat/RealEstateChatUI";
 import SaaSChatUI from "@/components/chat/SaaSChatUI";
 import HealthcareChatUI from "@/components/chat/HealthcareChatUI";
 import InstagramChatUI from "@/components/chat/InstagramChatUI";
+import EmbedChatUI from "@/components/chat/EmbedChatUI";
 
 // Force SSR so theme changes reflect immediately and avoid caching the branch
 export const dynamic = "force-dynamic";
@@ -168,12 +169,22 @@ export default async function PublicBotPage({ params, searchParams }: { params: 
     );
   }
 
-  // Embed mode: fill the iframe container fully
+  // Embed mode: use compact premium widget UI
   if (isEmbed) {
+    const brandOverride = sp?.brand as string | undefined;
     return (
-      <div className="w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden">
+      <div className="w-full h-[100dvh] overflow-hidden" style={{ background: '#fff' }}>
         <ErrorBoundary fallback={<div className="p-4 text-red-500">Something went wrong.</div>}>
-          {renderChatUI(bot)}
+          <EmbedChatUI
+            slug={bot.slug}
+            name={bot.name ?? "Chatbot"}
+            greeting={bot.greeting ?? "Hi! How can I help you?"}
+            brandColor={brandOverride || bot.brand_color || "#6366F1"}
+            avatarUrl={bot.avatar_url ?? null}
+            starterQuestions={bot.starter_questions ?? []}
+            botId={bot.id}
+            tagline={(bot as any).tagline ?? "Ask me anything..."}
+          />
         </ErrorBoundary>
       </div>
     );
