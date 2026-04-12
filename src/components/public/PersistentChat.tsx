@@ -185,6 +185,23 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCid]);
 
+  // ── Handoff polling: check for new messages when human agent is active ──
+  const [handoffActive, setHandoffActive] = useState(false);
+  useEffect(() => {
+    if (!handoffActive || !activeCid) return;
+    const interval = setInterval(async () => {
+      try {
+        const ms = await listPublicMessages(slug, activeCid);
+        const asMsgs: Msg[] = (ms as any).map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content as string }));
+        if (asMsgs.length > 0) {
+          setMessages(asMsgs);
+          setMessageCache((c) => ({ ...c, [activeCid]: asMsgs }));
+        }
+      } catch { }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [handoffActive, activeCid, slug]);
+
   async function ensureConversation(): Promise<string | null> {
     if (activeCid) return activeCid;
     try {
@@ -395,6 +412,17 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
     } finally {
       setLoading(false);
       pendingVoiceTextRef.current = null;
+      // Check if AI triggered handoff — activate polling
+      const accLower = acc.toLowerCase();
+      const handoffPhrases = [
+        "let me connect you to our support team for further assistance.",
+        "i'm transferring you to a human agent right now.",
+        "connecting you to a live agent, please hold on.",
+        "your message has been sent. a human agent is",
+      ];
+      if (handoffPhrases.some(p => accLower.includes(p))) {
+        setHandoffActive(true);
+      }
     }
   }
 
