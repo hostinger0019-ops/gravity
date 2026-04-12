@@ -303,6 +303,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       return updated;
     });
     setLoading(true);
+    let acc = "";
 
     try {
       const history: Msg[] = messages.slice(-13);
@@ -318,7 +319,6 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       });
 
       let assistantAdded = false;
-      let acc = "";
       const ensureAssistant = () => {
         if (assistantAdded) return;
         setMessages((m) => {
@@ -457,6 +457,7 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       return updated;
     });
     setLoading(true);
+    let acc = "";
     try {
       // Keep last 13 messages (user/assistant) and append the new user message => 14 total context window
       const history: Msg[] = messages.slice(-13);
@@ -469,7 +470,6 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
 
       // Prepare a streaming assistant message placeholder
       let assistantAdded = false;
-      let acc = "";
       const ensureAssistant = () => {
         if (assistantAdded) return;
         setMessages((m) => {
@@ -546,6 +546,17 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
       });
     } finally {
       setLoading(false);
+      // Check if AI triggered handoff — activate polling
+      const accLower = acc.toLowerCase();
+      const handoffPhrases = [
+        "let me connect you to our support team for further assistance.",
+        "i'm transferring you to a human agent right now.",
+        "connecting you to a live agent, please hold on.",
+        "your message has been sent. a human agent is",
+      ];
+      if (handoffPhrases.some(p => accLower.includes(p))) {
+        setHandoffActive(true);
+      }
     }
   }
 
