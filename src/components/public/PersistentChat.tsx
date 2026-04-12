@@ -338,10 +338,20 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
             const chunk = decoder.decode(value, { stream: true });
             if (!chunk) continue;
             acc += chunk;
+            // Strip handoff tags from display (same pattern as landing page JSON)
+            const cleanAcc = acc.replace(/\[HANDOFF_ACTION:\{[^}]*\}\]/g, "").replace(/\[HANDOFF_REQUEST\]/g, "").trim();
+            // Auto-trigger handoff if tag detected
+            if (/\[HANDOFF_ACTION:/.test(acc) && conversationId && botId) {
+              fetch('/api/handoff/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conversation_id: conversationId, chatbot_id: botId }),
+              }).catch(() => {});
+            }
             setMessages((m) => {
               const updated = [...m];
               const last = updated[updated.length - 1];
-              if (last && last.role === "assistant") last.content = acc;
+              if (last && last.role === "assistant") last.content = cleanAcc;
               const id = activeCid || cidBefore;
               if (id) setMessageCache((c) => ({ ...c, [id]: updated }));
               return updated as Msg[];
@@ -360,10 +370,20 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
             const chunk = decoder.decode(value, { stream: true });
             if (!chunk) continue;
             acc += chunk;
+            // Strip handoff tags from display
+            const cleanAcc2 = acc.replace(/\[HANDOFF_ACTION:\{[^}]*\}\]/g, "").replace(/\[HANDOFF_REQUEST\]/g, "").trim();
+            // Auto-trigger handoff if tag detected
+            if (/\[HANDOFF_ACTION:/.test(acc) && conversationId && botId) {
+              fetch('/api/handoff/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conversation_id: conversationId, chatbot_id: botId }),
+              }).catch(() => {});
+            }
             setMessages((m) => {
               const updated = [...m];
               const last = updated[updated.length - 1];
-              if (last && last.role === "assistant") last.content = acc;
+              if (last && last.role === "assistant") last.content = cleanAcc2;
               const id = activeCid || cidBefore;
               if (id) setMessageCache((c) => ({ ...c, [id]: updated }));
               return updated as Msg[];
