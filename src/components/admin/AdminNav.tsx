@@ -8,6 +8,7 @@ const devNoAuth = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEV_N
 
 const navItems = [
     { href: "/admin/agents", label: "My Agents", icon: "🤖" },
+    { href: "/admin/inbox", label: "Inbox", icon: "📨" },
     { href: "/admin/bookings", label: "Bookings", icon: "📅" },
     { href: "/admin/ai", label: "AI Generator", icon: "✨" },
 ];

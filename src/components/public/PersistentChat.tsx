@@ -1367,6 +1367,22 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
               </span>
             </button>
             <button type="button" onClick={onPickImage} className={`px-2 py-2 border rounded-xl flex-shrink-0 ${borderInput} transition-colors ${light ? "hover:bg-gray-100" : "hover:bg-[#141414]"}`}>📷</button>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!conversationId || !botId) return;
+                try {
+                  await fetch('/api/handoff/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conversation_id: conversationId, chatbot_id: botId }),
+                  });
+                  setMessages(prev => [...prev, { role: 'system', content: '🔔 Connecting you to a human agent. They have been notified and will be with you shortly.' }]);
+                } catch (e) { console.error('Handoff request failed:', e); }
+              }}
+              className={`px-2 py-2 border rounded-xl flex-shrink-0 text-xs transition-colors ${borderInput} ${light ? "hover:bg-gray-100 text-gray-600" : "hover:bg-[#141414] text-gray-400"}`}
+              title="Talk to a human agent"
+            >👤</button>
             <button type="submit" disabled={loading} className={`px-2 sm:px-3 py-2 border rounded-xl text-xs sm:text-sm flex-shrink-0 transition-shadow hover:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]`} style={{ borderColor: brandColor, color: brandColor }}>{loading ? '…' : 'Send'}</button>
           </div>
           {(partial || voiceTranscript) && (
