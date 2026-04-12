@@ -11,7 +11,7 @@ import { listPublicConversations, listPublicMessages } from "@/data/publicConver
 import { useVoiceChat } from "@/hooks/useVoiceChat";
 // Voice streaming is inline — no overlay needed
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant" | "system"; content: string };
 
 export default function PersistentChat(props: PublicChatProps & { botId: string }) {
   const {
@@ -172,7 +172,10 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
           setMessages(messageCache[activeCid]); // optimistic
         }
         const ms = await listPublicMessages(slug, activeCid);
-        const asMsgs: Msg[] = (ms as any).map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content as string }));
+        const asMsgs: Msg[] = (ms as any).map((m: any) => ({
+          role: (m.role === 'agent' ? 'assistant' : m.role === 'system' ? 'system' : m.role) as Msg['role'],
+          content: m.content as string,
+        }));
         const nextMsgs: Msg[] = asMsgs.length === 0 && greeting ? [{ role: "assistant", content: greeting }] : asMsgs;
         setMessages(nextMsgs as Msg[]);
         setMessageCache((c) => ({ ...c, [activeCid]: nextMsgs as Msg[] }));
@@ -192,7 +195,10 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
     const interval = setInterval(async () => {
       try {
         const ms = await listPublicMessages(slug, activeCid);
-        const asMsgs: Msg[] = (ms as any).map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content as string }));
+        const asMsgs: Msg[] = (ms as any).map((m: any) => ({
+          role: (m.role === 'agent' ? 'assistant' : m.role === 'system' ? 'system' : m.role) as Msg['role'],
+          content: m.content as string,
+        }));
         if (asMsgs.length > 0) {
           setMessages(asMsgs);
           setMessageCache((c) => ({ ...c, [activeCid]: asMsgs }));
@@ -1253,7 +1259,18 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
 
         {/* Messages */}
         <div className={`flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-3 md:p-6 space-y-4 ${bgPanel}`}>
-          {messages.map((m, i) => (
+          {messages.map((m, i) => {
+            // System messages: centered notifications
+            if (m.role === 'system') {
+              return (
+                <div key={i} className="flex justify-center" style={{ animation: 'fadeInMsg 0.3s ease-out both', animationDelay: `${Math.min(i * 0.05, 0.3)}s` }}>
+                  <div className={`text-xs px-4 py-2 rounded-full ${light ? 'bg-gray-100 text-gray-500' : 'bg-white/[0.06] text-gray-400'}`}>
+                    {m.content}
+                  </div>
+                </div>
+              );
+            }
+            return (
             <div
               key={i}
               className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
@@ -1351,7 +1368,8 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
                 )}
               </div>
             </div>
-          ))}
+          );
+          })}
           {typingIndicator && loading && (
             <div className="flex items-center gap-2.5" style={{ animation: 'fadeInMsg 0.3s ease-out both' }}>
               <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${light ? 'bg-gray-100 border border-gray-200' : 'bg-white/[0.06] border border-white/10'
