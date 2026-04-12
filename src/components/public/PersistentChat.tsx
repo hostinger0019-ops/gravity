@@ -181,6 +181,13 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
         setMessageCache((c) => ({ ...c, [activeCid]: nextMsgs as Msg[] }));
         const active = convs.find((c) => c.id === activeCid);
         if (active?.title) setChatName(active.title);
+        // Auto-enable polling if conversation is in handoff mode
+        const status = (active as any)?.handoff_status;
+        if (status === 'pending' || status === 'agent_active') {
+          setHandoffActive(true);
+        } else {
+          setHandoffActive(false);
+        }
       } catch (e) {
         console.warn("load messages failed", e);
       }
