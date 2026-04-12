@@ -338,20 +338,18 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
             const chunk = decoder.decode(value, { stream: true });
             if (!chunk) continue;
             acc += chunk;
-            // Strip handoff tags from display (same pattern as landing page JSON)
-            const cleanAcc = acc.replace(/\[HANDOFF_ACTION:\{[^}]*\}\]/g, "").replace(/\[HANDOFF_REQUEST\]/g, "").trim();
-            // Auto-trigger handoff if tag detected
-            if (/\[HANDOFF_ACTION:/.test(acc) && conversationId && botId) {
-              fetch('/api/handoff/request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ conversation_id: conversationId, chatbot_id: botId }),
-              }).catch(() => {});
+            // Skip first line if it contains handoff action tag (same pattern as product images)
+            let displayAcc = acc;
+            if (displayAcc.startsWith("[HANDOFF_ACTION:")) {
+              const nlIdx = displayAcc.indexOf("\n");
+              displayAcc = nlIdx >= 0 ? displayAcc.substring(nlIdx + 1).trim() : "";
             }
+            // Also strip any remaining tags
+            displayAcc = displayAcc.replace(/\[HANDOFF_ACTION:\{[^}]*\}\]/g, "").replace(/\[HANDOFF_REQUEST\]/g, "").trim();
             setMessages((m) => {
               const updated = [...m];
               const last = updated[updated.length - 1];
-              if (last && last.role === "assistant") last.content = cleanAcc;
+              if (last && last.role === "assistant") last.content = displayAcc;
               const id = activeCid || cidBefore;
               if (id) setMessageCache((c) => ({ ...c, [id]: updated }));
               return updated as Msg[];
@@ -370,20 +368,17 @@ export default function PersistentChat(props: PublicChatProps & { botId: string 
             const chunk = decoder.decode(value, { stream: true });
             if (!chunk) continue;
             acc += chunk;
-            // Strip handoff tags from display
-            const cleanAcc2 = acc.replace(/\[HANDOFF_ACTION:\{[^}]*\}\]/g, "").replace(/\[HANDOFF_REQUEST\]/g, "").trim();
-            // Auto-trigger handoff if tag detected
-            if (/\[HANDOFF_ACTION:/.test(acc) && conversationId && botId) {
-              fetch('/api/handoff/request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ conversation_id: conversationId, chatbot_id: botId }),
-              }).catch(() => {});
+            // Skip first line if it contains handoff action tag
+            let displayAcc2 = acc;
+            if (displayAcc2.startsWith("[HANDOFF_ACTION:")) {
+              const nlIdx2 = displayAcc2.indexOf("\n");
+              displayAcc2 = nlIdx2 >= 0 ? displayAcc2.substring(nlIdx2 + 1).trim() : "";
             }
+            displayAcc2 = displayAcc2.replace(/\[HANDOFF_ACTION:\{[^}]*\}\]/g, "").replace(/\[HANDOFF_REQUEST\]/g, "").trim();
             setMessages((m) => {
               const updated = [...m];
               const last = updated[updated.length - 1];
-              if (last && last.role === "assistant") last.content = cleanAcc2;
+              if (last && last.role === "assistant") last.content = displayAcc2;
               const id = activeCid || cidBefore;
               if (id) setMessageCache((c) => ({ ...c, [id]: updated }));
               return updated as Msg[];
