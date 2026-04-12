@@ -51,18 +51,12 @@ export function IntegrationsForm() {
   const previewUrl = useMemo(() => {
     if (!slug) return '';
     const p = new URLSearchParams();
-    p.set('slug', slug);
+    p.set('embed', '1');
     if (brand) p.set('brand', brand);
-    if (bubbleIcon !== '💬') p.set('icon', bubbleIcon);
-    if (widgetSize !== 'default') p.set('size', widgetSize);
-    if (position !== 'bottom-right') p.set('position', position);
-    if (!showPoweredBy) p.set('branding', 'false');
-    if (autoOpen) p.set('open', 'true');
-    if (avatarUrl) p.set('avatar', avatarUrl);
+    if (uiType) p.set('ui', uiType);
     if (theme) p.set('theme', theme);
-    if (uiType !== 'full') p.set('ui', uiType);
-    return `${origin}/embed/preview.html?${p.toString()}`;
-  }, [slug, origin, brand, bubbleIcon, widgetSize, position, showPoweredBy, autoOpen, avatarUrl, theme, uiType]);
+    return `${origin}/c/${slug}?${p.toString()}`;
+  }, [slug, origin, brand, uiType, theme]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode);

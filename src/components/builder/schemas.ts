@@ -82,6 +82,7 @@ export const settingsSchema = z.object({
   slug: z.string().min(3).regex(/^[a-z0-9-]+$/),
   is_public: z.boolean().default(false),
   tagline: z.string().optional().default("Ask me Anything…"),
+  enable_handoff: z.boolean().default(false),
 });
 
 export type InstructionsValues = z.infer<typeof instructionsSchema>;

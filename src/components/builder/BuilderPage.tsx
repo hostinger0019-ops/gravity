@@ -210,6 +210,7 @@ export function BuilderPage({ id }: { id?: string }) {
       model: record?.model || "gpt-4o-mini",
       temperature: Number(record?.temperature ?? 0.6),
       is_public: record?.is_public ?? true,
+      enable_handoff: (record as any)?.enable_handoff ?? false,
     };
   }, [record?.id]);
 

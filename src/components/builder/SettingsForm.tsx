@@ -142,6 +142,20 @@ export function SettingsForm({ botId }: { botId?: string }) {
           </div>
         </label>
       </div>
+
+      {/* Live Agent Handoff toggle */}
+      <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+        <div>
+          <div className="font-medium text-gray-900 text-sm">Live Agent Handoff</div>
+          <p className="text-xs text-gray-500">Allow visitors to request a human agent</p>
+        </div>
+        <label className="cursor-pointer">
+          <input type="checkbox" {...form.register("enable_handoff")} className="sr-only" />
+          <div className={`w-11 h-6 rounded-full transition-all flex items-center px-0.5 ${form.watch("enable_handoff") ? 'bg-green-500' : 'bg-gray-300'}`}>
+            <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.watch("enable_handoff") ? 'translate-x-5' : 'translate-x-0'}`} />
+          </div>
+        </label>
+      </div>
     </div>
   );
 }

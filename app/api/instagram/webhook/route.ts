@@ -36,16 +36,35 @@ export async function POST(request: NextRequest) {
     // Process incoming messages
     if (body.entry) {
       for (const entry of body.entry) {
-        // Handle messaging events
+        // Handle Instagram "changes" format (Instagram Messaging API)
+        if (entry.changes) {
+          for (const change of entry.changes) {
+            if (change.field === 'messages' && change.value?.message?.text) {
+              const senderId = change.value.sender?.id;
+              const messageText = change.value.message.text;
+
+              if (!senderId || change.value.message?.is_echo) {
+                console.log('⏭️ Skipping echo or invalid message');
+                continue;
+              }
+
+              console.log(`📨 New DM from ${senderId}: ${messageText}`);
+
+              forwardToGPU(senderId, messageText).catch(err => {
+                console.error('❌ GPU forwarding error:', err);
+              });
+            }
+          }
+        }
+
+        // Handle "messaging" format (fallback)
         if (entry.messaging) {
           for (const event of entry.messaging) {
-            // Skip echo messages (messages sent by us)
             if (event.message?.is_echo) {
               console.log('⏭️ Skipping echo message');
               continue;
             }
 
-            // Skip non-text messages (images, stickers, etc.)
             if (!event.message?.text) {
               console.log('⏭️ Skipping non-text message');
               continue;
@@ -56,7 +75,6 @@ export async function POST(request: NextRequest) {
 
             console.log(`📨 New DM from ${senderId}: ${messageText}`);
 
-            // Forward to GPU backend for AI processing (fire and forget)
             forwardToGPU(senderId, messageText).catch(err => {
               console.error('❌ GPU forwarding error:', err);
             });
